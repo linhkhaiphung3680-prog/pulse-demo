@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Pulse · AI 社交副驾驶</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'pulse-bg':       '#0B0C10',
+            'pulse-card':     '#16171D',
+            'pulse-card-2':   '#1E1F26',
+            'pulse-line':     '#2A2B33',
+            'pulse-purple':   '#8B5CF6',
+            'pulse-purple-2': '#A78BFA',
+            'pulse-purple-3': '#6D28D9',
+            'wechat-green':   '#95EC69',
+            'pulse-text':     '#ECEDEF',
+            'pulse-text-2':   '#A0A4AD',
+            'pulse-text-3':   '#6B7280',
+            'pulse-red':      '#EF4444',
+            'pulse-amber':    '#F59E0B',
+            'pulse-emerald':  '#10B981',
+            'pulse-blue':     '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['-apple-system','BlinkMacSystemFont','"SF Pro Text"','"PingFang SC"','"Microsoft YaHei"','sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body { background: #050609; color: #ECEDEF; height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif; -webkit-font-smoothing: antialiased; }
+
+    /* Phone frame */
+    .phone-frame {
+      width: 390px; height: 844px;
+      background: #0B0C10;
+      border-radius: 44px;
+      box-shadow:
+        0 0 0 12px #1a1b22,
+        0 0 0 13px #2a2b35,
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 120px rgba(139,92,246,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 32px;
+      background: #050609;
+      border-radius: 20px;
+      z-index: 100;
+    }
+
+    /* Screen container */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 320ms cubic-bezier(0.32,0.72,0.28,1), opacity 240ms ease;
+      will-change: transform;
+    }
+    .screen.is-hidden-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+    .screen.is-hidden-left  { transform: translateX(-30%); opacity: 0; pointer-events: none; }
+
+    /* Status bar */
+    .status-bar {
+      height: 50px;
+      padding: 16px 32px 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ECEDEF;
+      flex-shrink: 0;
+    }
+
+    /* Custom scrollbar (hidden) */
+    .scroll-area { overflow-y: auto; overflow-x: hidden; }
+    .scroll-area::-webkit-scrollbar { width: 0; }
+
+    /* Pulse glow for AI elements */
+    @keyframes ai-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
+      50%      { box-shadow: 0 0 0 6px rgba(139,92,246,0); }
+    }
+    .ai-pulse { animation: ai-glow 2.6s ease-in-out infinite; }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .ai-shimmer-text {
+      background: linear-gradient(90deg, #A78BFA 0%, #E9D5FF 50%, #A78BFA 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 3s linear infinite;
+    }
+
+    /* WeChat-style bubbles */
+    .bubble {
+      max-width: 75%;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 15px;
+      line-height: 1.45;
+      word-wrap: break-word;
+      position: relative;
+    }
+    .bubble-mine {
+      background: #95EC69;
+      color: #111;
+      border-radius: 6px 2px 6px 6px;
+      align-self: flex-end;
+    }
+    .bubble-mine::after {
+      content: '';
+      position: absolute;
+      top: 8px; right: -4px;
+      border: 5px solid transparent;
+      border-left-color: #95EC69;
+      border-right: 0;
+    }
+    .bubble-them {
+      background: #FFFFFF;
+      color: #111;
+      border-radius: 2px 6px 6px 6px;
+      align-self: flex-start;
+    }
+    .bubble-them::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: -4px;
+      border: 5px solid transparent;
+      border-right-color: #FFFFFF;
+      border-left: 0;
+    }
+
+    /* Avatar */
+    .avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: white;
+      flex-shrink: 0;
+      letter-spacing: -0.5px;
+    }
+    .avatar-sm { width: 40px; height: 40px; border-radius: 8px; font-size: 15px; }
+    .avatar-md { width: 56px; height: 56px; border-radius: 12px; font-size: 20px; }
+    .avatar-lg { width: 84px; height: 84px; border-radius: 18px; font-size: 30px; }
+    .avatar-tiny { width: 32px; height: 32px; border-radius: 7px; font-size: 13px; }
+
+    /* AI Copilot panel */
+    .copilot-panel {
+      background: linear-gradient(180deg, rgba(139,92,246,0.08) 0%, rgba(139,92,246,0.03) 100%);
+      border-top: 1px solid rgba(139,92,246,0.25);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Quad mode buttons (legacy, kept for compatibility but unused) */
+    .mode-btn {
+      transition: all 180ms ease;
+      border: 1px solid #2A2B33;
+      background: #1E1F26;
+    }
+    .mode-btn:hover {
+      border-color: #8B5CF6;
+      transform: translateY(-1px);
+    }
+    .mode-btn.active {
+      border-color: #8B5CF6;
+      background: linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.1) 100%);
+      box-shadow: 0 0 20px rgba(139,92,246,0.3);
+    }
+
+    /* Dynamic hint cards */
+    .hint-btn {
+      transition: all 200ms ease;
+      border: 1px solid #2A2B33;
+      background: #1E1F26;
+      cursor: pointer;
+    }
+    .hint-btn:hover {
+      border-color: rgba(139,92,246,0.5);
+      background: #22232A;
+      transform: translateY(-1px);
+    }
+    .hint-btn.active {
+      border-color: #8B5CF6;
+      background: linear-gradient(135deg, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.08) 100%);
+      box-shadow: 0 0 24px rgba(139,92,246,0.25);
+    }
+    .hint-btn.refreshing {
+      animation: hint-refresh 350ms ease;
+    }
+    @keyframes hint-refresh {
+      0%   { opacity: 0.3; transform: translateY(4px); }
+      100% { opacity: 1;   transform: translateY(0); }
+    }
+
+    /* Deep analysis sheet */
+    .analysis-sheet {
+      position: absolute;
+      inset: 0;
+      background: rgba(5,6,9,0.55);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 240ms ease;
+    }
+    .analysis-sheet.show { opacity: 1; pointer-events: auto; }
+    .analysis-sheet-body {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      max-height: 86%;
+      background: #0F1014;
+      border-top: 1px solid #2A2B33;
+      border-radius: 24px 24px 0 0;
+      transform: translateY(100%);
+      transition: transform 320ms cubic-bezier(0.32,0.72,0.28,1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .analysis-sheet.show .analysis-sheet-body { transform: translateY(0); }
+    .analysis-handle {
+      width: 36px; height: 4px;
+      background: #2A2B33;
+      border-radius: 999px;
+      margin: 8px auto 0 auto;
+    }
+
+    /* Discussion bubble */
+    .disc-bubble-ai {
+      background: linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(139,92,246,0.08) 100%);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 14px 14px 14px 4px;
+      padding: 10px 12px;
+      max-width: 85%;
+      align-self: flex-start;
+      font-size: 13px;
+      color: #ECEDEF;
+      line-height: 1.5;
+    }
+    .disc-bubble-me {
+      background: #1E1F26;
+      border: 1px solid #2A2B33;
+      border-radius: 14px 14px 4px 14px;
+      padding: 10px 12px;
+      max-width: 85%;
+      align-self: flex-end;
+      font-size: 13px;
+      color: #ECEDEF;
+      line-height: 1.5;
+    }
+    .followup-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #1E1F26;
+      border: 1px solid #2A2B33;
+      color: #A0A4AD;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 160ms ease;
+    }
+    .followup-chip:hover {
+      border-color: rgba(139,92,246,0.5);
+      color: #A78BFA;
+    }
+
+    /* Quick adjust chips (in draft area) */
+    .adjust-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #1E1F26;
+      border: 1px solid #2A2B33;
+      color: #ECEDEF;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 160ms ease;
+      user-select: none;
+    }
+    .adjust-chip:hover {
+      border-color: rgba(139,92,246,0.5);
+      background: #22232A;
+    }
+    .adjust-chip.active {
+      background: linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(139,92,246,0.10) 100%);
+      border-color: #8B5CF6;
+      color: #DDD6FE;
+      box-shadow: 0 0 16px rgba(139,92,246,0.25);
+    }
+    .adjust-chip-emoji { font-size: 13px; line-height: 1; }
+
+    /* Network graph node */
+    .node-group { cursor: pointer; }
+    .node-group .node-inner { transition: transform 200ms ease; transform-origin: center; transform-box: fill-box; }
+    .node-group:hover .node-inner { transform: scale(1.18); }
+    .node-circle { transition: all 200ms ease; }
+    .node-pulse {
+      animation: node-pulse-fade 2.6s ease-in-out infinite;
+    }
+    @keyframes node-pulse-fade {
+      0%, 100% { opacity: 0.45; }
+      50%      { opacity: 0.05; }
+    }
+
+    /* Fade-in entrance: opacity-only so it's safe inside SVG transform attribute */
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .pop-in { animation: fade-in 380ms ease-out backwards; }
+
+    @keyframes pop-bounce {
+      0%   { opacity: 0; transform: scale(0.6); }
+      60%  { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .pop-bounce { animation: pop-bounce 380ms cubic-bezier(0.34,1.56,0.64,1) backwards; }
+
+    /* Slide-up for copilot draft */
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .slide-up { animation: slide-up 280ms ease-out; }
+
+    /* Tab indicator */
+    .tab-indicator {
+      transition: transform 280ms cubic-bezier(0.32,0.72,0.28,1);
+    }
+
+    /* Hide scrollbar but keep scroll */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Toast */
+    .toast {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      transition: all 320ms ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Caption above chat indicating AI is listening */
+    .ai-listen {
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-listen::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.15) 50%, transparent 100%);
+      animation: shimmer 4s linear infinite;
+      pointer-events: none;
+    }
+
+    /* Network legend dot */
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <!-- Side annotation (visible on wide screens) -->
+  <div class="hidden lg:block absolute left-12 top-12 max-w-xs text-pulse-text-2">
+    <div class="text-xs uppercase tracking-widest text-pulse-purple mb-3">Pulse · Demo</div>
+    <h1 class="text-2xl font-semibold text-pulse-text mb-3">AI 社交副驾驶</h1>
+    <p class="text-sm leading-relaxed mb-4">让 AI 替你记住关键的人、理解关系、起草回复。</p>
+    <div class="text-xs space-y-2 leading-relaxed">
+      <div class="flex gap-2"><span class="text-pulse-purple">①</span> 智能社交收件箱（按 AI 优先级排序）</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">②</span> 聊天 + 四态副驾驶（附和/质疑/反对/忽视）</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">③</span> 人物档案 + 观点记忆</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">④</span> 关系网络图谱</div>
+    </div>
+    <div class="mt-6 text-[11px] text-pulse-text-3 leading-relaxed">
+      Tip：选择 hint → 草稿下方<br>
+      出现<span class="text-pulse-purple-2">语境化快捷调整 chips</span><br>
+      <span class="text-pulse-text-2">不同 hint 对应不同调整轴：</span><br>
+      · 热情确认 → 更热情/矜持<br>
+      · 温和分歧 → 更直接/温和<br>
+      · 商务承诺 → 更正式/轻松<br>
+      文字指令仅在 chips 不够时使用
+    </div>
+  </div>
+
+  <!-- Phone -->
+  <div class="phone-frame">
+
+    <!-- ============================ INBOX ============================ -->
+    <div id="screen-inbox" class="screen">
+      <!-- iOS status bar -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="flex items-center gap-1">
+          <svg width="18" height="11" viewBox="0 0 18 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="0.5"/><rect x="5" y="4" width="3" height="7" rx="0.5"/><rect x="10" y="2" width="3" height="9" rx="0.5"/><rect x="15" y="0" width="3" height="11" rx="0.5"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 2c2.2 0 4.2.8 5.7 2.2l-1.4 1.4C11.1 4.5 9.6 4 8 4S4.9 4.5 3.7 5.6L2.3 4.2C3.8 2.8 5.8 2 8 2zm0-4c3.6 0 6.9 1.4 9.4 3.6l-1.4 1.4C13.9 1.2 11 0 8 0S2.1 1.2.0 3l-1.4-1.4C1.1-.6 4.4-2 8-2z"/></svg>
+          <span class="ml-1 inline-block w-6 h-3 border border-pulse-text rounded-sm relative">
+            <span class="absolute inset-0.5 bg-pulse-text rounded-[1px]" style="width: calc(100% - 4px)"></span>
+          </span>
+        </span>
+      </div>
+
+      <!-- App header -->
+      <div class="px-5 pt-2 pb-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-pulse-purple to-pulse-purple-3 flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <span class="text-lg font-semibold tracking-tight">Pulse</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-pulse-purple/15 text-pulse-purple-2 font-medium">AI</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-9 h-9 rounded-full bg-pulse-card flex items-center justify-center text-pulse-text-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
+          <div class="avatar avatar-tiny" style="background: linear-gradient(135deg,#3B82F6,#8B5CF6)">我</div>
+        </div>
+      </div>
+
+      <!-- AI summary card -->
+      <div class="px-5 mb-3">
+        <div class="rounded-2xl p-4 ai-listen relative overflow-hidden" style="background: linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(59,130,246,0.10) 100%); border: 1px solid rgba(139,92,246,0.3);">
+          <div class="flex items-start gap-3 relative z-10">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-pulse-purple to-pulse-purple-3 flex items-center justify-center ai-pulse flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-xs text-pulse-purple-2 font-medium mb-1">AI 早间简报 · 9:32</div>
+              <div class="text-sm text-pulse-text leading-relaxed">
+                今天有 <span class="text-pulse-purple-2 font-semibold">3 条</span>需要立刻回 ·
+                <span class="text-pulse-text-2">2 条可忽略</span>
+              </div>
+              <div class="text-xs text-pulse-text-2 mt-1.5 leading-relaxed">
+                💡 <span class="text-pulse-text">妈妈</span> 已 30 天未联系，建议今天问候
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inbox list -->
+      <div class="scroll-area flex-1 px-5 pb-24">
+
+        <!-- Section: Reply now -->
+        <div class="mb-2 mt-1 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="legend-dot bg-pulse-red"></span>
+            <span class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">立刻回 · 2</span>
+          </div>
+          <span class="text-[10px] text-pulse-text-3">AI 优先级</span>
+        </div>
+
+        <div id="inbox-now" class="space-y-2 mb-5"></div>
+
+        <!-- Section: Later -->
+        <div class="mb-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="legend-dot bg-pulse-amber"></span>
+            <span class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">稍后回 · 3</span>
+          </div>
+        </div>
+
+        <div id="inbox-later" class="space-y-2 mb-5"></div>
+
+        <!-- Section: Ignore -->
+        <div class="mb-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="legend-dot bg-pulse-text-3"></span>
+            <span class="text-[11px] uppercase tracking-wider text-pulse-text-3 font-semibold">可忽略 · 2</span>
+          </div>
+          <span class="text-[10px] text-pulse-text-3">AI 已为你过滤</span>
+        </div>
+
+        <div id="inbox-ignore" class="space-y-2 mb-8 opacity-60"></div>
+
+      </div>
+
+      <!-- Tabbar -->
+      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-6">
+        <button data-tab="inbox" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="text-[10px] font-semibold">消息</span>
+        </button>
+        <button data-tab="network" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="3" r="2"/><circle cx="21" cy="12" r="2"/><circle cx="12" cy="21" r="2"/><circle cx="3" cy="12" r="2"/><path d="M12 6v3M12 15v3M6 12h3M15 12h3"/></svg>
+          <span class="text-[10px] font-semibold">关系网</span>
+        </button>
+        <button data-tab="me" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-[10px] font-semibold">我</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================ CHAT ============================ -->
+    <div id="screen-chat" class="screen is-hidden-right">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="flex items-center gap-1">
+          <span class="ml-1 inline-block w-6 h-3 border border-pulse-text rounded-sm relative">
+            <span class="absolute inset-0.5 bg-pulse-text rounded-[1px]" style="width: calc(100% - 4px)"></span>
+          </span>
+        </span>
+      </div>
+
+      <!-- Chat header -->
+      <div class="px-3 pt-1 pb-3 flex items-center gap-2 border-b border-pulse-line">
+        <button onclick="showScreen('inbox')" class="w-9 h-9 flex items-center justify-center text-pulse-text-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button id="chat-header-bio" class="flex-1 flex items-center gap-3 text-left">
+          <div id="chat-avatar" class="avatar avatar-sm" style="background:linear-gradient(135deg,#F472B6,#A855F7)">M</div>
+          <div class="flex-1">
+            <div id="chat-name" class="text-base font-semibold leading-tight">Mira Tanaka</div>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-pulse-emerald"></span>
+              <span class="text-[11px] text-pulse-text-2">active now · 老朋友 5 年</span>
+            </div>
+          </div>
+        </button>
+        <button class="w-9 h-9 rounded-lg bg-pulse-purple/15 flex items-center justify-center text-pulse-purple-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
+        </button>
+      </div>
+
+      <!-- Chat messages -->
+      <div id="chat-messages" class="scroll-area flex-1 px-3 py-4 flex flex-col gap-2.5" style="background:#1A1B20">
+        <div class="text-center text-[11px] text-pulse-text-3 my-1">今天 20:38</div>
+
+        <div class="bubble bubble-them">嘿！今晚还是 8 点见 Blue Note 吗？</div>
+        <div class="bubble bubble-them">他们今晚有 trio 演出，超期待 🎷</div>
+        <div class="bubble bubble-mine">在的在的</div>
+        <div class="bubble bubble-them">穿你最爱的就好，不用太正式</div>
+        <div class="bubble bubble-them">对了！我前几天淘到那个你说想要的玻璃杯，今晚带给你 ✨</div>
+        <div class="text-center text-[11px] text-pulse-text-3 my-1">20:43</div>
+        <div class="bubble bubble-them">所以 8 点没问题吧？我先去占位</div>
+      </div>
+
+      <!-- AI Copilot panel -->
+      <div id="copilot-panel" class="copilot-panel flex-shrink-0">
+        <!-- Collapsed analysis -->
+        <div id="copilot-analysis" class="px-4 pt-3 pb-2">
+          <div class="flex items-start gap-2 mb-3">
+            <div class="w-6 h-6 rounded-md bg-gradient-to-br from-pulse-purple to-pulse-purple-3 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-[11px] ai-shimmer-text font-semibold uppercase tracking-wider mb-1">AI 已分析</div>
+              <div class="text-sm text-pulse-text leading-snug">
+                Mira 期待你确认 8 点的安排，语气温暖、有礼物想送你。<br>
+                <span class="text-pulse-text-2 text-[12px]">建议：积极回应 + 表达期待</span>
+              </div>
+            </div>
+          </div>
+          <!-- Dynamic hints (2) + deep analysis button -->
+          <div id="hints-row" class="grid grid-cols-2 gap-2 mb-2">
+            <button class="hint-btn rounded-xl p-2.5 text-left flex items-start gap-2" data-hint="0">
+              <span class="text-[18px] leading-none mt-0.5" data-emoji></span>
+              <div class="flex-1 min-w-0">
+                <div class="text-[12px] font-semibold text-pulse-text leading-tight" data-label></div>
+                <div class="text-[10px] text-pulse-text-3 mt-0.5 leading-tight" data-sub></div>
+              </div>
+            </button>
+            <button class="hint-btn rounded-xl p-2.5 text-left flex items-start gap-2" data-hint="1">
+              <span class="text-[18px] leading-none mt-0.5" data-emoji></span>
+              <div class="flex-1 min-w-0">
+                <div class="text-[12px] font-semibold text-pulse-text leading-tight" data-label></div>
+                <div class="text-[10px] text-pulse-text-3 mt-0.5 leading-tight" data-sub></div>
+              </div>
+            </button>
+          </div>
+          <button id="open-analysis" class="w-full rounded-xl py-2 px-3 flex items-center justify-center gap-2 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v3M11 14h.01"/></svg>
+            <span class="text-[12px] font-semibold">AI 分析 · 这条消息 + 历史上下文</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- Expanded draft area -->
+        <div id="copilot-draft" class="hidden px-4 pb-3 slide-up">
+          <div class="border-t border-pulse-line/60 pt-3 mt-1">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-[11px] ai-shimmer-text font-semibold uppercase tracking-wider" id="draft-mode-label">附和回复 · 草稿</div>
+              <button id="draft-close" class="text-[11px] text-pulse-text-3">收起</button>
+            </div>
+            <div id="draft-text" contenteditable="true" class="bg-pulse-card-2 rounded-xl p-3 text-sm text-pulse-text leading-relaxed border border-pulse-line focus:outline-none focus:border-pulse-purple/60 mb-2.5 min-h-[60px]"></div>
+
+            <!-- Quick adjust chips (PRIMARY path) -->
+            <div id="adjust-chips-wrap" class="mb-2">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-pulse-purple-2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span class="text-[10px] uppercase tracking-wider text-pulse-text-2 font-semibold">快捷调整</span>
+              </div>
+              <div id="adjust-chips" class="flex flex-wrap gap-1.5"></div>
+            </div>
+
+            <!-- Custom instruction (SECONDARY / fallback, always visible) -->
+            <div class="mb-2.5">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-pulse-text-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span class="text-[10px] uppercase tracking-wider text-pulse-text-3 font-semibold">自定义指令</span>
+                <span class="text-[10px] text-pulse-text-3">· 以上不够时</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="discuss-input" type="text" placeholder="例：以小红书风格写 / 引用昨天的对话..." class="flex-1 bg-pulse-card rounded-xl px-3 py-1.5 text-[12px] text-pulse-text placeholder:text-pulse-text-3 border border-pulse-line focus:outline-none focus:border-pulse-purple/60"/>
+                <button id="discuss-go" class="px-3 py-1.5 rounded-xl bg-pulse-purple/20 text-pulse-purple-2 text-[11px] font-semibold border border-pulse-purple/30">改写</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 text-[10px] text-pulse-text-3">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                AI 仅在本地 · 端到端加密
+              </div>
+              <button id="send-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-lg shadow-pulse-purple/30">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                发送
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast">
+        <div class="bg-pulse-card border border-pulse-line rounded-full px-4 py-2 text-[12px] text-pulse-text shadow-xl"></div>
+      </div>
+
+      <!-- Deep Analysis Sheet -->
+      <div id="analysis-sheet" class="analysis-sheet">
+        <div class="analysis-sheet-body">
+          <div class="analysis-handle"></div>
+
+          <!-- Sheet header -->
+          <div class="px-5 pt-3 pb-3 flex items-center justify-between border-b border-pulse-line/60">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-pulse-purple to-pulse-purple-3 flex items-center justify-center ai-pulse">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
+              </div>
+              <div>
+                <div class="text-[14px] font-semibold text-pulse-text leading-none">AI 深度分析</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1">基于 5 年互动历史 · 仅在本地</div>
+              </div>
+            </div>
+            <button id="close-analysis" class="w-7 h-7 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <!-- Sheet body (scrollable) -->
+          <div class="scroll-area flex-1 px-5 py-3 space-y-3" id="analysis-content">
+            <!-- The analyzed message -->
+            <div class="bg-pulse-card-2 rounded-xl p-3 border border-pulse-line">
+              <div class="text-[10px] uppercase tracking-wider text-pulse-text-3 mb-1.5">这条消息</div>
+              <div class="text-[13px] text-pulse-text leading-relaxed" id="an-message">—</div>
+            </div>
+
+            <!-- Intent -->
+            <div>
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[14px]">🎯</span>
+                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">表层意图</div>
+              </div>
+              <div class="text-[13px] text-pulse-text leading-relaxed pl-5" id="an-intent">—</div>
+            </div>
+
+            <!-- Expectations -->
+            <div>
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[14px]">💭</span>
+                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">潜在期待</div>
+              </div>
+              <ul class="text-[13px] text-pulse-text leading-relaxed pl-5 space-y-1" id="an-expects"></ul>
+            </div>
+
+            <!-- History -->
+            <div>
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[14px]">📚</span>
+                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">关联历史上下文</div>
+              </div>
+              <div class="pl-5 space-y-1.5" id="an-history"></div>
+            </div>
+
+            <!-- Risk -->
+            <div class="rounded-xl p-3 border border-pulse-amber/30" style="background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.02) 100%);">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[14px]">⚠️</span>
+                <div class="text-[11px] uppercase tracking-wider text-pulse-amber font-semibold">风险点</div>
+              </div>
+              <div class="text-[12px] text-pulse-text leading-relaxed" id="an-risk">—</div>
+            </div>
+
+            <!-- Discussion thread -->
+            <div class="border-t border-pulse-line/60 pt-3">
+              <div class="flex items-center gap-1.5 mb-2">
+                <span class="text-[14px]">💬</span>
+                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">跟 AI 继续讨论</div>
+              </div>
+              <div id="discussion-thread" class="flex flex-col gap-2 mb-2.5"></div>
+              <div id="followup-chips" class="flex flex-wrap gap-1.5 mb-2.5"></div>
+            </div>
+          </div>
+
+          <!-- Sheet input -->
+          <div class="px-4 py-3 border-t border-pulse-line/60 flex items-center gap-2 bg-pulse-card/50">
+            <input id="analysis-input" type="text" placeholder="问 AI 任何关于这条消息的问题..." class="flex-1 bg-pulse-card-2 rounded-xl px-3 py-2 text-[13px] text-pulse-text placeholder:text-pulse-text-3 border border-pulse-line focus:outline-none focus:border-pulse-purple/60"/>
+            <button id="analysis-send" class="px-3 py-2 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[12px] font-semibold flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
+              问
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================ PROFILE ============================ -->
+    <div id="screen-profile" class="screen is-hidden-right">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="flex items-center gap-1">
+          <span class="ml-1 inline-block w-6 h-3 border border-pulse-text rounded-sm relative">
+            <span class="absolute inset-0.5 bg-pulse-text rounded-[1px]" style="width: calc(100% - 4px)"></span>
+          </span>
+        </span>
+      </div>
+
+      <div class="px-3 pt-1 pb-2 flex items-center justify-between">
+        <button onclick="showScreen('chat')" class="w-9 h-9 flex items-center justify-center text-pulse-text-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="text-[13px] text-pulse-text-2">人物档案</span>
+        <button class="w-9 h-9 flex items-center justify-center text-pulse-text-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+        </button>
+      </div>
+
+      <div class="scroll-area flex-1 px-5 pb-6">
+        <!-- Profile header -->
+        <div class="flex flex-col items-center pt-2 pb-5">
+          <div class="relative mb-3">
+            <div class="avatar avatar-lg" style="background:linear-gradient(135deg,#F472B6,#A855F7)">M</div>
+            <div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-pulse-emerald border-[3px] border-pulse-bg flex items-center justify-center">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div class="text-xl font-semibold mb-1">Mira Tanaka</div>
+          <div class="flex flex-wrap justify-center gap-1.5 mb-3">
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-pulse-card border border-pulse-line text-pulse-text-2">老朋友</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-pulse-card border border-pulse-line text-pulse-text-2">5 年</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-pulse-card border border-pulse-line text-pulse-text-2">摄影师</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-pulse-card border border-pulse-line text-pulse-text-2">📍 Brooklyn</span>
+          </div>
+          <!-- Strength meter -->
+          <div class="w-full max-w-[280px] bg-pulse-card rounded-2xl p-3.5 border border-pulse-line">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[11px] text-pulse-text-2">关系热度</span>
+              <span class="text-[11px] text-pulse-emerald font-semibold">最近常聊 · 强</span>
+            </div>
+            <div class="h-1.5 bg-pulse-line rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-pulse-emerald to-pulse-purple-2 rounded-full" style="width:82%"></div>
+            </div>
+            <div class="flex items-center justify-between mt-2 text-[10px] text-pulse-text-3">
+              <span>30 天聊了 28 次</span>
+              <span>上次见 · 3 周前</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="relative mb-4">
+          <div class="grid grid-cols-3 bg-pulse-card rounded-xl p-1 border border-pulse-line relative">
+            <button class="profile-tab z-10 py-2 text-[12px] font-semibold text-pulse-text" data-ptab="overview">概览</button>
+            <button class="profile-tab z-10 py-2 text-[12px] font-semibold text-pulse-text-3" data-ptab="opinions">观点档案</button>
+            <button class="profile-tab z-10 py-2 text-[12px] font-semibold text-pulse-text-3" data-ptab="timeline">时间线</button>
+            <div id="ptab-indicator" class="tab-indicator absolute inset-y-1 left-1 w-[calc(33.333%-4px)] rounded-lg bg-gradient-to-br from-pulse-purple/30 to-pulse-purple-3/20 border border-pulse-purple/40"></div>
+          </div>
+        </div>
+
+        <!-- Overview tab -->
+        <div id="ptab-overview" class="space-y-3">
+          <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
+            <div class="text-[11px] text-pulse-text-3 uppercase tracking-wider mb-2">高频话题</div>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-[12px] px-2.5 py-1 rounded-lg bg-pulse-purple/15 text-pulse-purple-2 border border-pulse-purple/30">📷 摄影 · 14 次</span>
+              <span class="text-[12px] px-2.5 py-1 rounded-lg bg-pulse-purple/10 text-pulse-purple-2 border border-pulse-purple/20">🎷 爵士乐 · 9 次</span>
+              <span class="text-[12px] px-2.5 py-1 rounded-lg bg-pulse-card-2 text-pulse-text-2 border border-pulse-line">🍜 Brooklyn 餐厅 · 6</span>
+              <span class="text-[12px] px-2.5 py-1 rounded-lg bg-pulse-card-2 text-pulse-text-2 border border-pulse-line">职业规划 · 4</span>
+            </div>
+          </div>
+
+          <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
+            <div class="text-[11px] text-pulse-text-3 uppercase tracking-wider mb-3">重要日期</div>
+            <div class="space-y-2.5">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-pulse-amber/20 flex items-center justify-center text-pulse-amber">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="text-[13px] text-pulse-text">生日</div>
+                  <div class="text-[11px] text-pulse-text-3">11 月 4 日 · 还有 155 天</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-pulse-blue/20 flex items-center justify-center text-pulse-blue">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="text-[13px] text-pulse-text">个人摄影展开幕</div>
+                  <div class="text-[11px] text-pulse-text-3">6 月 15 日 · 还有 13 天</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
+            <div class="text-[11px] text-pulse-text-3 uppercase tracking-wider mb-2">AI 备忘</div>
+            <div class="text-[13px] text-pulse-text leading-relaxed">
+              她对 <span class="text-pulse-purple-2">摄影展</span>很在意，提了 4 次。<br>
+              建议在 6/15 前主动询问筹备状况。
+            </div>
+          </div>
+        </div>
+
+        <!-- Opinions tab -->
+        <div id="ptab-opinions" class="space-y-3 hidden">
+          <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-[12px] text-pulse-text font-semibold">关于工作</div>
+              <span class="text-[10px] text-pulse-text-3">3 条沉淀</span>
+            </div>
+            <div class="space-y-2.5">
+              <div class="border-l-2 border-pulse-amber pl-3">
+                <div class="text-[12px] text-pulse-text leading-relaxed">"远程会议太多了，根本没时间做创作"</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1">5/12 · 微信</div>
+              </div>
+              <div class="border-l-2 border-pulse-purple pl-3">
+                <div class="text-[12px] text-pulse-text leading-relaxed">"在认真考虑跳到一个独立设计工作室"</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1">5/28 · 微信</div>
+              </div>
+              <div class="border-l-2 border-pulse-emerald pl-3">
+                <div class="text-[12px] text-pulse-text leading-relaxed">"准备 6 月办自己的摄影个展"</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1">5/30 · 微信</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
+            <div class="text-[12px] text-pulse-text font-semibold mb-3">关于音乐</div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-pulse-card-2 rounded-lg p-2.5">
+                <div class="text-[10px] text-pulse-emerald uppercase tracking-wider mb-1">喜欢</div>
+                <div class="text-[12px] text-pulse-text leading-tight">爵士、Bossa Nova、独立民谣</div>
+              </div>
+              <div class="bg-pulse-card-2 rounded-lg p-2.5">
+                <div class="text-[10px] text-pulse-red uppercase tracking-wider mb-1">不喜欢</div>
+                <div class="text-[12px] text-pulse-text leading-tight">重金属、电子舞曲</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
+            <div class="text-[12px] text-pulse-text font-semibold mb-2">⚠️ 立场注意</div>
+            <div class="text-[12px] text-pulse-text-2 leading-relaxed">
+              她对<span class="text-pulse-amber">"AI 自动回复"</span>持保留态度，5/20 提过 "讨厌跟机器人聊天"。<br>
+              <span class="text-pulse-text-3 text-[11px]">→ 建议在她面前少提 Pulse 这类工具</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline tab -->
+        <div id="ptab-timeline" class="hidden space-y-0 relative">
+          <div class="absolute left-[15px] top-2 bottom-2 w-px bg-pulse-line"></div>
+          <div class="relative pl-10 pb-5">
+            <div class="absolute left-[10px] top-1 w-3 h-3 rounded-full bg-pulse-purple ring-4 ring-pulse-purple/20"></div>
+            <div class="text-[10px] text-pulse-text-3 mb-1">今天 · 20:43</div>
+            <div class="text-[13px] text-pulse-text">邀请你 8pm 见 Blue Note</div>
+          </div>
+          <div class="relative pl-10 pb-5">
+            <div class="absolute left-[10px] top-1 w-3 h-3 rounded-full bg-pulse-emerald ring-4 ring-pulse-emerald/20"></div>
+            <div class="text-[10px] text-pulse-text-3 mb-1">5 月 30 日</div>
+            <div class="text-[13px] text-pulse-text">告诉你 6 月将办个人摄影展</div>
+          </div>
+          <div class="relative pl-10 pb-5">
+            <div class="absolute left-[10px] top-1 w-3 h-3 rounded-full bg-pulse-blue ring-4 ring-pulse-blue/20"></div>
+            <div class="text-[10px] text-pulse-text-3 mb-1">5 月 15 日</div>
+            <div class="text-[13px] text-pulse-text">你们一起去了 Blue Note 听演出</div>
+          </div>
+          <div class="relative pl-10 pb-5">
+            <div class="absolute left-[10px] top-1 w-3 h-3 rounded-full bg-pulse-amber ring-4 ring-pulse-amber/20"></div>
+            <div class="text-[10px] text-pulse-text-3 mb-1">4 月 28 日</div>
+            <div class="text-[13px] text-pulse-text">她升职为 Senior Photographer</div>
+          </div>
+          <div class="relative pl-10 pb-5">
+            <div class="absolute left-[10px] top-1 w-3 h-3 rounded-full bg-pulse-text-3"></div>
+            <div class="text-[10px] text-pulse-text-3 mb-1">2 月 14 日</div>
+            <div class="text-[13px] text-pulse-text-2">情人节问候</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================ NETWORK ============================ -->
+    <div id="screen-network" class="screen is-hidden-right">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="flex items-center gap-1">
+          <span class="ml-1 inline-block w-6 h-3 border border-pulse-text rounded-sm relative">
+            <span class="absolute inset-0.5 bg-pulse-text rounded-[1px]" style="width: calc(100% - 4px)"></span>
+          </span>
+        </span>
+      </div>
+
+      <div class="px-5 pt-1 pb-2 flex items-center justify-between">
+        <div>
+          <div class="text-lg font-semibold">关系网络</div>
+          <div class="text-[11px] text-pulse-text-2">62 位联系人 · 7 个社群</div>
+        </div>
+        <div class="flex items-center gap-1 bg-pulse-card rounded-xl p-1 border border-pulse-line">
+          <button class="net-view-btn px-2.5 py-1 text-[10px] rounded-lg bg-pulse-purple/25 text-pulse-purple-2 font-semibold" data-view="rings">同心圆</button>
+          <button class="net-view-btn px-2.5 py-1 text-[10px] rounded-lg text-pulse-text-3" data-view="list">列表</button>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="px-5 mb-2 flex items-center gap-3 text-[10px] text-pulse-text-2">
+        <span class="flex items-center gap-1"><span class="legend-dot bg-pulse-emerald"></span>家人</span>
+        <span class="flex items-center gap-1"><span class="legend-dot bg-pulse-blue"></span>朋友</span>
+        <span class="flex items-center gap-1"><span class="legend-dot bg-pulse-purple"></span>同事</span>
+        <span class="flex items-center gap-1"><span class="legend-dot bg-pulse-amber"></span>客户</span>
+      </div>
+
+      <!-- Graph -->
+      <div class="flex-1 relative scroll-area">
+        <div id="network-graph" class="relative" style="height: 360px;">
+          <svg id="net-svg" viewBox="-200 -180 400 360" class="w-full h-full">
+            <!-- Concentric guides -->
+            <circle cx="0" cy="0" r="60"  fill="none" stroke="#2A2B33" stroke-dasharray="2,3" />
+            <circle cx="0" cy="0" r="115" fill="none" stroke="#2A2B33" stroke-dasharray="2,3" />
+            <circle cx="0" cy="0" r="165" fill="none" stroke="#2A2B33" stroke-dasharray="2,3" />
+            <!-- edges + nodes injected by JS -->
+            <g id="net-edges"></g>
+            <g id="net-nodes"></g>
+          </svg>
+        </div>
+
+        <!-- Selected card -->
+        <div id="node-card" class="hidden mx-5 mb-3 rounded-2xl bg-pulse-card border border-pulse-line p-3.5 slide-up">
+          <div class="flex items-center gap-3">
+            <div id="nc-avatar" class="avatar avatar-sm"></div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <div id="nc-name" class="text-[14px] font-semibold"></div>
+                <span id="nc-tag" class="text-[10px] px-1.5 py-0.5 rounded bg-pulse-card-2 text-pulse-text-2"></span>
+              </div>
+              <div id="nc-summary" class="text-[11px] text-pulse-text-3 mt-0.5"></div>
+            </div>
+            <button id="nc-go" class="px-2.5 py-1.5 rounded-lg bg-pulse-purple/20 text-pulse-purple-2 text-[11px] font-semibold border border-pulse-purple/30">查看</button>
+          </div>
+        </div>
+
+        <!-- Health alert -->
+        <div class="mx-5 mb-24 rounded-2xl border border-pulse-amber/30 p-4" style="background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(245,158,11,0.03) 100%);">
+          <div class="flex items-start gap-2 mb-3">
+            <div class="w-7 h-7 rounded-lg bg-pulse-amber/20 flex items-center justify-center text-pulse-amber flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+            </div>
+            <div>
+              <div class="text-[12px] font-semibold text-pulse-text">关系健康度提醒</div>
+              <div class="text-[11px] text-pulse-text-2">3 段重要关系需要关注</div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-3 bg-pulse-card-2 rounded-xl p-2.5">
+              <div class="avatar avatar-tiny" style="background:linear-gradient(135deg,#10B981,#059669)">妈</div>
+              <div class="flex-1">
+                <div class="text-[12px] text-pulse-text">妈妈 · 已 30 天未联系</div>
+                <div class="text-[10px] text-pulse-text-3">建议今天问候</div>
+              </div>
+              <button class="px-2.5 py-1 rounded-lg bg-pulse-purple/20 text-pulse-purple-2 text-[10px] font-semibold border border-pulse-purple/30 inline-greeting">一键问候</button>
+            </div>
+            <div class="flex items-center gap-3 bg-pulse-card-2 rounded-xl p-2.5">
+              <div class="avatar avatar-tiny" style="background:linear-gradient(135deg,#F59E0B,#D97706)">J</div>
+              <div class="flex-1">
+                <div class="text-[12px] text-pulse-text">Jules 发了重要朋友圈</div>
+                <div class="text-[10px] text-pulse-text-3">关于职业转型，你未互动</div>
+              </div>
+              <button class="px-2.5 py-1 rounded-lg bg-pulse-card border border-pulse-line text-pulse-text-2 text-[10px] font-semibold">查看</button>
+            </div>
+            <div class="flex items-center gap-3 bg-pulse-card-2 rounded-xl p-2.5">
+              <div class="avatar avatar-tiny" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">N</div>
+              <div class="flex-1">
+                <div class="text-[12px] text-pulse-text">Noa · 立场分歧预警</div>
+                <div class="text-[10px] text-pulse-text-3">最近话题立场不同，措辞谨慎</div>
+              </div>
+              <button class="px-2.5 py-1 rounded-lg bg-pulse-card border border-pulse-line text-pulse-text-2 text-[10px] font-semibold">查看</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabbar -->
+      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-6">
+        <button data-tab="inbox" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="text-[10px] font-semibold">消息</span>
+        </button>
+        <button data-tab="network" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="3" r="2"/><circle cx="21" cy="12" r="2"/><circle cx="12" cy="21" r="2"/><circle cx="3" cy="12" r="2"/><path d="M12 6v3M12 15v3M6 12h3M15 12h3"/></svg>
+          <span class="text-[10px] font-semibold">关系网</span>
+        </button>
+        <button data-tab="me" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-[10px] font-semibold">我</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Side annotation right (shortcuts) -->
+  <div class="hidden lg:block absolute right-12 bottom-12 max-w-xs text-pulse-text-3 text-[11px] leading-relaxed">
+    <div class="text-pulse-text-2 mb-2 font-semibold">建议体验路径</div>
+    <div>① 收件箱 → 切换不同联系人</div>
+    <div>② 选 hint → <span class="text-pulse-purple-2">看草稿下方 chips</span></div>
+    <div>③ 点 chip → 草稿即时变化</div>
+    <div>　Mira：🔥 更热情 / 🌙 更矜持</div>
+    <div>　Ava：👔 更正式 / 😊 更轻松</div>
+    <div>　Noa：⚔️ 更直接 / 🕊️ 更温和</div>
+    <div>④ 「AI 分析」→ 看历史 + 追问</div>
+    <div>⑤ 底部 tabbar → 关系网</div>
+  </div>
+
+  <script>
+  // ===================== DATA =====================
+
+  const CONTACTS = {
+    mira:   { id:'mira',   name:'Mira Tanaka',  initial:'M',  bg:'linear-gradient(135deg,#F472B6,#A855F7)',
+              tag:'老朋友', cluster:'friends', strength:'high',  topics:['摄影','爵士'], lastSeen:'3 周前',
+              summary:'摄影师 · 5 年老友 · 今晚 8pm 有约' },
+    dad:    { id:'dad',    name:'爸爸',         initial:'爸', bg:'linear-gradient(135deg,#10B981,#047857)',
+              tag:'家人',   cluster:'family',  strength:'high',  topics:['家事','健康'], lastSeen:'2 天前',
+              summary:'最近膝盖不太好，关心他的复查' },
+    mom:    { id:'mom',    name:'妈妈',         initial:'妈', bg:'linear-gradient(135deg,#10B981,#059669)',
+              tag:'家人',   cluster:'family',  strength:'medium',  topics:['家事'], lastSeen:'30 天前',
+              summary:'已 30 天未联系 · 建议今天问候' },
+    ava:    { id:'ava',    name:'Ava Okafor',   initial:'A',  bg:'linear-gradient(135deg,#F59E0B,#D97706)',
+              tag:'客户',   cluster:'clients', strength:'medium', topics:['项目','合同'], lastSeen:'昨天',
+              summary:'B 轮签约客户 · 项目 Q3 上线' },
+    jules:  { id:'jules',  name:'Jules Soto',   initial:'J',  bg:'linear-gradient(135deg,#F59E0B,#EA580C)',
+              tag:'前同事', cluster:'work',    strength:'medium', topics:['职场'], lastSeen:'12 天前',
+              summary:'最近发了重要朋友圈，未互动' },
+    noa:    { id:'noa',    name:'Noa Bergström', initial:'N', bg:'linear-gradient(135deg,#3B82F6,#1D4ED8)',
+              tag:'朋友',   cluster:'friends', strength:'medium', topics:['哲学','政治'], lastSeen:'5 天前',
+              summary:'立场不同，对话需谨慎' },
+    studio: { id:'studio', name:'Studio Hours', initial:'#',  bg:'linear-gradient(135deg,#6B7280,#374151)',
+              tag:'群聊',   cluster:'work',    strength:'low',    topics:['工作'], lastSeen:'1 小时前',
+              summary:'8 人群 · 你不在的 60 分钟有 124 条' },
+    climb:  { id:'climb',  name:'Climb Crew',   initial:'#',  bg:'linear-gradient(135deg,#6B7280,#1F2937)',
+              tag:'群聊',   cluster:'friends', strength:'low',    topics:['户外'], lastSeen:'昨天',
+              summary:'下周末线路讨论' },
+    lily:   { id:'lily',   name:'Lily Chen',    initial:'L',  bg:'linear-gradient(135deg,#A855F7,#7E22CE)',
+              tag:'同事',   cluster:'work',    strength:'low',    topics:['工作'], lastSeen:'1 周前',
+              summary:'同事 · 偶尔合作' },
+    ken:    { id:'ken',    name:'Ken Park',     initial:'K',  bg:'linear-gradient(135deg,#A855F7,#6D28D9)',
+              tag:'同事',   cluster:'work',    strength:'low',    topics:['工作'], lastSeen:'10 天前',
+              summary:'前端开发 · 上次问过技术' },
+    rena:   { id:'rena',   name:'Rena Sato',    initial:'R',  bg:'linear-gradient(135deg,#F59E0B,#B45309)',
+              tag:'客户',   cluster:'clients', strength:'low',    topics:['销售'], lastSeen:'2 周前',
+              summary:'潜在客户 · 待跟进' },
+    sis:    { id:'sis',    name:'妹妹',          initial:'妹', bg:'linear-gradient(135deg,#10B981,#065F46)',
+              tag:'家人',   cluster:'family',  strength:'high',   topics:['家'], lastSeen:'昨天',
+              summary:'本科生 · 周末回家' },
+  };
+
+  // Inbox layout
+  const INBOX = {
+    now: [
+      { id:'ava',   preview:'Q3 项目合同细节确认一下', time:'9:12', priority:'立刻回', action:'附和确认' },
+      { id:'mira',  preview:'今晚 8 点 Blue Note？带礼物给你 ✨', time:'昨天 20:43', priority:'立刻回', action:'附和' },
+    ],
+    later: [
+      { id:'dad',   preview:'医生说要复查，下周二有空吗', time:'昨天', priority:'稍后回', action:'附和' },
+      { id:'jules', preview:'我决定从字节出来做自己的工作室了', time:'2 天前', priority:'稍后回', action:'附和' },
+      { id:'noa',   preview:'你怎么看上次说的那个话题？', time:'5 天前', priority:'稍后回', action:'温和回应' },
+    ],
+    ignore: [
+      { id:'studio', preview:'设计稿 v3 已上传 + 124 条', time:'1 小时前', priority:'群聊', action:'AI 已总结' },
+      { id:'climb',  preview:'下周末路线大家选一下', time:'昨天', priority:'群聊', action:'明日再看' },
+    ],
+  };
+
+  // AI suggestions per contact: hints (dynamic, relationship+content driven) + deep analysis
+  const AI_REPLIES = {
+    mira: {
+      analysis: 'Mira 期待你确认 8 点的安排，语气温暖、有礼物想送你。<br><span class="text-pulse-text-2 text-[12px]">建议：积极回应 + 表达期待</span>',
+      hints: [
+        {
+          emoji:'✨', label:'热情确认',   sub:'应和 + 表达期待',
+          draft:'好啊！8 点见，我准时到 ☕\n超期待你说的那个玻璃杯，谢谢你还记得 ✨',
+          chips: [
+            { id:'warm',     emoji:'🔥', label:'更热情',  text:'哇 8 点 Blue Note！我已经在倒计时了 🤩\n那个玻璃杯！你居然还记得！太期待今晚了～' },
+            { id:'reserved', emoji:'🌙', label:'更矜持',  text:'好的，8 点见。\n谢谢你还记得那个玻璃杯。' },
+            { id:'short',    emoji:'➖', label:'更短',    text:'8 点见 ✨ 期待玻璃杯！' },
+            { id:'long',     emoji:'➕', label:'更长',    text:'太好了！今晚 8 点 Blue Note 准时见，trio 我也很期待。\n你说的那个玻璃杯，我从 5 月一直惦记着，没想到你真带来了，先在这里谢过 🥹\n路上小心，等你～' },
+          ],
+        },
+        {
+          emoji:'🤔', label:'小调整',     sub:'晚 20 分钟 + 问演出',
+          draft:'8 点会不会有点早？我可能 8:20 才能到，给我留个位 hh\n顺带问下，今晚是 trio 哪几位？',
+          chips: [
+            { id:'direct',  emoji:'💬', label:'更直接',  text:'我得 8:20 才能到，给我留个位。\n今晚 trio 是哪几位？' },
+            { id:'gentle',  emoji:'🌸', label:'更委婉',  text:'不好意思 8 点可能有点紧 🥲\n给我留个位，我尽量 8:20 前到～对了今晚 trio 阵容是？' },
+            { id:'short',   emoji:'➖', label:'更短',    text:'我 8:20 到，留个位 ✨' },
+            { id:'apology', emoji:'🙏', label:'加歉意',  text:'抱歉今晚可能要晚 20 分钟到，让你先等一下 🙏\n给我留个位，trio 是哪几位演？' },
+          ],
+        },
+      ],
+      deepAnalysis: {
+        message: '8 点见 Blue Note？带礼物给你 ✨ · 所以 8 点没问题吧？',
+        intent: '确认 8 点见面 + 想亲手送礼物给你',
+        expectations: ['希望你准时（她已订位）', '希望你重视她准备的玻璃杯', '希望你今晚情绪 high'],
+        history: [
+          { date:'5/15', text:'你们一起去过 Blue Note，你迟到了 15 分钟' },
+          { date:'5/30', text:'她说"看到一个玻璃杯让我想起你"' },
+          { date:'今天 17:02', text:'她朋友圈预告"今晚有惊喜礼物"' },
+        ],
+        risk: '上次迟到她原话"没事下次记得"，AI 判断：表面平静实际有失望，今晚务必准时',
+        followups: [ '为什么她这样说？', '我该准备回礼吗？', '上次迟到她真生气了吗？' ],
+        qa: {
+          '为什么': '她在确认安排，同时也在暗示她重视这次见面——主动备礼物 + 朋友圈预告，都是社交信号。她在说"我为我们的见面做了准备"。',
+          '回礼':   '建议带一瓶她喜欢的 Bourbon（你们 4/2 在 Westlight 一起喝过她说"这酒能配 trio"）。不用贵但要"她喜欢"。',
+          '生气':   '5/15 她原话"没事下次记得"。AI 跨语境判断：那天是她生日前一周，她表面平静实际失望（你们 5/16 聊天她回复变短）。',
+          '历史':   '过去 30 天你们聊了 28 次，主要话题：摄影 14 次 / 爵士 9 次 / Brooklyn 餐厅 6 次。她从不主动催你，所以"再确认"=她真的有点紧张。',
+          '默认':   '继续追问吧——我会基于你们 5 年的对话历史回答。',
+        }
+      }
+    },
+    ava: {
+      analysis: 'Ava 在催 Q3 合同细节，语气专业但有时间压力。<br><span class="text-pulse-text-2 text-[12px]">建议：明确确认 + 给出时间承诺</span>',
+      hints: [
+        {
+          emoji:'✅', label:'承诺时间',   sub:'今日 17:00 前反馈',
+          draft:'Ava 你好，合同细节我今天下午 5 点前发你。如果有任何调整需求，我们明天电话同步。',
+          chips: [
+            { id:'formal',  emoji:'👔', label:'更正式', text:'Ava 您好，Q3 合同细节将于今日 17:00 前发送至您邮箱。如有任何调整需求，建议明日上午电话同步，敬请确认。' },
+            { id:'casual',  emoji:'😊', label:'更轻松', text:'Ava，5 点前一定发你～有问题咱们明天电话过一下' },
+            { id:'detail',  emoji:'📋', label:'加细节', text:'Ava 你好，Q3 合同细节我今天 5 点前发你邮箱，包含付款节奏和验收标准两部分。如需调整，明天上午 10 点电话同步，方便吗？' },
+            { id:'short',   emoji:'➖', label:'更短',   text:'Ava，5 点前发你。有调整明天电话。' },
+          ],
+        },
+        {
+          emoji:'📞', label:'请求会议',   sub:'细节多 → 同步会',
+          draft:'想跟你确认一下：付款节奏是按月还是里程碑？这影响合同条款写法，明天 30 分钟电话过一下？',
+          chips: [
+            { id:'formal',   emoji:'👔', label:'更正式',     text:'Ava，关于付款节奏和合同条款，希望能与您约一次 30 分钟的电话沟通，建议明日上午，您方便的时间敬请告知。' },
+            { id:'pro',      emoji:'💼', label:'更专业',     text:'付款节奏（按月 vs 里程碑）会直接影响第 4 条和验收标准的措辞。建议明天 30 分钟电话对齐，避免反复改稿。' },
+            { id:'timeline', emoji:'📋', label:'加 agenda',  text:'明天电话想对齐两点：① 付款节奏 ② 验收标准。30 分钟够吗？我下午会准备好初稿等你 input。' },
+          ],
+        },
+      ],
+      deepAnalysis: {
+        message: 'Q3 项目合同细节确认一下',
+        intent: '催促合同细节 · 她那边可能有内部 deadline',
+        expectations: ['24 小时内有具体反馈', '希望感觉到你重视这个项目', '不想被来回 ping'],
+        history: [
+          { date:'4/20', text:'签约时她强调过 SLA—"24h 内回复"' },
+          { date:'5/25', text:'上次合同问题你拖了 3 天，她内部被批了' },
+          { date:'昨天 18:00', text:'她在群里 @你确认时间，你没看到' },
+        ],
+        risk: '她是 B 轮关键客户，第二次拖延可能影响续约。她偏好结构化反馈而非长文。',
+        followups: [ '她最在意哪个条款？', '上次类似情况怎么处理？', '她什么时候情绪会好？' ],
+        qa: {
+          '条款':   '基于过往 12 次沟通：她最敏感「付款节奏」（影响她的现金流报表）和「验收标准」（她背 KPI）。其他条款她基本不细看。',
+          '上次':   '5/25 你拖了 3 天，最后用「主动 + 详细 timeline + 道歉」化解。她回复"理解，下次提前打招呼"。',
+          '情绪':   '她周一情绪最佳（每周复盘后），周五最赶（要发周报）。今天周三 → 中性。建议下午发，避免她早会期间。',
+          '默认':   '需要更多 context 我可以拉历史邮件或合同条款帮你分析。',
+        }
+      }
+    },
+    dad: {
+      analysis: '爸爸提到复查，语气平静但希望你陪同。<br><span class="text-pulse-text-2 text-[12px]">建议：积极陪同 + 表达关心</span>',
+      hints: [
+        {
+          emoji:'❤️', label:'主动陪同',   sub:'家人健康优先',
+          draft:'下周二上午我没事，我陪你一起去。你别自己跑，我开车来接你～',
+          chips: [
+            { id:'warm',     emoji:'❤️', label:'更暖',     text:'爸，下周二我陪着你去！你别自己跑，我早点过去接你，咱爷俩一块儿～' },
+            { id:'plain',    emoji:'😎', label:'更轻',     text:'行，下周二我陪你去。' },
+            { id:'long',     emoji:'➕', label:'更长',     text:'爸，下周二上午我特意把会议都挪开了，陪你一起去。我开车去接你，先吃个早饭再去医院。复查完咱去公园走走？' },
+            { id:'practical',emoji:'📝', label:'加细节',   text:'下周二我陪你。我开车几点到家接你？早饭顺路解决。挂号交给我提前搞定。' },
+          ],
+        },
+        {
+          emoji:'🚗', label:'确认 + 接送', sub:'细节落实让他安心',
+          draft:'下周二几点？我开车来接你。要不要先去吃个早饭再去？',
+          chips: [
+            { id:'detail',  emoji:'🗓', label:'加细节',  text:'下周二几点开始？我提前 1 小时到家接你，先去你常去那家粥铺吃早饭，然后送你去医院。' },
+            { id:'family', emoji:'👨', label:'更家常', text:'下周二几点啊？我去接你，咱们先吃点东西～' },
+            { id:'short',  emoji:'➖', label:'更短',   text:'几点？我去接你。' },
+          ],
+        },
+      ],
+      deepAnalysis: {
+        message: '医生说要复查，下周二有空吗',
+        intent: '想让你陪同复查 · 但碍于家长面子说得很轻描淡写',
+        expectations: ['希望你能陪去', '希望你不要担心他', '希望你主动安排不用他开口求'],
+        history: [
+          { date:'4/15', text:'上次复查你陪去了，他后来跟妈妈说"儿子很贴心"' },
+          { date:'3/8',  text:'他第一次提膝盖不舒服，但说"小问题"' },
+          { date:'去年 11 月', text:'类似情况他自己去，回来情绪低了 3 天' },
+        ],
+        risk: '爸从不主动开口求陪伴，这次说明他真的需要。错过会让他心里有结。',
+        followups: [ '爸最近健康状况怎么样？', '我应该带什么去医院？', '妈妈对这事什么态度？' ],
+        qa: {
+          '健康':   '基于他近 30 天对话：膝盖痛 6 次提及，"上下楼有点费劲"。睡眠也提了 2 次"早醒"。建议复查后顺便问问医生睡眠。',
+          '带什么': '他爱吃的：山楂糕、核桃。检查日空腹，可以带温水 + 软糕点等检查后吃。别带苹果（他牙不好）。',
+          '妈妈':   '妈妈昨天朋友圈"老头子又拖着不去看"——这条信息其实是你妈"逼"他发的，他自己不会主动开口。',
+          '默认':   '继续问吧，我会基于家人通讯录的历史给你建议。',
+        }
+      }
+    },
+    jules: {
+      analysis: 'Jules 宣布重大职业决定，需要支持而非建议。<br><span class="text-pulse-text-2 text-[12px]">建议：先共情 + 表达祝福</span>',
+      hints: [
+        {
+          emoji:'🚀', label:'支持 + 庆祝', sub:'先共情，不给建议',
+          draft:'太酷了！jules 你想清楚就一起冲，需要任何帮忙说一声 🚀',
+          chips: [
+            { id:'hype',    emoji:'🎉', label:'更兴奋', text:'Jules 牛批！🎉 终于来了！独立工作室创始人闪亮登场～需要任何 connect 喊我！🚀' },
+            { id:'calm',    emoji:'😎', label:'更克制', text:'挺好的决定，支持你。需要帮忙说一声。' },
+            { id:'commit',  emoji:'🤝', label:'加承诺', text:'太酷了！这件事我等了你 3 个月 😄\n我帮你转招人帖、帮你 connect 客户，下周见一面聊聊？' },
+            { id:'short',   emoji:'➖', label:'更短',   text:'冲！需要帮忙喊我 🚀' },
+          ],
+        },
+        {
+          emoji:'💼', label:'询问方向',   sub:'让他多说，他想分享',
+          draft:'哇这个决定挺大的！工作室主要做什么方向？想做哪类客户？',
+          chips: [
+            { id:'specific', emoji:'🔍', label:'更具体', text:'工作室主打什么品类？先 to B 还是 to C？团队规划几个人？' },
+            { id:'open',     emoji:'🌊', label:'更开放', text:'哇大动作！跟我说说你的想法吧～' },
+            { id:'pro',      emoji:'💼', label:'偏专业', text:'工作室定位是 design studio 还是 agency 模式？早期 cash flow 怎么打？' },
+          ],
+        },
+      ],
+      deepAnalysis: {
+        message: '我决定从字节出来做自己的工作室了',
+        intent: '宣布重大决定 · 想要朋友的支持，不需要建议',
+        expectations: ['听到祝福', '感觉被理解', '后续可能找你帮忙 connect 资源'],
+        history: [
+          { date:'3/12', text:'他第一次抱怨现公司"束缚太多"' },
+          { date:'4/20', text:'他独自纠结"是不是该出来"，犹豫 3 个月' },
+          { date:'5/15', text:'他说"想找几个人一起做点东西"' },
+        ],
+        risk: '⚠️ 此时表达"风险高/再想想"会被解读为不支持。3 个月犹豫已过，他要的是确认而非分析。',
+        followups: [ '他最希望我说什么？', '他历史上重大决定我都怎么回应的？', '他可能找我帮什么忙？' ],
+        qa: {
+          '希望':   '他要的关键词是"挺你 / 厉害 / 一起冲"。最忌讳的是"想清楚了吗 / 现在 timing 不好"——会让他觉得你不信他。',
+          '历史':   '过去 5 年他做过 3 个重大决定（裸辞 / 异地恋 / 买房），你都先表达支持后聊细节。这次也保持节奏。',
+          '帮忙':   '高概率：① 让你帮转发招人帖；② 介绍他认识投资人/客户。建议主动说"需要 connect 喊我"=最高情商支持。',
+          '默认':   '继续问吧，关于他的更多关系动态我都有记录。',
+        }
+      }
+    },
+    noa: {
+      analysis: '⚠️ 你们在这个话题上立场分歧。<br><span class="text-pulse-text-2 text-[12px]">建议：避免争论，转向共同兴趣</span>',
+      hints: [
+        {
+          emoji:'🤝', label:'温和分歧',   sub:'保持友谊不放弃立场',
+          draft:'我大致理解你的角度，虽然我有些不同看法。要不周末喝个咖啡当面聊？',
+          chips: [
+            { id:'firm',     emoji:'⚔️', label:'更直接',  text:'我跟你看法不一样。这个话题得当面聊，周末咖啡？' },
+            { id:'gentle',   emoji:'🕊️', label:'更温和',  text:'我大概懂你想表达的，虽然视角不太一样。周末喝咖啡慢慢聊？' },
+            { id:'friendship',emoji:'🤝', label:'强调友谊', text:'我们这话题想法不一样，但这正是我珍惜跟你聊天的原因 ☺️\n周末当面聊吧。' },
+          ],
+        },
+        {
+          emoji:'🌊', label:'转移话题',   sub:'上次已经聊崩过',
+          draft:'这个话题晚上聊 hh\n对了，你上周说要给我推荐的那本书叫啥？',
+          chips: [
+            { id:'natural', emoji:'🌊', label:'更自然',     text:'这个话题改天再聊～对了你上次说的那本书我一直没找到名字' },
+            { id:'witty',   emoji:'😏', label:'更幽默',     text:'这话题留着下次咖啡馆现场撕 😏\n倒是你之前说的那本书叫啥？' },
+            { id:'shared',  emoji:'📚', label:'切共同兴趣', text:'这个改天聊。我倒是好奇你最近读的那本，你不是说要借给我？' },
+          ],
+        },
+      ],
+      deepAnalysis: {
+        message: '你怎么看上次说的那个话题？',
+        intent: '想跟你深入讨论分歧话题 · 测试你的立场',
+        expectations: ['希望真诚回应而非敷衍', '希望友谊不被立场影响', '可能希望你被他说服'],
+        history: [
+          { date:'4/8',  text:'类似话题你们聊崩了一次（聊了 4 小时不欢而散）' },
+          { date:'5/2',  text:'你转移话题，他后来变得话少' },
+          { date:'5/20', text:'他朋友圈发了对此话题的长文，你没点赞' },
+        ],
+        risk: '强硬反对会损友谊；完全顺从又显虚伪。他能识别敷衍。建议"承认分歧 + 表达对友谊的重视"。',
+        followups: [ '为什么我们总在这话题分歧？', '怎么礼貌地结束这话题？', '完全不回他会怎样？' ],
+        qa: {
+          '为什么': '基于你们 6 年对话：他成长背景偏理想主义（北欧），你偏务实主义。这话题触及核心价值观差异，永远不会一致。',
+          '结束':   '最有效话术是"我们在这上面想法不同，但这正是我珍惜跟你聊天的原因"——表达分歧 + 强调关系价值。他这套吃。',
+          '不回':   '有 70% 概率他会再发一次（他朋友圈刚发完长文，正在情绪点上）。建议简短回应而非完全沉默。',
+          '默认':   '这是高难度社交场景，多问我几个问题再决定。',
+        }
+      }
+    },
+  };
+
+  // Style rewrites for "discuss with AI"
+  const REWRITES = {
+    mira: {
+      humor:   '8 点见！你的那个玻璃杯我等了三个月，比 trio 还期待 😂',
+      brief:   '好的，8 点见 ✨',
+      formal:  '好的，那今晚 8 点 Blue Note 见，感谢你专程带礼物。',
+      warm:    '今晚一定到 🥹 你能记得那个玻璃杯，让我有点感动。',
+    },
+    ava:   { humor:'放心 Ava，今天下午 5 点 SLA 内一定到 📦', brief:'下午 5 点前发你', formal:'Ava，您好。Q3 合同细节我将于今日 17:00 前发出，敬请查收。', warm:'下午 5 点前一定发到，有任何问题随时叫我' },
+    dad:   { humor:'下周二我陪着！你别又自己偷偷跑医院 😤', brief:'下周二我陪你去', formal:'好的爸爸，下周二我陪您一起去复查。我会开车去接您。', warm:'放心吧爸，下周二我陪你～你最近别累着' },
+    jules: { humor:'独立工作室创始人 Jules ✨ 这下我得叫你 boss 了', brief:'恭喜！需要任何 connect 喊我', formal:'恭喜你做出这个重要决定，期待看到你工作室的作品。', warm:'真为你高兴！这是你想了好久的事情，一定会成 🌱' },
+    noa:   { humor:'我们立场不同，所以我们才有得聊嘛 😏', brief:'有不同看法，周末聊？', formal:'对此我持有不同观点，希望我们可以择期当面深入交流。', warm:'谢谢你愿意跟我聊这些，虽然我们看法不同，我珍惜这种交流' },
+  };
+
+  // ===================== STATE =====================
+  let currentContact = 'mira';
+  let currentHintIdx = null;
+  let currentScreen = 'inbox';
+
+  // ===================== ROUTING =====================
+  function showScreen(name) {
+    const screens = ['inbox','chat','profile','network'];
+    screens.forEach(s => {
+      const el = document.getElementById('screen-'+s);
+      if (s === name) {
+        el.classList.remove('is-hidden-right','is-hidden-left');
+      } else {
+        // direction: forward -> hide right, back -> hide left
+        const order = { inbox:0, chat:1, profile:2, network:3 };
+        if (order[s] > order[name]) el.classList.add('is-hidden-right');
+        else el.classList.add('is-hidden-left');
+        el.classList.remove(order[s] > order[name] ? 'is-hidden-left' : 'is-hidden-right');
+      }
+    });
+    currentScreen = name;
+    if (name === 'network') renderNetwork();
+  }
+
+  // ===================== RENDER: INBOX =====================
+  function renderInbox() {
+    const buildItem = (msg) => {
+      const c = CONTACTS[msg.id];
+      const isUrgent = msg.priority === '立刻回';
+      return `
+        <button onclick="openChat('${c.id}')" class="w-full bg-pulse-card hover:bg-pulse-card-2 transition rounded-2xl p-3 border border-pulse-line flex items-center gap-3 text-left">
+          <div class="relative flex-shrink-0">
+            <div class="avatar avatar-sm" style="background:${c.bg}">${c.initial}</div>
+            ${isUrgent ? '<span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-pulse-red ring-2 ring-pulse-card"></span>' : ''}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-0.5">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="text-[14px] font-semibold text-pulse-text truncate">${c.name}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-pulse-card-2 text-pulse-text-3 flex-shrink-0">${c.tag}</span>
+              </div>
+              <span class="text-[10px] text-pulse-text-3 flex-shrink-0 ml-2">${msg.time}</span>
+            </div>
+            <div class="text-[12px] text-pulse-text-2 truncate leading-relaxed">${msg.preview}</div>
+            ${msg.action ? `<div class="mt-1.5 inline-flex items-center gap-1 text-[10px] text-pulse-purple-2 bg-pulse-purple/10 px-2 py-0.5 rounded-md border border-pulse-purple/20">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13 8L19 7L15 11L19 15L13 14L12 20L11 14L5 15L9 11L5 7L11 8L12 2Z"/></svg>
+              AI 推荐：${msg.action}
+            </div>` : ''}
+          </div>
+        </button>
+      `;
+    };
+    document.getElementById('inbox-now').innerHTML    = INBOX.now.map(buildItem).join('');
+    document.getElementById('inbox-later').innerHTML  = INBOX.later.map(buildItem).join('');
+    document.getElementById('inbox-ignore').innerHTML = INBOX.ignore.map(buildItem).join('');
+  }
+
+  // ===================== CHAT =====================
+  function openChat(contactId) {
+    currentContact = contactId;
+    const c = CONTACTS[contactId];
+    document.getElementById('chat-name').textContent = c.name;
+    const av = document.getElementById('chat-avatar');
+    av.textContent = c.initial;
+    av.style.background = c.bg;
+
+    // reset copilot
+    currentHintIdx = null;
+    document.getElementById('copilot-draft').classList.add('hidden');
+    document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
+
+    // update analysis text + hint buttons per contact
+    const ai = AI_REPLIES[contactId] || AI_REPLIES.mira;
+    document.querySelector('#copilot-analysis .text-pulse-text.leading-snug').innerHTML = ai.analysis;
+    populateHints(ai.hints || []);
+
+    // refresh chat scripted history
+    if (contactId === 'mira') {
+      // already laid out in HTML - leave it
+    } else {
+      const messages = document.getElementById('chat-messages');
+      const last = INBOX.now.concat(INBOX.later).find(m => m.id === contactId);
+      const preview = last ? last.preview : '...';
+      messages.innerHTML = `
+        <div class="text-center text-[11px] text-pulse-text-3 my-1">今天</div>
+        <div class="bubble bubble-them">${preview}</div>
+      `;
+    }
+
+    showScreen('chat');
+  }
+
+  // Populate the 2 dynamic hints
+  function populateHints(hints) {
+    const btns = document.querySelectorAll('.hint-btn');
+    btns.forEach((btn, i) => {
+      const h = hints[i];
+      if (!h) {
+        btn.style.visibility = 'hidden';
+        return;
+      }
+      btn.style.visibility = 'visible';
+      btn.querySelector('[data-emoji]').textContent = h.emoji;
+      btn.querySelector('[data-label]').textContent = h.label;
+      btn.querySelector('[data-sub]').textContent = h.sub;
+      // refresh animation
+      btn.classList.remove('refreshing');
+      void btn.offsetWidth;
+      btn.classList.add('refreshing');
+    });
+  }
+
+  // Hint select -> generate draft + render chips
+  function selectHint(idx) {
+    currentHintIdx = idx;
+    document.querySelectorAll('.hint-btn').forEach((b, i) => {
+      b.classList.toggle('active', i === idx);
+    });
+    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const hint = (ai.hints || [])[idx];
+    if (!hint) return;
+
+    document.getElementById('draft-mode-label').textContent = `${hint.emoji} ${hint.label} · 草稿`;
+
+    const draftEl = document.getElementById('draft-text');
+    draftEl.innerText = hint.draft;
+    draftEl.dataset.baseDraft = hint.draft; // remember default for chip toggle
+
+    // Render adjustment chips for THIS hint
+    renderAdjustChips(hint.chips || []);
+
+    // Show draft panel with slide-up animation
+    document.getElementById('copilot-draft').classList.remove('hidden');
+    document.getElementById('copilot-draft').classList.remove('slide-up');
+    void document.getElementById('copilot-draft').offsetWidth;
+    document.getElementById('copilot-draft').classList.add('slide-up');
+
+    // restore default send button
+    const sendBtn = document.getElementById('send-btn');
+    sendBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>发送`;
+  }
+
+  // Render quick-adjust chips
+  function renderAdjustChips(chips) {
+    const wrap = document.getElementById('adjust-chips-wrap');
+    const container = document.getElementById('adjust-chips');
+    if (!chips.length) {
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = '';
+    container.innerHTML = chips.map(c => `
+      <button class="adjust-chip" data-chip-id="${c.id}">
+        <span class="adjust-chip-emoji">${c.emoji}</span>
+        <span>${c.label}</span>
+      </button>
+    `).join('');
+    container.querySelectorAll('.adjust-chip').forEach(btn => {
+      btn.addEventListener('click', () => applyChip(btn.dataset.chipId));
+    });
+  }
+
+  // Apply a chip: rewrite draft, toggle active state
+  function applyChip(chipId) {
+    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const hint = (ai.hints || [])[currentHintIdx];
+    if (!hint) return;
+    const chip = (hint.chips || []).find(c => c.id === chipId);
+    if (!chip) return;
+
+    const draftEl = document.getElementById('draft-text');
+    const allChips = document.querySelectorAll('.adjust-chip');
+
+    // toggle: if clicking active chip, revert to base draft
+    const target = document.querySelector(`.adjust-chip[data-chip-id="${chipId}"]`);
+    const wasActive = target.classList.contains('active');
+
+    allChips.forEach(c => c.classList.remove('active'));
+
+    if (wasActive) {
+      // revert to base
+      draftEl.innerText = draftEl.dataset.baseDraft || hint.draft;
+      // animate
+      flashDraft(draftEl);
+      return;
+    }
+    target.classList.add('active');
+    draftEl.innerText = chip.text;
+    flashDraft(draftEl);
+  }
+
+  // Flash animation when draft updates
+  function flashDraft(el) {
+    el.classList.remove('slide-up');
+    void el.offsetWidth;
+    el.classList.add('slide-up');
+  }
+
+  // Discuss with AI -> rewrite draft (fallback path for edge cases)
+  function discussRewrite() {
+    const input = document.getElementById('discuss-input');
+    const q = input.value.trim();
+    if (!q) {
+      showToast('试试上方快捷调整 chip ↑');
+      return;
+    }
+    const rewrites = REWRITES[currentContact] || REWRITES.mira;
+    let style = null;
+    if (/幽默|搞笑|逗|皮/.test(q)) style = 'humor';
+    else if (/简短|短点|精简|简洁|短一点/.test(q)) style = 'brief';
+    else if (/正式|商务|严谨|正经/.test(q)) style = 'formal';
+    else if (/温暖|暖|走心|真诚|柔软/.test(q)) style = 'warm';
+
+    const draftEl = document.getElementById('draft-text');
+    // clear chip active state since custom instruction overrides
+    document.querySelectorAll('.adjust-chip').forEach(c => c.classList.remove('active'));
+
+    if (style) {
+      draftEl.innerText = rewrites[style];
+      const tag = { humor:'幽默版', brief:'简短版', formal:'正式版', warm:'温暖版' }[style];
+      document.getElementById('draft-mode-label').textContent = `${tag} · AI 改写`;
+      showToast('已为你改写为 ' + tag);
+    } else {
+      draftEl.innerText = (draftEl.innerText + '\n\n（按你说的「' + q + '」调整后版本）');
+      showToast('AI 已根据你的反馈微调');
+    }
+    flashDraft(draftEl);
+    input.value = '';
+  }
+
+  // Send draft -> add to chat
+  function sendDraft() {
+    const draftText = document.getElementById('draft-text').innerText.trim();
+    if (!draftText) return;
+    const messages = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'bubble bubble-mine slide-up';
+    div.style.whiteSpace = 'pre-wrap';
+    div.innerText = draftText;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    document.getElementById('copilot-draft').classList.add('hidden');
+    document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
+    showToast('已发送 · AI 已记录此次互动');
+  }
+
+  // ===================== DEEP ANALYSIS =====================
+  function openDeepAnalysis() {
+    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const da = ai.deepAnalysis;
+    if (!da) {
+      showToast('该联系人深度分析数据待补充');
+      return;
+    }
+    document.getElementById('an-message').textContent = '"' + da.message + '"';
+    document.getElementById('an-intent').textContent = da.intent;
+    document.getElementById('an-expects').innerHTML = da.expectations.map(e => `<li class="flex gap-2"><span class="text-pulse-purple-2">·</span><span>${e}</span></li>`).join('');
+    document.getElementById('an-history').innerHTML = da.history.map(h => `
+      <div class="flex gap-2.5">
+        <div class="text-[10px] text-pulse-text-3 mt-0.5 w-12 flex-shrink-0">${h.date}</div>
+        <div class="text-[12px] text-pulse-text leading-relaxed flex-1">${h.text}</div>
+      </div>
+    `).join('');
+    document.getElementById('an-risk').textContent = da.risk;
+
+    // reset thread
+    document.getElementById('discussion-thread').innerHTML = '';
+    // populate followup chips
+    const chipsEl = document.getElementById('followup-chips');
+    chipsEl.innerHTML = (da.followups || []).map(q =>
+      `<button class="followup-chip" data-q="${q}">${q}</button>`
+    ).join('');
+    chipsEl.querySelectorAll('.followup-chip').forEach(chip => {
+      chip.addEventListener('click', () => askAnalysis(chip.dataset.q));
+    });
+
+    document.getElementById('analysis-sheet').classList.add('show');
+  }
+
+  function closeDeepAnalysis() {
+    document.getElementById('analysis-sheet').classList.remove('show');
+  }
+
+  function askAnalysis(question) {
+    const trimmed = (question || '').trim();
+    if (!trimmed) return;
+
+    // append user bubble
+    const thread = document.getElementById('discussion-thread');
+    const userBubble = document.createElement('div');
+    userBubble.className = 'disc-bubble-me slide-up';
+    userBubble.innerText = trimmed;
+    thread.appendChild(userBubble);
+
+    // generate AI response (keyword match)
+    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const qa = ai.deepAnalysis.qa || {};
+    let answer = qa['默认'] || 'AI 还在学习这个问题，稍后再问试试。';
+    for (const key of Object.keys(qa)) {
+      if (key === '默认') continue;
+      if (trimmed.indexOf(key) !== -1) { answer = qa[key]; break; }
+    }
+
+    // typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'disc-bubble-ai slide-up';
+    typing.innerHTML = '<span class="text-pulse-text-3">AI 思考中</span><span class="ai-shimmer-text">...</span>';
+    thread.appendChild(typing);
+
+    setTimeout(() => {
+      typing.classList.remove('slide-up');
+      typing.innerText = answer;
+      // scroll to bottom
+      const scroll = document.getElementById('analysis-content');
+      scroll.scrollTop = scroll.scrollHeight;
+    }, 600);
+
+    // clear input
+    document.getElementById('analysis-input').value = '';
+    // scroll
+    setTimeout(() => {
+      const scroll = document.getElementById('analysis-content');
+      scroll.scrollTop = scroll.scrollHeight;
+    }, 50);
+  }
+
+  // Toast
+  let toastTimer;
+  function showToast(text) {
+    const t = document.getElementById('toast');
+    t.querySelector('div').textContent = text;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ===================== PROFILE =====================
+  function showProfileTab(name) {
+    const tabs = ['overview','opinions','timeline'];
+    tabs.forEach((t, i) => {
+      const btn = document.querySelector(`.profile-tab[data-ptab="${t}"]`);
+      btn.classList.toggle('text-pulse-text', t === name);
+      btn.classList.toggle('text-pulse-text-3', t !== name);
+      document.getElementById('ptab-' + t).classList.toggle('hidden', t !== name);
+    });
+    const idx = tabs.indexOf(name);
+    document.getElementById('ptab-indicator').style.transform = `translateX(${idx * 100}%)`;
+  }
+
+  // ===================== NETWORK =====================
+  function renderNetwork() {
+    const nodesG = document.getElementById('net-nodes');
+    const edgesG = document.getElementById('net-edges');
+    if (nodesG.dataset.rendered === '1') return;
+    nodesG.dataset.rendered = '1';
+
+    const ringMap = { high: 60, medium: 115, low: 165 };
+    const clusterColor = { family:'#10B981', friends:'#3B82F6', work:'#8B5CF6', clients:'#F59E0B' };
+
+    // group by ring + spread evenly
+    const byStrength = { high: [], medium: [], low: [] };
+    Object.values(CONTACTS).forEach(c => byStrength[c.strength].push(c));
+
+    let nodesHtml = '';
+    let edgesHtml = '';
+    let delay = 0;
+
+    // Center "我"
+    nodesHtml += `
+      <g class="node-group pop-in" style="animation-delay:0ms" transform="translate(0,0)">
+        <g class="node-inner">
+          <circle r="22" fill="url(#meGrad)" />
+          <text text-anchor="middle" dy="5" fill="white" font-size="13" font-weight="600">我</text>
+        </g>
+      </g>
+    `;
+
+    Object.keys(byStrength).forEach(s => {
+      const r = ringMap[s];
+      const list = byStrength[s];
+      const n = list.length;
+      list.forEach((c, i) => {
+        const angle = (Math.PI * 2 * i / n) - Math.PI / 2 + (s==='medium' ? 0.25 : s==='low' ? 0.13 : 0);
+        const x = r * Math.cos(angle);
+        const y = r * Math.sin(angle);
+        const fill = clusterColor[c.cluster];
+        const radius = s === 'high' ? 16 : s === 'medium' ? 13 : 10;
+        delay += 70;
+        edgesHtml += `<line x1="0" y1="0" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${fill}" stroke-opacity="${s==='high'?0.5:s==='medium'?0.3:0.15}" stroke-width="${s==='high'?1.5:1}" class="pop-in" style="animation-delay:${delay}ms" />`;
+        nodesHtml += `
+          <g class="node-group pop-in" style="animation-delay:${delay+30}ms" transform="translate(${x.toFixed(1)},${y.toFixed(1)})" onclick="selectNode('${c.id}')">
+            <g class="node-inner">
+              ${c.id === 'mom' ? `<circle r="${radius+8}" fill="#F59E0B" fill-opacity="0.25" class="node-pulse" />` : ''}
+              <circle r="${radius}" fill="${fill}" class="node-circle" />
+              <text text-anchor="middle" dy="4" fill="white" font-size="${s==='high'?12:10}" font-weight="600">${c.initial}</text>
+            </g>
+          </g>
+        `;
+      });
+    });
+
+    // gradient defs
+    const defs = `
+      <defs>
+        <radialGradient id="meGrad">
+          <stop offset="0%" stop-color="#A78BFA"/>
+          <stop offset="100%" stop-color="#6D28D9"/>
+        </radialGradient>
+      </defs>
+    `;
+    document.getElementById('net-svg').insertAdjacentHTML('afterbegin', defs);
+    edgesG.innerHTML = edgesHtml;
+    nodesG.innerHTML = nodesHtml;
+  }
+
+  function selectNode(id) {
+    const c = CONTACTS[id];
+    if (!c) return;
+    document.getElementById('node-card').classList.remove('hidden');
+    const nc = document.getElementById('nc-avatar');
+    nc.textContent = c.initial;
+    nc.style.background = c.bg;
+    document.getElementById('nc-name').textContent = c.name;
+    document.getElementById('nc-tag').textContent = c.tag;
+    document.getElementById('nc-summary').textContent = c.summary;
+    document.getElementById('nc-go').onclick = () => openChat(id);
+  }
+
+  // ===================== EVENTS =====================
+  function bindEvents() {
+    // Tabbar buttons (delegate)
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const tab = b.dataset.tab;
+        if (tab === 'inbox') showScreen('inbox');
+        if (tab === 'network') showScreen('network');
+        if (tab === 'me') showToast('「我」页 demo 暂未实现');
+      });
+    });
+
+    // Dynamic hint cards
+    document.querySelectorAll('.hint-btn').forEach(b => {
+      b.addEventListener('click', () => selectHint(parseInt(b.dataset.hint, 10)));
+    });
+
+    // Draft close
+    document.getElementById('draft-close').addEventListener('click', () => {
+      document.getElementById('copilot-draft').classList.add('hidden');
+      document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
+    });
+
+    // Deep analysis open / close / send
+    document.getElementById('open-analysis').addEventListener('click', openDeepAnalysis);
+    document.getElementById('close-analysis').addEventListener('click', closeDeepAnalysis);
+    document.getElementById('analysis-sheet').addEventListener('click', e => {
+      if (e.target.id === 'analysis-sheet') closeDeepAnalysis();
+    });
+    document.getElementById('analysis-send').addEventListener('click', () => {
+      askAnalysis(document.getElementById('analysis-input').value);
+    });
+    document.getElementById('analysis-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') askAnalysis(e.target.value);
+    });
+
+    // Discuss
+    document.getElementById('discuss-go').addEventListener('click', discussRewrite);
+    document.getElementById('discuss-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') discussRewrite();
+    });
+
+    // Send
+    document.getElementById('send-btn').addEventListener('click', sendDraft);
+
+    // Chat header to profile
+    document.getElementById('chat-header-bio').addEventListener('click', () => {
+      showScreen('profile');
+    });
+
+    // Profile tabs
+    document.querySelectorAll('.profile-tab').forEach(t => {
+      t.addEventListener('click', () => showProfileTab(t.dataset.ptab));
+    });
+
+    // Network view toggle (just visual, list mode shows toast)
+    document.querySelectorAll('.net-view-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.net-view-btn').forEach(x => {
+          x.classList.remove('bg-pulse-purple/25','text-pulse-purple-2','font-semibold');
+          x.classList.add('text-pulse-text-3');
+        });
+        b.classList.remove('text-pulse-text-3');
+        b.classList.add('bg-pulse-purple/25','text-pulse-purple-2','font-semibold');
+        if (b.dataset.view === 'list') showToast('列表视图开发中');
+      });
+    });
+
+    // Inline greeting (mom one-tap)
+    document.querySelectorAll('.inline-greeting').forEach(b => {
+      b.addEventListener('click', () => openChat('mom'));
+    });
+  }
+
+  // ===================== INIT =====================
+  document.addEventListener('DOMContentLoaded', () => {
+    renderInbox();
+    bindEvents();
+    showProfileTab('overview');
+    // pre-populate Mira's hints so chat screen is ready immediately
+    const initAi = AI_REPLIES.mira;
+    populateHints(initAi.hints);
+  });
+  </script>
+</body>
+</html>

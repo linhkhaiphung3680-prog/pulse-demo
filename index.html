@@ -804,11 +804,16 @@
               </div>
             </button>
           </div>
-          <button id="open-analysis" class="w-full rounded-xl py-2 px-3 flex items-center justify-center gap-2 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v3M11 14h.01"/></svg>
-            <span class="text-[12px] font-semibold">AI 分析 · 这条消息 + 历史上下文</span>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="open-analysis" class="rounded-xl py-2 px-2.5 flex items-center justify-center gap-1.5 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v3M11 14h.01"/></svg>
+              <span class="text-[12px] font-semibold">AI 分析</span>
+            </button>
+            <button id="open-pi-context" class="rounded-xl py-2 px-2.5 flex items-center justify-center gap-1.5 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
+              <div class="pi-avatar-mini" style="width:14px;height:14px;font-size:10px">π</div>
+              <span class="text-[12px] font-semibold">跟小 P 商量</span>
+            </button>
+          </div>
         </div>
 
         <!-- Expanded draft area -->
@@ -943,6 +948,41 @@
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
               问
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pi-in-context chat sheet (summon Pi to discuss current chat reply) -->
+      <div id="pi-context-sheet" class="analysis-sheet">
+        <div class="analysis-sheet-body" style="max-height:84%">
+          <div class="analysis-handle"></div>
+          <div class="px-5 pt-3 pb-3 flex items-center justify-between border-b border-pulse-line/60">
+            <div class="flex items-center gap-2">
+              <div class="pi-avatar-mini active">π</div>
+              <div>
+                <div class="text-[14px] font-semibold leading-none">跟小 P 商量这条</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1" id="pi-ctx-subtitle">Mira · 老朋友 5 年</div>
+              </div>
+            </div>
+            <button id="pi-ctx-close" class="w-7 h-7 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="px-5 pt-3 pb-2">
+            <div class="bg-pulse-card-2 rounded-xl p-3 border border-pulse-line">
+              <div class="text-[10px] uppercase tracking-wider text-pulse-text-3 mb-1.5">小 P 看到的语境</div>
+              <div class="text-[12px] text-pulse-text leading-relaxed" id="pi-ctx-preview">—</div>
+            </div>
+          </div>
+
+          <div class="scroll-area flex-1 px-5 py-2 flex flex-col gap-2.5" id="pi-ctx-thread"></div>
+
+          <div class="px-5 pb-2 flex flex-wrap gap-1.5" id="pi-ctx-chips"></div>
+
+          <div class="px-4 py-3 border-t border-pulse-line/60 flex items-center gap-2">
+            <input id="pi-ctx-input" type="text" placeholder="问小 P 任何关于这条回复的事..." class="flex-1 bg-pulse-card-2 rounded-xl px-3 py-2 text-[13px] text-pulse-text placeholder:text-pulse-text-3 border border-pulse-line focus:outline-none focus:border-pulse-purple/60"/>
+            <button id="pi-ctx-send" class="px-3 py-2 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[12px] font-semibold">问</button>
           </div>
         </div>
       </div>
@@ -1291,21 +1331,7 @@
       <!-- ============= TAB: CHAT ============= -->
       <div id="pi-tab-chat" class="flex-1 flex flex-col overflow-hidden">
         <div id="pi-thread" class="scroll-area flex-1 px-5 py-3 flex flex-col gap-2.5">
-          <!-- Pi opening message -->
-          <div class="pi-bubble pi-bubble-pi">
-            嘿，我是<b>小 P</b>，你的社交副驾驶 ✨<br>
-            过去 12 天我帮你处理了 <b class="text-pulse-purple-2">187 条</b>消息，学到 <b class="text-pulse-purple-2">9 个</b>偏好。今天有 3 条立刻回的消息，2 段关系需要关注。
-          </div>
-          <div class="pi-bubble pi-bubble-pi">
-            想调整什么？可以直接跟我说，比如：
-          </div>
-          <!-- Quick prompts -->
-          <div class="flex flex-wrap gap-2 mb-2">
-            <button class="pi-quick" data-pi-quick="emoji">以后回客户少用 emoji</button>
-            <button class="pi-quick" data-pi-quick="long">回复别那么长</button>
-            <button class="pi-quick" data-pi-quick="noa">Noa 那种话题别再帮我接</button>
-            <button class="pi-quick" data-pi-quick="brief">告诉我你今天学到什么</button>
-          </div>
+          <!-- Pi opening (rendered dynamically based on time) -->
         </div>
 
         <!-- Pi chat input -->
@@ -1372,7 +1398,7 @@
         </div>
 
         <!-- Toggles -->
-        <div class="bg-pulse-card border border-pulse-line rounded-2xl p-4">
+        <div class="bg-pulse-card border border-pulse-line rounded-2xl p-4 mb-4">
           <div class="text-[11px] uppercase tracking-wider text-pulse-text-3 font-semibold mb-1">主动行为</div>
           <div class="setting-row">
             <div>
@@ -1401,6 +1427,59 @@
               <div class="text-[11px] text-pulse-text-3 mt-0.5">学习你的用词、句式、emoji 偏好让代笔像你</div>
             </div>
             <div class="toggle on" data-toggle></div>
+          </div>
+        </div>
+
+        <!-- Per-group overrides -->
+        <div class="bg-pulse-card border border-pulse-line rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-1">
+            <div>
+              <div class="text-[12px] text-pulse-text font-semibold">针对人群单独设置</div>
+              <div class="text-[10px] text-pulse-text-3 mt-0.5">为不同关系类型自定义风格</div>
+            </div>
+            <div class="toggle on" data-toggle id="group-override-toggle"></div>
+          </div>
+          <div class="space-y-1 mt-3">
+            <button class="group-row w-full flex items-center justify-between py-2.5 hover:bg-pulse-card-2 rounded-lg transition px-2 -mx-2 text-left" data-group="family">
+              <div class="flex items-center gap-2.5">
+                <span class="text-[18px]">👨‍👩‍👧</span>
+                <div>
+                  <div class="text-[13px] text-pulse-text">家人</div>
+                  <div class="text-[10px] text-pulse-text-2">温暖 + emoji 适中 · <span class="text-pulse-purple-2">已自定义</span></div>
+                </div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-pulse-text-3"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button class="group-row w-full flex items-center justify-between py-2.5 hover:bg-pulse-card-2 rounded-lg transition px-2 -mx-2 text-left" data-group="friends">
+              <div class="flex items-center gap-2.5">
+                <span class="text-[18px]">👥</span>
+                <div>
+                  <div class="text-[13px] text-pulse-text">朋友</div>
+                  <div class="text-[10px] text-pulse-text-3">跟随默认</div>
+                </div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-pulse-text-3"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button class="group-row w-full flex items-center justify-between py-2.5 hover:bg-pulse-card-2 rounded-lg transition px-2 -mx-2 text-left" data-group="work">
+              <div class="flex items-center gap-2.5">
+                <span class="text-[18px]">💼</span>
+                <div>
+                  <div class="text-[13px] text-pulse-text">同事</div>
+                  <div class="text-[10px] text-pulse-text-3">跟随默认</div>
+                </div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-pulse-text-3"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button class="group-row w-full flex items-center justify-between py-2.5 hover:bg-pulse-card-2 rounded-lg transition px-2 -mx-2 text-left" data-group="clients">
+              <div class="flex items-center gap-2.5">
+                <span class="text-[18px]">🏢</span>
+                <div>
+                  <div class="text-[13px] text-pulse-text">客户</div>
+                  <div class="text-[10px] text-pulse-text-2">简练 + 正式 + 不用 emoji · <span class="text-pulse-purple-2">已自定义</span></div>
+                </div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-pulse-text-3"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -1631,6 +1710,86 @@
           <span class="text-[10px] font-semibold">小 P</span>
         </button>
       </div>
+
+      <!-- Forget reason sheet -->
+      <div id="forget-sheet" class="analysis-sheet">
+        <div class="analysis-sheet-body" style="max-height:72%">
+          <div class="analysis-handle"></div>
+          <div class="px-5 pt-3 pb-3 flex items-center justify-between border-b border-pulse-line/60">
+            <div class="flex items-center gap-2">
+              <div class="pi-avatar-mini">π</div>
+              <div>
+                <div class="text-[14px] font-semibold leading-none">告诉小 P 为什么</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1">这能让我学得更准</div>
+              </div>
+            </div>
+            <button id="forget-close" class="w-7 h-7 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="scroll-area flex-1 px-5 py-3">
+            <div class="bg-pulse-card-2 rounded-xl p-3 border border-pulse-line mb-4">
+              <div class="text-[10px] uppercase tracking-wider text-pulse-text-3 mb-1.5">想忘掉的偏好</div>
+              <div class="text-[13px] text-pulse-text" id="forget-pref-name">—</div>
+            </div>
+            <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold mb-2">为什么？</div>
+            <div class="space-y-2 mb-4" id="forget-reasons">
+              <button class="forget-reason w-full text-left rounded-xl border border-pulse-line p-3 hover:border-pulse-purple/50 transition" data-reason="inaccurate">
+                <div class="text-[13px] text-pulse-text font-medium">这个推断不准确</div>
+                <div class="text-[11px] text-pulse-text-3 mt-0.5">小 P 误读了我的行为，会继续观察</div>
+              </button>
+              <button class="forget-reason w-full text-left rounded-xl border border-pulse-line p-3 hover:border-pulse-purple/50 transition" data-reason="outdated">
+                <div class="text-[13px] text-pulse-text font-medium">已经过时了</div>
+                <div class="text-[11px] text-pulse-text-3 mt-0.5">以前是这样，现在我改变了想法</div>
+              </button>
+              <button class="forget-reason w-full text-left rounded-xl border border-pulse-line p-3 hover:border-pulse-purple/50 transition" data-reason="boundary">
+                <div class="text-[13px] text-pulse-text font-medium">不希望被这样推断</div>
+                <div class="text-[11px] text-pulse-text-3 mt-0.5">这个维度我不想小 P 追踪</div>
+              </button>
+              <button class="forget-reason w-full text-left rounded-xl border border-pulse-line p-3 hover:border-pulse-purple/50 transition" data-reason="other">
+                <div class="text-[13px] text-pulse-text font-medium">其他原因</div>
+                <div class="text-[11px] text-pulse-text-3 mt-0.5">我自己写</div>
+              </button>
+            </div>
+            <div id="forget-other-input" class="hidden mb-4">
+              <input type="text" placeholder="告诉小 P 具体原因..." class="w-full bg-pulse-card-2 rounded-xl px-3 py-2 text-[13px] text-pulse-text placeholder:text-pulse-text-3 border border-pulse-line focus:outline-none focus:border-pulse-purple/60"/>
+            </div>
+          </div>
+          <div class="px-4 py-3 border-t border-pulse-line/60 flex gap-2">
+            <button id="forget-cancel" class="flex-1 py-2.5 rounded-xl border border-pulse-line text-[12px] text-pulse-text-2">取消</button>
+            <button id="forget-confirm" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[12px] font-semibold">确认忘掉</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group override sheet -->
+      <div id="group-sheet" class="analysis-sheet">
+        <div class="analysis-sheet-body" style="max-height:80%">
+          <div class="analysis-handle"></div>
+          <div class="px-5 pt-3 pb-3 flex items-center justify-between border-b border-pulse-line/60">
+            <div class="flex items-center gap-2">
+              <span id="group-icon" class="text-[20px]">👨‍👩‍👧</span>
+              <div>
+                <div class="text-[14px] font-semibold leading-none" id="group-title">家人 · 风格覆盖</div>
+                <div class="text-[10px] text-pulse-text-3 mt-1">只对这群人生效，其他保持默认</div>
+              </div>
+            </div>
+            <button id="group-close" class="w-7 h-7 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="scroll-area flex-1 px-5 py-3" id="group-body">
+            <!-- group sliders rendered dynamically -->
+          </div>
+          <div class="px-4 py-3 border-t border-pulse-line/60 flex gap-2">
+            <button id="group-reset" class="flex-1 py-2.5 rounded-xl border border-pulse-line text-[12px] text-pulse-text-2">重置为默认</button>
+            <button id="group-save" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[12px] font-semibold">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pi-in-context chat sheet moved to screen-chat (so it overlays chat screen) -->
+
     </div>
 
   </div>
@@ -1960,6 +2119,7 @@
     });
     currentScreen = name;
     if (name === 'network') renderNetwork();
+    if (name === 'pi') renderPiOpening();
   }
 
   // ===================== RENDER: INBOX =====================
@@ -2367,6 +2527,63 @@
   }
 
   // ===================== PI (AI persona) =====================
+  // Time-aware opening
+  function getPiOpening() {
+    const h = new Date().getHours();
+    const minute = new Date().getMinutes();
+    let greeting, body, signal;
+    if (h >= 5 && h < 11) {
+      greeting = '早上好 ☀️';
+      body = '昨晚有 <b class="text-pulse-purple-2">2 条</b>你没看到的消息，<b>5 段</b>关系健康度有变化。今天还有 <b class="text-pulse-purple-2">3 条</b>需要立刻回。';
+      signal = '💡 妈妈昨晚 22:14 给你打过一个语音，未接。建议早间问候时提一下。';
+    } else if (h >= 11 && h < 14) {
+      greeting = '中午好 🍱';
+      body = '今早处理了 <b>14 条</b>消息，发现一个新的关系信号：<b class="text-pulse-purple-2">Jules</b> 上午 11:08 提了「想见你」。';
+      signal = '💡 中午是你回复速度最高的时段（基于过去 30 天）。要不要趁现在清掉收件箱？';
+    } else if (h >= 14 && h < 18) {
+      greeting = '下午好';
+      body = `<b class="text-pulse-purple-2">Mira</b> ${minute >= 15 ? '15 分钟前' : '刚刚'}发了消息，是关于今晚 8pm 的确认。`;
+      signal = '💡 你过去 5 次回 Mira 都在 30 分钟内。建议保持节奏。';
+    } else if (h >= 18 && h < 22) {
+      greeting = '晚上好 🌙';
+      body = '今天累不累？我帮你处理了 <b>23 条</b>消息，省下大约 <b class="text-pulse-purple-2">40 分钟</b>。明天还有 <b>2 件</b>事要提醒你。';
+      signal = '💡 你倾向 22:00 后回家人。妈妈刚发了"在干嘛"，我可以帮你起个温暖的草稿。';
+    } else {
+      greeting = '夜深了 😴';
+      body = '这个点先不打扰你了。明早再聚个早简报？我会帮你筛掉今晚的群消息泥石流（已默默处理 <b>67 条</b>）。';
+      signal = '💡 凌晨发消息容易让对方误会语境。建议睡前最后再回 1-2 条最重要的。';
+    }
+    return { greeting, body, signal };
+  }
+
+  function renderPiOpening() {
+    const thread = document.getElementById('pi-thread');
+    if (!thread) return;
+    if (thread.querySelector('[data-pi-opening]')) return; // already rendered
+    const op = getPiOpening();
+    thread.innerHTML = `
+      <div class="pi-bubble pi-bubble-pi" data-pi-opening>
+        ${op.greeting} 我是<b>小 P</b> ✨<br>${op.body}
+      </div>
+      <div class="pi-bubble pi-bubble-pi">
+        ${op.signal}
+      </div>
+      <div class="pi-bubble pi-bubble-pi">
+        想调整什么？可以直接跟我说，比如：
+      </div>
+      <div class="flex flex-wrap gap-2 mb-2">
+        <button class="pi-quick" data-pi-quick="emoji">以后回客户少用 emoji</button>
+        <button class="pi-quick" data-pi-quick="long">回复别那么长</button>
+        <button class="pi-quick" data-pi-quick="noa">Noa 那种话题别再帮我接</button>
+        <button class="pi-quick" data-pi-quick="brief">告诉我你今天学到什么</button>
+      </div>
+    `;
+    // Re-bind quick prompts (they were re-rendered)
+    thread.querySelectorAll('[data-pi-quick]').forEach(b => {
+      b.addEventListener('click', () => piSend(PI_QUICK_TEXT[b.dataset.piQuick]));
+    });
+  }
+
   // Predefined responses to user instructions (Wizard of Oz)
   const PI_RESPONSES = {
     'emoji_clients': '收到 ✨ 已记下：对客户少用 emoji。\n\n影响范围：所有标签为「客户」的联系人（4 位）\n生效时间：立即\n\n要不要也对「同事」一起？',
@@ -2467,6 +2684,301 @@
       t.addEventListener('click', () => showToast('系统级承诺 · 不可关闭'));
     });
   }
+
+  // ===================== FORGET MODAL (B) =====================
+  let forgetTargetCard = null;
+  let forgetPrefName = '';
+
+  const FORGET_RESPONSES = {
+    inaccurate: '明白。我把这次误判记下来了——会重新观察你这方面的信号，并降低对类似推断的置信度。\n\n如果方便，下次草稿出错时点「不喜欢」让我看到具体例子，会学得更快。',
+    outdated:   '好的，时间会让人变。这项偏好已从今天起重置，我会从最近 7 天的互动重新积累。\n\n如果你想直接告诉我新的偏好是什么，我可以马上切换。',
+    boundary:   '对不起，我尊重你的隐私边界。这个维度我不再追踪、不再推断、不再使用。\n\n你的拒绝本身也是我学习的信号——其他维度我也会更小心。',
+    other:      '已记下你的反馈。能告诉我具体是哪里不舒服吗？这能让我学得更准。',
+  };
+
+  function openForgetModal(card) {
+    forgetTargetCard = card;
+    forgetPrefName = card.querySelector('.text-\\[13px\\]')?.textContent || '该项偏好';
+    document.getElementById('forget-pref-name').textContent = forgetPrefName;
+    // reset selection
+    document.querySelectorAll('.forget-reason').forEach(b => {
+      b.classList.remove('border-pulse-purple/60');
+      b.style.background = '';
+    });
+    document.getElementById('forget-other-input').classList.add('hidden');
+    document.querySelector('#forget-other-input input').value = '';
+    document.getElementById('forget-confirm').dataset.reason = '';
+    document.getElementById('forget-sheet').classList.add('show');
+  }
+
+  function closeForgetModal() {
+    document.getElementById('forget-sheet').classList.remove('show');
+  }
+
+  function selectForgetReason(reason, btn) {
+    document.querySelectorAll('.forget-reason').forEach(b => {
+      b.classList.remove('border-pulse-purple/60');
+      b.style.background = '';
+    });
+    btn.classList.add('border-pulse-purple/60');
+    btn.style.background = 'rgba(139,92,246,0.10)';
+    document.getElementById('forget-confirm').dataset.reason = reason;
+    document.getElementById('forget-other-input').classList.toggle('hidden', reason !== 'other');
+  }
+
+  function confirmForget() {
+    const reason = document.getElementById('forget-confirm').dataset.reason;
+    if (!reason) {
+      showToast('请先选择一个原因');
+      return;
+    }
+    const reply = FORGET_RESPONSES[reason];
+    // animate card out
+    if (forgetTargetCard) {
+      forgetTargetCard.style.transition = 'all 380ms ease';
+      forgetTargetCard.style.opacity = '0';
+      forgetTargetCard.style.transform = 'translateX(-32px)';
+      forgetTargetCard.style.maxHeight = '0';
+      forgetTargetCard.style.padding = '0';
+      forgetTargetCard.style.marginBottom = '0';
+    }
+    closeForgetModal();
+    showToast('已让小 P 忘掉这项偏好');
+    // append Pi response to the chat thread
+    setTimeout(() => {
+      const thread = document.getElementById('pi-thread');
+      if (thread && !thread.children.length) renderPiOpening();
+      const sysNote = document.createElement('div');
+      sysNote.className = 'text-center text-[10px] text-pulse-text-3 my-1';
+      sysNote.textContent = `你让小 P 忘掉「${forgetPrefName}」`;
+      thread.appendChild(sysNote);
+      const replyBubble = document.createElement('div');
+      replyBubble.className = 'pi-bubble pi-bubble-pi slide-up';
+      replyBubble.style.whiteSpace = 'pre-wrap';
+      replyBubble.innerText = reply;
+      thread.appendChild(replyBubble);
+      thread.scrollTop = thread.scrollHeight;
+    }, 200);
+  }
+
+  // ===================== GROUP OVERRIDE SHEET (D) =====================
+  const GROUPS = {
+    family:  { icon:'👨‍👩‍👧', title:'家人',
+      hint:'对家人，小 P 默认更暖、更口语、更长一些。',
+      sliders:[
+        { label:'语气',     options:[['warm','温暖'],['balanced','平衡'],['brief','简练']], active:0 },
+        { label:'Emoji',   options:[['rare','少用'],['medium','适中'],['rich','多用']], active:1 },
+        { label:'直接度',   options:[['soft','委婉'],['balanced','平衡'],['direct','直接']], active:0 },
+      ],
+      toggles:[ {label:'称呼用昵称', on:true}, {label:'问候带关心细节（健康/睡眠）', on:true} ]
+    },
+    friends: { icon:'👥', title:'朋友',
+      hint:'对朋友，小 P 跟随你的全局默认。如要单独设置，下面调整即可。',
+      sliders:[
+        { label:'语气',     options:[['warm','温暖'],['balanced','平衡'],['brief','简练']], active:1 },
+        { label:'Emoji',   options:[['rare','少用'],['medium','适中'],['rich','多用']], active:1 },
+        { label:'直接度',   options:[['soft','委婉'],['balanced','平衡'],['direct','直接']], active:1 },
+      ],
+      toggles:[ {label:'允许玩梗 / 调侃', on:true} ]
+    },
+    work:    { icon:'💼', title:'同事',
+      hint:'对同事，建议平衡专业与友好。',
+      sliders:[
+        { label:'语气',     options:[['warm','温暖'],['balanced','平衡'],['brief','简练']], active:1 },
+        { label:'Emoji',   options:[['rare','少用'],['medium','适中'],['rich','多用']], active:0 },
+        { label:'直接度',   options:[['soft','委婉'],['balanced','平衡'],['direct','直接']], active:1 },
+      ],
+      toggles:[ {label:'称呼用全名 / 英文名', on:true} ]
+    },
+    clients: { icon:'🏢', title:'客户',
+      hint:'对客户，小 P 默认更正式、不用 emoji、给具体时间承诺。',
+      sliders:[
+        { label:'语气',     options:[['warm','温暖'],['balanced','平衡'],['brief','简练']], active:2 },
+        { label:'Emoji',   options:[['rare','少用'],['medium','适中'],['rich','多用']], active:0 },
+        { label:'直接度',   options:[['soft','委婉'],['balanced','平衡'],['direct','直接']], active:1 },
+      ],
+      toggles:[ {label:'称呼用「您」', on:true}, {label:'承诺时附 timeline', on:true} ]
+    },
+  };
+
+  function openGroupSheet(groupId) {
+    const g = GROUPS[groupId];
+    if (!g) return;
+    document.getElementById('group-icon').textContent = g.icon;
+    document.getElementById('group-title').textContent = g.title + ' · 风格覆盖';
+    const body = document.getElementById('group-body');
+    body.innerHTML = `
+      <div class="bg-pulse-card-2 rounded-xl p-3 border border-pulse-line mb-4 text-[12px] text-pulse-text-2 leading-relaxed">${g.hint}</div>
+      ${g.sliders.map((s, si) => `
+        <div class="mb-4">
+          <div class="text-[11px] uppercase tracking-wider text-pulse-text-3 font-semibold mb-2">${s.label}</div>
+          <div class="scale-3" data-group-scale="${si}">
+            ${s.options.map((o, oi) => `<button class="scale-3-btn ${oi===s.active?'active':''}" data-val="${o[0]}">${o[1]}</button>`).join('')}
+            <div class="scale-3-thumb" style="transform:translateX(${s.active * 100}%)"></div>
+          </div>
+        </div>
+      `).join('')}
+      ${g.toggles.length ? `
+      <div class="bg-pulse-card border border-pulse-line rounded-2xl p-4">
+        <div class="text-[11px] uppercase tracking-wider text-pulse-text-3 font-semibold mb-1">${g.title}专属</div>
+        ${g.toggles.map(t => `
+          <div class="setting-row">
+            <div class="text-[13px] text-pulse-text">${t.label}</div>
+            <div class="toggle ${t.on?'on':''}" data-toggle></div>
+          </div>
+        `).join('')}
+      </div>` : ''}
+    `;
+    // re-bind sliders + toggles inside this body
+    body.querySelectorAll('[data-group-scale]').forEach(scale => {
+      const btns = scale.querySelectorAll('.scale-3-btn');
+      const thumb = scale.querySelector('.scale-3-thumb');
+      btns.forEach((b, i) => {
+        b.addEventListener('click', () => {
+          btns.forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          thumb.style.transform = `translateX(${i * 100}%)`;
+        });
+      });
+    });
+    body.querySelectorAll('[data-toggle]').forEach(t => {
+      t.addEventListener('click', () => {
+        if (t.classList.contains('locked')) return;
+        t.classList.toggle('on');
+      });
+    });
+    document.getElementById('group-sheet').classList.add('show');
+  }
+
+  function closeGroupSheet() {
+    document.getElementById('group-sheet').classList.remove('show');
+  }
+
+  // ===================== PI-IN-CONTEXT (C) =====================
+  // Per-contact context-aware Pi when summoned from chat
+  const PI_CTX_PRESETS = {
+    mira: {
+      preview: '老朋友 5 年，刚邀你 8pm 见 Blue Note + 带礼物。她过去 30 天聊了 28 次，从不主动催——这次"再确认"= 她真的紧张。',
+      opener: (hint) => hint
+        ? `你倾向「${hint.label}」对吧？我看了下你们的历史，给你三个判断点：<br>· 上次你迟到 15 分钟，她表面没事但回复变短<br>· 她今天朋友圈预告了"惊喜礼物"<br>· 你过去 5 次回 Mira 都用了 emoji<br><br>哪里不确定？`
+        : '想跟我商量怎么回 Mira 吗？我看到她在确认 8pm，态度积极，准备了礼物。\n\n核心 trade-off：你今晚是否有时间专注享受。',
+      chips: ['选这个会不会太冷？', '该带什么回礼？', '上次她真的不开心吗？'],
+      qa: {
+        '太冷': '不会，「热情确认」对老友刚好。她今天主动 + 带礼物，你冷淡反而违和。如果真担心，把"好啊"换成"等你"会更暖。',
+        '回礼': '建议带一瓶 Bourbon——你们 4/2 在 Westlight 喝过她说"这酒能配 trio"。她记得给你的玻璃杯，你也记得她喜欢的酒，对等。',
+        '不开心': '5/15 她原话"没事下次记得"。AI 跨语境判断：表面平静实际失望（你们 5/16 聊天她回复变短，且没主动起话题）。但今天主动找你，说明她已经过去了。',
+        '默认':   '基于你们 5 年互动史，我可以从「礼物 / 时间 / 历史 / 情绪 / 朋友圈」任意一个角度给你看法。',
+      }
+    },
+    ava: {
+      preview: 'B 轮关键客户，催 Q3 合同细节。她偏好 SLA 节奏（24h 内回），上次你拖了 3 天她内部被批了。',
+      opener: (hint) => hint
+        ? `你想用「${hint.label}」对吧？专业对她合适。一个细节：她周三（今天）情绪中性，发草稿避开她早会时段（10:00-11:30）就行。`
+        : '商量怎么回 Ava 吗？她在催，时间窗口紧。两条路：①给具体时间承诺 ②请求快速会议对齐。',
+      chips: ['几点发她最合适？', '她最在意什么？', '会不会显得太客气？'],
+      qa: {
+        '几点': '基于过往：她周一情绪最佳，周五最赶。今天周三 → 中性。建议下午 14:00-16:00 发，避开早会和午饭。',
+        '在意': '过往 12 次沟通：她最敏感「付款节奏」（影响她现金流报表）和「验收标准」（她背 KPI）。其他条款她基本不细看。',
+        '客气': '不会。她吃专业语调，反而你太轻松她会觉得你不够重视。「您 + 具体时间 + 主动 follow-up」是她舒服的节奏。',
+        '默认':   '我可以从「她的内部 KPI / 时间偏好 / 历史敏感点」任意维度展开。',
+      }
+    },
+    dad: {
+      preview: '爸爸提复查，语气平静但他从不主动开口求陪伴——这次说明他真需要。妈妈昨天朋友圈："老头子又拖着不去看"。',
+      opener: (hint) => hint
+        ? `「${hint.label}」是对的，他要的是你主动。两个细节：①别问"你需要我陪吗"，他面子上会说不需要 ②直接说"我陪你去"。`
+        : '商量怎么回爸爸吗？这条比看起来重要。他从不主动求陪，这次开口=他需要。',
+      chips: ['他真的希望我陪？', '该带什么去医院？', '怎么不让他觉得是负担？'],
+      qa: {
+        '陪': '高度肯定。基于他近 30 天对话：膝盖痛 6 次提及，提到"上下楼有点费劲"。妈妈昨天朋友圈是关键信号——他自己不会开口，妈妈"逼"他发的。',
+        '带什么': '他爱吃的：山楂糕、核桃。检查日空腹，可以带温水 + 软糕点等检查后吃。别带苹果（他牙不好）。',
+        '负担': '别用"我特意挪开了会议"——会让他有压力。换成"下周二我反正没事"，他更舒服。家人之间，"轻描淡写的在场"是最大的爱。',
+        '默认':   '关于爸的关系动态，我都有完整记录。继续问。',
+      }
+    },
+    jules: {
+      preview: '前同事，刚宣布从字节出来开工作室。他犹豫了 3 个月，今天开口=已经决定了。',
+      opener: (hint) => hint
+        ? `「${hint.label}」对——他要的是支持不是分析。提醒一句：千万别说"想清楚了吗 / 现在 timing 不好"，他这 3 个月已经想了 100 遍。`
+        : '商量怎么回 Jules 吗？这条很关键。3 个月犹豫已过，他要的是确认，不是建议。',
+      chips: ['说"风险高"会怎样？', '他可能找我帮什么？', '太热情会不会假？'],
+      qa: {
+        '风险': '会被解读为不支持。他经历过 3 次重大决定（裸辞 / 异地恋 / 买房），你都先支持后聊细节。这次保持节奏。',
+        '帮': '高概率：①让你帮转发招人帖 ②介绍他认识投资人/客户。建议主动说"需要 connect 喊我"=最高情商。',
+        '假': '不会。他 5/15 提过"想找几个人一起做点东西"——你今天热情=印证他的判断。冷淡反而显假。',
+        '默认':   '我对你们的友谊轨迹很熟，可以从任何角度展开。',
+      }
+    },
+    noa: {
+      preview: '⚠️ 高难度场景。你们 4/8 在类似话题聊崩过 4 小时。5/2 你转移话题他后来话少。5/20 他朋友圈发长文你没点赞。',
+      opener: (hint) => hint
+        ? `「${hint.label}」要小心。${hint.label === '温和分歧' ? '友谊优先但不能太软——他会识别敷衍。' : '这次转移可能让他失望，建议至少回应"我读了你的长文"。'}`
+        : '商量怎么回 Noa 吗？说实话——这是最难的场景。直接反对损友谊，敷衍他识别得出来。',
+      chips: ['完全不回会怎样？', '怎么礼貌结束？', '他真的能识别敷衍？'],
+      qa: {
+        '不回': '70% 概率他会再发一次（朋友圈长文刚发完，正在情绪点上）。建议简短回应而非完全沉默——但简短≠敷衍，要带"我读过"的细节。',
+        '结束': '最有效话术："我们在这上面想法不同，但这正是我珍惜跟你聊天的原因"——表达分歧 + 强调关系价值。他这套吃。',
+        '识别': '能。基于你们 6 年对话：他对"嗯""有道理"这类词的回复速度会变慢，且后续主动起话题频率下降。他已经训练自己识别敷衍了。',
+        '默认':   '这个关系最复杂，多问我几个问题再决定也好。',
+      }
+    },
+  };
+
+  function openPiContext() {
+    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const c = CONTACTS[currentContact] || CONTACTS.mira;
+    const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
+    const hint = currentHintIdx !== null ? (ai.hints || [])[currentHintIdx] : null;
+
+    document.getElementById('pi-ctx-subtitle').textContent = `${c.name} · ${c.tag}`;
+    document.getElementById('pi-ctx-preview').innerHTML = preset.preview;
+
+    const thread = document.getElementById('pi-ctx-thread');
+    thread.innerHTML = `
+      <div class="pi-bubble pi-bubble-pi slide-up">${preset.opener(hint)}</div>
+    `;
+
+    const chipsEl = document.getElementById('pi-ctx-chips');
+    chipsEl.innerHTML = preset.chips.map(c => `<button class="followup-chip" data-q="${c}">${c}</button>`).join('');
+    chipsEl.querySelectorAll('.followup-chip').forEach(chip => {
+      chip.addEventListener('click', () => askPiContext(chip.dataset.q));
+    });
+
+    document.getElementById('pi-context-sheet').classList.add('show');
+  }
+
+  function closePiContext() {
+    document.getElementById('pi-context-sheet').classList.remove('show');
+  }
+
+  function askPiContext(q) {
+    q = (q || '').trim();
+    if (!q) return;
+    const thread = document.getElementById('pi-ctx-thread');
+    const userBubble = document.createElement('div');
+    userBubble.className = 'pi-bubble pi-bubble-me slide-up';
+    userBubble.innerText = q;
+    thread.appendChild(userBubble);
+
+    const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
+    let answer = preset.qa['默认'];
+    for (const key of Object.keys(preset.qa)) {
+      if (key === '默认') continue;
+      if (q.indexOf(key) !== -1) { answer = preset.qa[key]; break; }
+    }
+
+    const typing = document.createElement('div');
+    typing.className = 'pi-bubble pi-bubble-pi slide-up';
+    typing.innerHTML = '<span class="ai-shimmer-text">小 P 思考中...</span>';
+    thread.appendChild(typing);
+
+    document.getElementById('pi-ctx-input').value = '';
+    setTimeout(() => {
+      typing.innerHTML = answer;
+      thread.scrollTop = thread.scrollHeight;
+    }, 600);
+    setTimeout(() => { thread.scrollTop = thread.scrollHeight; }, 30);
+  }
   function bindEvents() {
     // Tabbar buttons (delegate)
     document.querySelectorAll('.tab-btn').forEach(b => {
@@ -2505,19 +3017,57 @@
     // Toggles in style + perm tabs
     bindToggles();
 
-    // "忘掉" buttons in learn tab
+    // "忘掉" buttons in learn tab -> open forget modal (B)
     document.querySelectorAll('#pi-tab-learn .pref-card button').forEach(b => {
       if (b.textContent.trim() === '忘掉') {
         b.addEventListener('click', () => {
           const card = b.closest('.pref-card');
-          card.style.transition = 'all 320ms ease';
-          card.style.opacity = '0.3';
-          card.style.transform = 'translateX(-20px)';
-          showToast('已让小 P 忘掉这项偏好');
+          openForgetModal(card);
         });
       } else if (b.textContent.includes('查看证据')) {
         b.addEventListener('click', () => showToast('证据面板待实现'));
       }
+    });
+
+    // Forget sheet
+    document.getElementById('forget-close').addEventListener('click', closeForgetModal);
+    document.getElementById('forget-cancel').addEventListener('click', closeForgetModal);
+    document.getElementById('forget-confirm').addEventListener('click', confirmForget);
+    document.getElementById('forget-sheet').addEventListener('click', e => {
+      if (e.target.id === 'forget-sheet') closeForgetModal();
+    });
+    document.querySelectorAll('.forget-reason').forEach(b => {
+      b.addEventListener('click', () => selectForgetReason(b.dataset.reason, b));
+    });
+
+    // Group override sheet (D)
+    document.querySelectorAll('.group-row').forEach(r => {
+      r.addEventListener('click', () => openGroupSheet(r.dataset.group));
+    });
+    document.getElementById('group-close').addEventListener('click', closeGroupSheet);
+    document.getElementById('group-sheet').addEventListener('click', e => {
+      if (e.target.id === 'group-sheet') closeGroupSheet();
+    });
+    document.getElementById('group-reset').addEventListener('click', () => {
+      showToast('已重置为跟随默认');
+      closeGroupSheet();
+    });
+    document.getElementById('group-save').addEventListener('click', () => {
+      showToast('小 P 会按新设置生成草稿');
+      closeGroupSheet();
+    });
+
+    // Pi-in-context (C) summon Pi from chat
+    document.getElementById('open-pi-context').addEventListener('click', openPiContext);
+    document.getElementById('pi-ctx-close').addEventListener('click', closePiContext);
+    document.getElementById('pi-context-sheet').addEventListener('click', e => {
+      if (e.target.id === 'pi-context-sheet') closePiContext();
+    });
+    document.getElementById('pi-ctx-send').addEventListener('click', () => {
+      askPiContext(document.getElementById('pi-ctx-input').value);
+    });
+    document.getElementById('pi-ctx-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') askPiContext(e.target.value);
     });
 
     // Dynamic hint cards

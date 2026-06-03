@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Pulse · AI 社交副驾驶</title>
+  <title>Pulse · 小 P 社交副驾驶</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -682,7 +682,7 @@
             <span class="legend-dot bg-pulse-red"></span>
             <span class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">立刻回 · 2</span>
           </div>
-          <span class="text-[10px] text-pulse-text-3">AI 优先级</span>
+          <span class="text-[10px] text-pulse-text-3">小 P 优先级</span>
         </div>
 
         <div id="inbox-now" class="space-y-2 mb-5"></div>
@@ -703,7 +703,7 @@
             <span class="legend-dot bg-pulse-text-3"></span>
             <span class="text-[11px] uppercase tracking-wider text-pulse-text-3 font-semibold">可忽略 · 2</span>
           </div>
-          <span class="text-[10px] text-pulse-text-3">AI 已为你过滤</span>
+          <span class="text-[10px] text-pulse-text-3">小 P 已为你过滤</span>
         </div>
 
         <div id="inbox-ignore" class="space-y-2 mb-8 opacity-60"></div>
@@ -780,7 +780,7 @@
               <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
             </div>
             <div class="flex-1">
-              <div class="text-[11px] ai-shimmer-text font-semibold uppercase tracking-wider mb-1">AI 已分析</div>
+              <div class="text-[11px] ai-shimmer-text font-semibold uppercase tracking-wider mb-1">小 P 看完了</div>
               <div class="text-sm text-pulse-text leading-snug">
                 Mira 期待你确认 8 点的安排，语气温暖、有礼物想送你。<br>
                 <span class="text-pulse-text-2 text-[12px]">建议：积极回应 + 表达期待</span>
@@ -804,16 +804,11 @@
               </div>
             </button>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="open-analysis" class="rounded-xl py-2 px-2.5 flex items-center justify-center gap-1.5 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v3M11 14h.01"/></svg>
-              <span class="text-[12px] font-semibold">AI 分析</span>
-            </button>
-            <button id="open-pi-context" class="rounded-xl py-2 px-2.5 flex items-center justify-center gap-1.5 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
-              <div class="pi-avatar-mini" style="width:14px;height:14px;font-size:10px">π</div>
-              <span class="text-[12px] font-semibold">跟小 P 商量</span>
-            </button>
-          </div>
+          <button id="open-pi-context" class="w-full rounded-xl py-2.5 px-3 flex items-center justify-center gap-2 border border-pulse-purple/30 bg-gradient-to-r from-pulse-purple/15 to-pulse-purple/5 text-pulse-purple-2 hover:from-pulse-purple/25 transition">
+            <div class="pi-avatar-mini" style="width:18px;height:18px;font-size:12px">π</div>
+            <span class="text-[12px] font-semibold">跟小 P 商量这条 · 看历史 + 追问</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
         </div>
 
         <!-- Expanded draft area -->
@@ -850,7 +845,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1.5 text-[10px] text-pulse-text-3">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                AI 仅在本地 · 端到端加密
+                小 P 仅在本地 · 端到端加密
               </div>
               <button id="send-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[13px] font-semibold flex items-center gap-1.5 shadow-lg shadow-pulse-purple/30">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -863,93 +858,6 @@
 
       <div class="toast" id="toast">
         <div class="bg-pulse-card border border-pulse-line rounded-full px-4 py-2 text-[12px] text-pulse-text shadow-xl"></div>
-      </div>
-
-      <!-- Deep Analysis Sheet -->
-      <div id="analysis-sheet" class="analysis-sheet">
-        <div class="analysis-sheet-body">
-          <div class="analysis-handle"></div>
-
-          <!-- Sheet header -->
-          <div class="px-5 pt-3 pb-3 flex items-center justify-between border-b border-pulse-line/60">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-pulse-purple to-pulse-purple-3 flex items-center justify-center ai-pulse">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
-              </div>
-              <div>
-                <div class="text-[14px] font-semibold text-pulse-text leading-none">AI 深度分析</div>
-                <div class="text-[10px] text-pulse-text-3 mt-1">基于 5 年互动历史 · 仅在本地</div>
-              </div>
-            </div>
-            <button id="close-analysis" class="w-7 h-7 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            </button>
-          </div>
-
-          <!-- Sheet body (scrollable) -->
-          <div class="scroll-area flex-1 px-5 py-3 space-y-3" id="analysis-content">
-            <!-- The analyzed message -->
-            <div class="bg-pulse-card-2 rounded-xl p-3 border border-pulse-line">
-              <div class="text-[10px] uppercase tracking-wider text-pulse-text-3 mb-1.5">这条消息</div>
-              <div class="text-[13px] text-pulse-text leading-relaxed" id="an-message">—</div>
-            </div>
-
-            <!-- Intent -->
-            <div>
-              <div class="flex items-center gap-1.5 mb-1.5">
-                <span class="text-[14px]">🎯</span>
-                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">表层意图</div>
-              </div>
-              <div class="text-[13px] text-pulse-text leading-relaxed pl-5" id="an-intent">—</div>
-            </div>
-
-            <!-- Expectations -->
-            <div>
-              <div class="flex items-center gap-1.5 mb-1.5">
-                <span class="text-[14px]">💭</span>
-                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">潜在期待</div>
-              </div>
-              <ul class="text-[13px] text-pulse-text leading-relaxed pl-5 space-y-1" id="an-expects"></ul>
-            </div>
-
-            <!-- History -->
-            <div>
-              <div class="flex items-center gap-1.5 mb-1.5">
-                <span class="text-[14px]">📚</span>
-                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">关联历史上下文</div>
-              </div>
-              <div class="pl-5 space-y-1.5" id="an-history"></div>
-            </div>
-
-            <!-- Risk -->
-            <div class="rounded-xl p-3 border border-pulse-amber/30" style="background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.02) 100%);">
-              <div class="flex items-center gap-1.5 mb-1.5">
-                <span class="text-[14px]">⚠️</span>
-                <div class="text-[11px] uppercase tracking-wider text-pulse-amber font-semibold">风险点</div>
-              </div>
-              <div class="text-[12px] text-pulse-text leading-relaxed" id="an-risk">—</div>
-            </div>
-
-            <!-- Discussion thread -->
-            <div class="border-t border-pulse-line/60 pt-3">
-              <div class="flex items-center gap-1.5 mb-2">
-                <span class="text-[14px]">💬</span>
-                <div class="text-[11px] uppercase tracking-wider text-pulse-text-2 font-semibold">跟 AI 继续讨论</div>
-              </div>
-              <div id="discussion-thread" class="flex flex-col gap-2 mb-2.5"></div>
-              <div id="followup-chips" class="flex flex-wrap gap-1.5 mb-2.5"></div>
-            </div>
-          </div>
-
-          <!-- Sheet input -->
-          <div class="px-4 py-3 border-t border-pulse-line/60 flex items-center gap-2 bg-pulse-card/50">
-            <input id="analysis-input" type="text" placeholder="问 AI 任何关于这条消息的问题..." class="flex-1 bg-pulse-card-2 rounded-xl px-3 py-2 text-[13px] text-pulse-text placeholder:text-pulse-text-3 border border-pulse-line focus:outline-none focus:border-pulse-purple/60"/>
-            <button id="analysis-send" class="px-3 py-2 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[12px] font-semibold flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/></svg>
-              问
-            </button>
-          </div>
-        </div>
       </div>
 
       <!-- Pi-in-context chat sheet (summon Pi to discuss current chat reply) -->
@@ -1088,7 +996,7 @@
           </div>
 
           <div class="bg-pulse-card rounded-2xl p-4 border border-pulse-line">
-            <div class="text-[11px] text-pulse-text-3 uppercase tracking-wider mb-2">AI 备忘</div>
+            <div class="text-[11px] text-pulse-text-3 uppercase tracking-wider mb-2">小 P 备忘</div>
             <div class="text-[13px] text-pulse-text leading-relaxed">
               她对 <span class="text-pulse-purple-2">摄影展</span>很在意，提了 4 次。<br>
               建议在 6/15 前主动询问筹备状况。
@@ -1308,7 +1216,7 @@
         <div class="flex-1">
           <div class="flex items-center gap-2">
             <span class="text-[18px] font-semibold leading-none">小 P</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-pulse-purple/15 text-pulse-purple-2 font-medium">Pulse · AI</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-pulse-purple/15 text-pulse-purple-2 font-medium">Pulse · 你的副驾驶</span>
           </div>
           <div class="flex items-center gap-1.5 mt-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-pulse-emerald"></span>
@@ -1800,7 +1708,7 @@
     <div>① 收件箱 → 切换不同联系人</div>
     <div>② 选 hint → 看草稿下方 chips</div>
     <div>③ 点 chip → 草稿即时变化</div>
-    <div>④ 「AI 分析」→ 看历史 + 追问</div>
+    <div>④ 「跟小 P 商量」→ 看历史 + 追问</div>
     <div>⑤ 底部 tabbar → 关系网</div>
     <div>⑥ 底部 tabbar → <span class="text-pulse-purple-2">小 P</span></div>
     <div>　对话 / 风格 / 权限 / 已学到</div>
@@ -1860,7 +1768,7 @@
       { id:'noa',   preview:'你怎么看上次说的那个话题？', time:'5 天前', priority:'稍后回', action:'温和回应' },
     ],
     ignore: [
-      { id:'studio', preview:'设计稿 v3 已上传 + 124 条', time:'1 小时前', priority:'群聊', action:'AI 已总结' },
+      { id:'studio', preview:'设计稿 v3 已上传 + 124 条', time:'1 小时前', priority:'群聊', action:'小 P 已总结' },
       { id:'climb',  preview:'下周末路线大家选一下', time:'昨天', priority:'群聊', action:'明日再看' },
     ],
   };
@@ -2144,7 +2052,7 @@
             <div class="text-[12px] text-pulse-text-2 truncate leading-relaxed">${msg.preview}</div>
             ${msg.action ? `<div class="mt-1.5 inline-flex items-center gap-1 text-[10px] text-pulse-purple-2 bg-pulse-purple/10 px-2 py-0.5 rounded-md border border-pulse-purple/20">
               <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13 8L19 7L15 11L19 15L13 14L12 20L11 14L5 15L9 11L5 7L11 8L12 2Z"/></svg>
-              AI 推荐：${msg.action}
+              小 P 推荐：${msg.action}
             </div>` : ''}
           </div>
         </button>
@@ -2318,11 +2226,11 @@
     if (style) {
       draftEl.innerText = rewrites[style];
       const tag = { humor:'幽默版', brief:'简短版', formal:'正式版', warm:'温暖版' }[style];
-      document.getElementById('draft-mode-label').textContent = `${tag} · AI 改写`;
+      document.getElementById('draft-mode-label').textContent = `${tag} · 小 P 改写`;
       showToast('已为你改写为 ' + tag);
     } else {
       draftEl.innerText = (draftEl.innerText + '\n\n（按你说的「' + q + '」调整后版本）');
-      showToast('AI 已根据你的反馈微调');
+      showToast('小 P 已根据你的反馈微调');
     }
     flashDraft(draftEl);
     input.value = '';
@@ -2341,88 +2249,13 @@
     messages.scrollTop = messages.scrollHeight;
     document.getElementById('copilot-draft').classList.add('hidden');
     document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
-    showToast('已发送 · AI 已记录此次互动');
+    showToast('已发送 · 小 P 已记录');
   }
 
-  // ===================== DEEP ANALYSIS =====================
-  function openDeepAnalysis() {
-    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
-    const da = ai.deepAnalysis;
-    if (!da) {
-      showToast('该联系人深度分析数据待补充');
-      return;
-    }
-    document.getElementById('an-message').textContent = '"' + da.message + '"';
-    document.getElementById('an-intent').textContent = da.intent;
-    document.getElementById('an-expects').innerHTML = da.expectations.map(e => `<li class="flex gap-2"><span class="text-pulse-purple-2">·</span><span>${e}</span></li>`).join('');
-    document.getElementById('an-history').innerHTML = da.history.map(h => `
-      <div class="flex gap-2.5">
-        <div class="text-[10px] text-pulse-text-3 mt-0.5 w-12 flex-shrink-0">${h.date}</div>
-        <div class="text-[12px] text-pulse-text leading-relaxed flex-1">${h.text}</div>
-      </div>
-    `).join('');
-    document.getElementById('an-risk').textContent = da.risk;
-
-    // reset thread
-    document.getElementById('discussion-thread').innerHTML = '';
-    // populate followup chips
-    const chipsEl = document.getElementById('followup-chips');
-    chipsEl.innerHTML = (da.followups || []).map(q =>
-      `<button class="followup-chip" data-q="${q}">${q}</button>`
-    ).join('');
-    chipsEl.querySelectorAll('.followup-chip').forEach(chip => {
-      chip.addEventListener('click', () => askAnalysis(chip.dataset.q));
-    });
-
-    document.getElementById('analysis-sheet').classList.add('show');
-  }
-
-  function closeDeepAnalysis() {
-    document.getElementById('analysis-sheet').classList.remove('show');
-  }
-
-  function askAnalysis(question) {
-    const trimmed = (question || '').trim();
-    if (!trimmed) return;
-
-    // append user bubble
-    const thread = document.getElementById('discussion-thread');
-    const userBubble = document.createElement('div');
-    userBubble.className = 'disc-bubble-me slide-up';
-    userBubble.innerText = trimmed;
-    thread.appendChild(userBubble);
-
-    // generate AI response (keyword match)
-    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
-    const qa = ai.deepAnalysis.qa || {};
-    let answer = qa['默认'] || 'AI 还在学习这个问题，稍后再问试试。';
-    for (const key of Object.keys(qa)) {
-      if (key === '默认') continue;
-      if (trimmed.indexOf(key) !== -1) { answer = qa[key]; break; }
-    }
-
-    // typing indicator
-    const typing = document.createElement('div');
-    typing.className = 'disc-bubble-ai slide-up';
-    typing.innerHTML = '<span class="text-pulse-text-3">AI 思考中</span><span class="ai-shimmer-text">...</span>';
-    thread.appendChild(typing);
-
-    setTimeout(() => {
-      typing.classList.remove('slide-up');
-      typing.innerText = answer;
-      // scroll to bottom
-      const scroll = document.getElementById('analysis-content');
-      scroll.scrollTop = scroll.scrollHeight;
-    }, 600);
-
-    // clear input
-    document.getElementById('analysis-input').value = '';
-    // scroll
-    setTimeout(() => {
-      const scroll = document.getElementById('analysis-content');
-      scroll.scrollTop = scroll.scrollHeight;
-    }, 50);
-  }
+  // ===================== DEEP ANALYSIS (deprecated, merged into Pi context sheet) =====================
+  // The 'AI 分析' button has been merged with '跟小 P 商量' to avoid concept overlap.
+  // openPiContext() now handles both: it renders structured analysis (intent/expectations/history/risk)
+  // in Pi's voice, then continues with chat-style follow-ups.
 
   // Toast
   let toastTimer;
@@ -2927,24 +2760,66 @@
   function openPiContext() {
     const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
     const c = CONTACTS[currentContact] || CONTACTS.mira;
+    const da = ai.deepAnalysis || {};
     const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
     const hint = currentHintIdx !== null ? (ai.hints || [])[currentHintIdx] : null;
 
     document.getElementById('pi-ctx-subtitle').textContent = `${c.name} · ${c.tag}`;
-    document.getElementById('pi-ctx-preview').innerHTML = preset.preview;
 
-    const thread = document.getElementById('pi-ctx-thread');
-    thread.innerHTML = `
-      <div class="pi-bubble pi-bubble-pi slide-up">${preset.opener(hint)}</div>
+    // Top context preview = the actual message
+    document.getElementById('pi-ctx-preview').innerHTML = `
+      <div class="text-[10px] uppercase tracking-wider text-pulse-text-3 mb-1.5">她说的</div>
+      <div class="text-[13px] text-pulse-text leading-relaxed">"${da.message || preset.preview}"</div>
     `;
 
+    // Pi delivers the structured analysis IN HER OWN VOICE through 4 bubbles
+    const thread = document.getElementById('pi-ctx-thread');
+    const historyHtml = (da.history || []).map(h =>
+      `<div class="flex gap-2"><span class="text-pulse-text-3 flex-shrink-0">·</span><span><span class="text-pulse-text-3 mr-1">${h.date}</span>${h.text}</span></div>`
+    ).join('');
+
+    const expectsHtml = (da.expectations || []).map(e =>
+      `<div class="flex gap-2"><span class="text-pulse-purple-2">·</span><span>${e}</span></div>`
+    ).join('');
+
+    const pivotMessage = hint
+      ? `⚠️ ${da.risk || ''}<br><br>你倾向「<b>${hint.label}</b>」对吧？我有几个看法...`
+      : `⚠️ ${da.risk || ''}<br><br>你想怎么回？`;
+
+    thread.innerHTML = `
+      <div class="pi-bubble pi-bubble-pi slide-up">
+        <div class="text-[10px] text-pulse-purple-2 font-semibold mb-1.5 uppercase tracking-wider">她到底想说什么</div>
+        ${da.intent || preset.preview}
+      </div>
+      ${expectsHtml ? `
+      <div class="pi-bubble pi-bubble-pi slide-up">
+        <div class="text-[10px] text-pulse-purple-2 font-semibold mb-1.5 uppercase tracking-wider">她真正期待</div>
+        ${expectsHtml}
+      </div>` : ''}
+      ${historyHtml ? `
+      <div class="pi-bubble pi-bubble-pi slide-up">
+        <div class="text-[10px] text-pulse-purple-2 font-semibold mb-1.5 uppercase tracking-wider">历史里值得看的</div>
+        ${historyHtml}
+      </div>` : ''}
+      <div class="pi-bubble pi-bubble-pi slide-up" style="background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(139,92,246,0.10)); border-color:rgba(245,158,11,0.3)">
+        ${pivotMessage}
+      </div>
+    `;
+
+    // Combined chips: ctx-specific + deepAnalysis followups (de-duped, max 4)
+    const allChips = [...preset.chips, ...(da.followups || [])];
+    const uniqueChips = [...new Set(allChips)].slice(0, 4);
     const chipsEl = document.getElementById('pi-ctx-chips');
-    chipsEl.innerHTML = preset.chips.map(c => `<button class="followup-chip" data-q="${c}">${c}</button>`).join('');
+    chipsEl.innerHTML = uniqueChips.map(q =>
+      `<button class="followup-chip" data-q="${q}">${q}</button>`
+    ).join('');
     chipsEl.querySelectorAll('.followup-chip').forEach(chip => {
       chip.addEventListener('click', () => askPiContext(chip.dataset.q));
     });
 
     document.getElementById('pi-context-sheet').classList.add('show');
+    // scroll to top
+    setTimeout(() => { thread.scrollTop = 0; }, 50);
   }
 
   function closePiContext() {
@@ -2960,12 +2835,22 @@
     userBubble.innerText = q;
     thread.appendChild(userBubble);
 
+    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
     const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
-    let answer = preset.qa['默认'];
+
+    // Try preset.qa first, then deepAnalysis.qa
+    let answer = null;
     for (const key of Object.keys(preset.qa)) {
       if (key === '默认') continue;
       if (q.indexOf(key) !== -1) { answer = preset.qa[key]; break; }
     }
+    if (!answer && ai.deepAnalysis && ai.deepAnalysis.qa) {
+      for (const key of Object.keys(ai.deepAnalysis.qa)) {
+        if (key === '默认') continue;
+        if (q.indexOf(key) !== -1) { answer = ai.deepAnalysis.qa[key]; break; }
+      }
+    }
+    if (!answer) answer = preset.qa['默认'];
 
     const typing = document.createElement('div');
     typing.className = 'pi-bubble pi-bubble-pi slide-up';
@@ -3079,19 +2964,6 @@
     document.getElementById('draft-close').addEventListener('click', () => {
       document.getElementById('copilot-draft').classList.add('hidden');
       document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
-    });
-
-    // Deep analysis open / close / send
-    document.getElementById('open-analysis').addEventListener('click', openDeepAnalysis);
-    document.getElementById('close-analysis').addEventListener('click', closeDeepAnalysis);
-    document.getElementById('analysis-sheet').addEventListener('click', e => {
-      if (e.target.id === 'analysis-sheet') closeDeepAnalysis();
-    });
-    document.getElementById('analysis-send').addEventListener('click', () => {
-      askAnalysis(document.getElementById('analysis-input').value);
-    });
-    document.getElementById('analysis-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') askAnalysis(e.target.value);
     });
 
     // Discuss

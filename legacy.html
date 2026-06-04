@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Pulse · 你的生活副驾驶</title>
+  <title>Pulse · 小 P 社交副驾驶（v0.3 历史版本）</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -485,7 +485,7 @@
     /* Pi segmented control (4 modules) */
     .pi-seg {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       background: #16171D;
       border: 1px solid #2A2B33;
       border-radius: 12px;
@@ -494,7 +494,7 @@
     }
     .pi-seg-btn {
       padding: 7px 0;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       color: #6B7280;
       border-radius: 9px;
@@ -508,7 +508,7 @@
       top: 3px;
       bottom: 3px;
       left: 3px;
-      width: calc(16.6667% - 1px);
+      width: calc(25% - 6px);
       border-radius: 9px;
       background: linear-gradient(135deg, rgba(139,92,246,0.30) 0%, rgba(139,92,246,0.15) 100%);
       border: 1px solid rgba(139,92,246,0.4);
@@ -653,264 +653,39 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-6">
 
-  <!-- Version banner -->
-  <div style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #6D28D9, #8B5CF6); color: white; padding: 6px 16px; font-size: 11px; text-align: center; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-    ✨ Pulse <strong>Life Copilot v0.4-pre</strong>（生活副驾驶）·
-    <a href="legacy.html" style="color: white; text-decoration: underline;">查看 v0.3 旧版</a> ·
-    <a href="LIFE_COPILOT.md" style="color: white; text-decoration: underline;">战略蓝图</a>
+  <!-- Legacy version banner -->
+  <div style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #6D28D9, #8B5CF6); color: white; padding: 8px 16px; font-size: 12px; text-align: center; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    📦 这是 Pulse <strong>v0.3 历史版本</strong>（社交副驾驶）·
+    <a href="index.html" style="color: white; text-decoration: underline; font-weight: 600;">→ 跳到最新版（Life Copilot）</a>
   </div>
 
   <!-- Side annotation (visible on wide screens) -->
   <div class="hidden lg:block absolute left-12 top-12 max-w-xs text-pulse-text-2">
-    <div class="text-xs uppercase tracking-widest text-pulse-purple mb-3">Pulse · Life Copilot</div>
-    <h1 class="text-2xl font-semibold text-pulse-text mb-3">小 P · 你的生活副驾驶</h1>
-    <p class="text-sm leading-relaxed mb-4">让小 P 替你记住关键的人、看见重要的事、活出想成为的样子。</p>
+    <div class="text-xs uppercase tracking-widest text-pulse-purple mb-3">Pulse · Demo</div>
+    <h1 class="text-2xl font-semibold text-pulse-text mb-3">小 P · 你的社交副驾驶</h1>
+    <p class="text-sm leading-relaxed mb-4">让小 P 替你记住关键的人、理解关系、起草回复。</p>
     <div class="text-xs space-y-2 leading-relaxed">
-      <div class="flex gap-2"><span class="text-pulse-purple">①</span> <strong>今日驾驶舱</strong>（北极星 + 3 件事）</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">②</span> 智能收件箱（含主线徽章）</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">③</span> 聊天 + 副驾驶</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">④</span> 人物档案 + 观点记忆</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">⑤</span> 关系网络图谱</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">⑥</span> 小 P 主面板（含<strong>北极星 / 主线</strong>）</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">⑦</span> <strong>每日复盘</strong>（5 分钟三问）</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">①</span> 智能社交收件箱（AI 优先级排序）</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">②</span> 聊天 + 副驾驶（动态 hint + 场景化 chips）</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">③</span> 人物档案 + 观点记忆</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">④</span> 关系网络图谱</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">⑤</span> 小 P 设置 + 对话纠正</div>
     </div>
     <div class="mt-6 text-[11px] text-pulse-text-3 leading-relaxed">
-      Tip：今日驾驶舱是新主屏<br>
-      底部 tabbar 4 个 tab：<br>
-      <span class="text-pulse-purple-2">今日 / 消息 / 关系网 / 小 P</span><br><br>
-      跟小 P 商量当天该做什么、<br>
-      或点「今晚复盘」5 分钟闭环。
+      Tip：底部 tabbar 点 <span class="text-pulse-purple-2">小 P</span><br>
+      可以跟它对话调教，例如：<br>
+      · "以后回客户少用 emoji"<br>
+      · "回复别那么长"<br>
+      · "今天你学到什么了？"<br>
+      也可以在「风格 / 权限」里手动调节
     </div>
   </div>
 
   <!-- Phone -->
   <div class="phone-frame">
 
-    <!-- ============================ TODAY COCKPIT (NEW HOME) ============================ -->
-    <div id="screen-today" class="screen">
-      <!-- iOS status bar -->
-      <div class="status-bar">
-        <span>9:41</span>
-        <span class="flex items-center gap-1">
-          <svg width="18" height="11" viewBox="0 0 18 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="0.5"/><rect x="5" y="4" width="3" height="7" rx="0.5"/><rect x="10" y="2" width="3" height="9" rx="0.5"/><rect x="15" y="0" width="3" height="11" rx="0.5"/></svg>
-          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 2c2.2 0 4.2.8 5.7 2.2l-1.4 1.4C11.1 4.5 9.6 4 8 4S4.9 4.5 3.7 5.6L2.3 4.2C3.8 2.8 5.8 2 8 2zm0-4c3.6 0 6.9 1.4 9.4 3.6l-1.4 1.4C13.9 1.2 11 0 8 0S2.1 1.2.0 3l-1.4-1.4C1.1-.6 4.4-2 8-2z"/></svg>
-          <span class="ml-1 inline-block w-6 h-3 border border-pulse-text rounded-sm relative">
-            <span class="absolute inset-0.5 bg-pulse-text rounded-[1px]" style="width: calc(100% - 4px)"></span>
-          </span>
-        </span>
-      </div>
-
-      <!-- Scrollable area -->
-      <div class="scroll-area flex-1 overflow-y-auto" style="padding-bottom: 92px;">
-
-        <!-- North Star (always visible) -->
-        <div class="px-5 pt-3 pb-2 border-b border-pulse-line/50">
-          <div class="flex items-center gap-1.5 mb-1">
-            <span class="text-[9px]">★</span>
-            <span class="text-[9px] uppercase tracking-widest text-pulse-purple-2 font-semibold">北极星</span>
-          </div>
-          <button id="today-northstar" class="text-[12px] leading-relaxed text-pulse-text text-left w-full">
-            "成为最值得信赖的爸爸 + 影响 100 万产品人的设计师"
-          </button>
-        </div>
-
-        <!-- Greeting + date -->
-        <div class="px-5 pt-4 pb-2 flex items-end justify-between">
-          <div>
-            <div class="text-[11px] text-pulse-purple-2 mb-1">🌅 早安</div>
-            <div class="text-2xl font-semibold tracking-tight">Ethan</div>
-          </div>
-          <div class="text-right">
-            <div class="text-xs text-pulse-text-2">6 月 2 日</div>
-            <div class="text-[10px] text-pulse-text-3">周一 · 第 23 周</div>
-          </div>
-        </div>
-
-        <!-- Pi morning briefing -->
-        <div class="px-5 mb-4 mt-2">
-          <div class="rounded-2xl p-3.5 ai-listen relative overflow-hidden" style="background: linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(59,130,246,0.10) 100%); border: 1px solid rgba(139,92,246,0.3);">
-            <div class="flex items-start gap-2.5 relative z-10">
-              <div class="pi-avatar-sm flex-shrink-0">π</div>
-              <div class="flex-1">
-                <div class="text-[10px] text-pulse-purple-2 font-medium mb-1">小 P · 早间简报</div>
-                <div class="text-[13px] text-pulse-text leading-relaxed">
-                  今天主线 <span class="text-pulse-purple-2 font-semibold">C 不可缺</span>，主线 A 还差 2 个 OKR 案例可做完。
-                </div>
-                <div class="text-[11px] text-pulse-text-2 mt-1.5 leading-relaxed">
-                  💬 妈妈 已 28 天未联系，1 分钟语音 = 这周连接强度 ↑26%
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Today's 3 -->
-        <div class="px-5 mb-4">
-          <div class="flex items-center justify-between mb-2.5">
-            <h3 class="text-[13px] font-semibold flex items-center gap-1.5">
-              <span>📌 今日 3 件事</span>
-            </h3>
-            <span id="today-3-count" class="text-[10px] text-pulse-text-3">0 / 3 已完成</span>
-          </div>
-          <div id="today-3-list" class="space-y-2"></div>
-        </div>
-
-        <!-- Today's connect -->
-        <div class="px-5 mb-4">
-          <h3 class="text-[13px] font-semibold mb-2.5 flex items-center gap-1.5">
-            <span>💬 今日值得连接</span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-pulse-purple/15 text-pulse-purple-2 font-medium">复利</span>
-          </h3>
-          <button onclick="openChat('mom')" class="w-full bg-pulse-card hover:bg-pulse-card-2 transition rounded-2xl p-3 border border-pulse-line flex items-center gap-3 text-left">
-            <div class="avatar avatar-sm flex-shrink-0" style="background:linear-gradient(135deg,#10B981,#047857)">妈</div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1.5 mb-0.5">
-                <span class="text-[13px] font-semibold">妈妈</span>
-                <span class="text-[10px] text-pulse-text-3">家人 · 28 天</span>
-              </div>
-              <div class="text-[11px] text-pulse-text-2 leading-snug">
-                <span class="text-pulse-emerald">+1 分钟语音</span> = 这个月连接强度 32% → 58%
-              </div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pulse-text-3 flex-shrink-0"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-        </div>
-
-        <!-- Inbox preview -->
-        <div class="px-5 mb-4">
-          <h3 class="text-[13px] font-semibold mb-2.5">📥 待回消息</h3>
-          <button onclick="showScreen('inbox')" class="w-full bg-pulse-card hover:bg-pulse-card-2 transition rounded-2xl p-3 border border-pulse-line flex items-center gap-3 text-left">
-            <div class="flex -space-x-2">
-              <div class="avatar avatar-tiny ring-2 ring-pulse-card" style="background:linear-gradient(135deg,#F472B6,#A855F7);width:28px;height:28px">M</div>
-              <div class="avatar avatar-tiny ring-2 ring-pulse-card" style="background:linear-gradient(135deg,#3B82F6,#1E40AF);width:28px;height:28px">A</div>
-              <div class="avatar avatar-tiny ring-2 ring-pulse-card" style="background:linear-gradient(135deg,#F59E0B,#B45309);width:28px;height:28px">客</div>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-[12px] font-semibold mb-0.5">3 条立刻回 · 2 条稍后</div>
-              <div class="text-[10px] text-pulse-text-3">小 P 已为你过滤 4 条群消息</div>
-            </div>
-            <span class="text-[10px] text-pulse-purple-2 flex-shrink-0">完整 →</span>
-          </button>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="px-5 mb-2 grid grid-cols-2 gap-2">
-          <button onclick="openConsultToday()" class="rounded-xl p-3 bg-pulse-purple/15 hover:bg-pulse-purple/25 transition border border-pulse-purple/30 text-left">
-            <div class="text-[11px] text-pulse-purple-2 font-semibold mb-0.5">✨ 跟小 P 商量</div>
-            <div class="text-[10px] text-pulse-text-2 leading-snug">今天该怎么过</div>
-          </button>
-          <button onclick="openReflection()" class="rounded-xl p-3 bg-pulse-card hover:bg-pulse-card-2 transition border border-pulse-line text-left">
-            <div class="text-[11px] text-pulse-text font-semibold mb-0.5">🌙 今晚复盘</div>
-            <div class="text-[10px] text-pulse-text-3 leading-snug">5 分钟三问</div>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Tabbar -->
-      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-3">
-        <button data-tab="today" onclick="showScreen('today')" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-purple">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span class="text-[10px] font-semibold">今日</span>
-        </button>
-        <button data-tab="inbox" onclick="showScreen('inbox')" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span class="text-[10px] font-semibold">消息</span>
-        </button>
-        <button data-tab="network" onclick="showScreen('network')" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="3" r="2"/><circle cx="21" cy="12" r="2"/><circle cx="12" cy="21" r="2"/><circle cx="3" cy="12" r="2"/><path d="M12 6v3M12 15v3M6 12h3M15 12h3"/></svg>
-          <span class="text-[10px] font-semibold">关系网</span>
-        </button>
-        <button data-tab="pi" onclick="showScreen('pi')" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
-          <div class="pi-avatar-mini">π</div>
-          <span class="text-[10px] font-semibold">小 P</span>
-        </button>
-      </div>
-
-      <!-- Reflection sheet (overlay over today) -->
-      <div id="reflection-sheet" class="analysis-sheet">
-        <div class="analysis-sheet-body" style="max-height:90%; overflow-y:auto;">
-          <div class="analysis-handle"></div>
-          <div class="px-5 pb-6">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">🌙</span>
-                <div>
-                  <div class="text-[14px] font-semibold">今日复盘</div>
-                  <div class="text-[10px] text-pulse-text-3">6 月 2 日 · 5 分钟</div>
-                </div>
-              </div>
-              <button onclick="closeReflection()" class="w-8 h-8 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-              </button>
-            </div>
-
-            <!-- Q1: today's 3 -->
-            <div class="bg-pulse-card rounded-2xl p-3.5 border border-pulse-line mb-2.5">
-              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-2">Q1 · 今天三件事</div>
-              <div id="reflect-q1" class="space-y-2"></div>
-            </div>
-
-            <!-- Q2: best moment -->
-            <div class="bg-pulse-card rounded-2xl p-3.5 border border-pulse-line mb-2.5">
-              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-2">Q2 · 今天哪段互动最好？</div>
-              <div class="text-[10px] text-pulse-text-3 mb-2">小 P 已读取所有对话，给你 2 个候选</div>
-              <div class="space-y-1.5">
-                <button onclick="pickBestMoment(this)" data-moment="mira" class="reflect-moment w-full text-left rounded-lg p-2.5 bg-pulse-card-2 hover:bg-pulse-purple/15 transition border border-pulse-line text-[12px] leading-relaxed">
-                  <div class="text-pulse-text-2 mb-0.5 text-[10px]">14:00 · Mira</div>
-                  <div class="text-pulse-text">她跟你聊 PM 转型，让你感觉「不孤单」</div>
-                </button>
-                <button onclick="pickBestMoment(this)" data-moment="daughter" class="reflect-moment w-full text-left rounded-lg p-2.5 bg-pulse-card-2 hover:bg-pulse-purple/15 transition border border-pulse-line text-[12px] leading-relaxed">
-                  <div class="text-pulse-text-2 mb-0.5 text-[10px]">19:30 · 女儿</div>
-                  <div class="text-pulse-text">青蛙弗洛格故事讲完，她说"爸爸再讲一个"</div>
-                </button>
-              </div>
-              <textarea id="reflect-q2-text" placeholder="或自己写一段..." class="w-full mt-2 bg-pulse-bg rounded-lg p-2 text-[12px] text-pulse-text border border-pulse-line resize-none" rows="2"></textarea>
-            </div>
-
-            <!-- Q3: tomorrow's 3 -->
-            <div class="bg-pulse-card rounded-2xl p-3.5 border border-pulse-line mb-2.5">
-              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-2">Q3 · 明天三件事</div>
-              <div class="text-[10px] text-pulse-text-3 mb-2">小 P 草拟（可改）</div>
-              <div class="space-y-1.5 text-[12px]">
-                <div class="flex items-center gap-2 p-2 bg-pulse-card-2 rounded-lg">
-                  <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:#F59E0B25;color:#F59E0B">主线 A</span>
-                  <span class="flex-1">客户访谈准备（3 个问题）</span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-pulse-card-2 rounded-lg">
-                  <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:#10B98125;color:#10B981">主线 B</span>
-                  <span class="flex-1">跑 3km <span class="text-pulse-text-3 text-[10px]">（昨日延期）</span></span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-pulse-card-2 rounded-lg">
-                  <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:#F472B625;color:#F472B6">主线 C</span>
-                  <span class="flex-1">陪女儿 19:30</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pi feedback (revealed after submit) -->
-            <div id="reflect-pi-feedback" class="hidden mb-3 rounded-2xl p-3.5" style="background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(59,130,246,0.10)); border: 1px solid rgba(139,92,246,0.3);">
-              <div class="flex items-start gap-2.5">
-                <div class="pi-avatar-sm flex-shrink-0">π</div>
-                <div class="flex-1">
-                  <div class="text-[10px] text-pulse-purple-2 font-medium mb-1">小 P 的反馈</div>
-                  <div id="reflect-pi-text" class="text-[12px] leading-relaxed"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Submit -->
-            <button id="reflect-submit-btn" onclick="submitReflection()" class="w-full py-3 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[13px] font-semibold">
-              完成复盘 · 喂给小 P 的长期记忆
-            </button>
-            <div class="text-[10px] text-pulse-text-3 text-center mt-2">复盘是小 P 长期记忆的<strong>唯一</strong>写入入口</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ============================ INBOX ============================ -->
-    <div id="screen-inbox" class="screen is-hidden-right">
+    <div id="screen-inbox" class="screen">
       <!-- iOS status bar -->
       <div class="status-bar">
         <span>9:41</span>
@@ -999,11 +774,7 @@
       </div>
 
       <!-- Tabbar -->
-      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-3">
-        <button data-tab="today" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span class="text-[10px] font-semibold">今日</span>
-        </button>
+      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-6">
         <button data-tab="inbox" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-purple">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span class="text-[10px] font-semibold">消息</span>
@@ -1487,11 +1258,7 @@
       </div>
 
       <!-- Tabbar -->
-      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-3">
-        <button data-tab="today" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span class="text-[10px] font-semibold">今日</span>
-        </button>
+      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-6">
         <button data-tab="inbox" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span class="text-[10px] font-semibold">消息</span>
@@ -1536,65 +1303,11 @@
       <!-- Segment tabs -->
       <div class="px-5 pb-2">
         <div class="pi-seg" id="pi-seg">
-          <button class="pi-seg-btn" data-pi="northstar">★北极星</button>
-          <button class="pi-seg-btn" data-pi="mainlines">主线</button>
           <button class="pi-seg-btn active" data-pi="chat">对话</button>
           <button class="pi-seg-btn" data-pi="style">风格</button>
           <button class="pi-seg-btn" data-pi="perm">权限</button>
           <button class="pi-seg-btn" data-pi="learn">已学到</button>
           <div class="pi-seg-indicator" id="pi-seg-indicator"></div>
-        </div>
-      </div>
-
-      <!-- ============= TAB: NORTH STAR ============= -->
-      <div id="pi-tab-northstar" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
-        <div class="text-[11px] uppercase tracking-widest text-pulse-purple-2 font-semibold mb-2">★ 你的北极星</div>
-        <div class="rounded-2xl p-4 mb-3" style="background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(59,130,246,0.10)); border: 1px solid rgba(139,92,246,0.3);">
-          <div class="text-[13px] leading-relaxed text-pulse-text">
-            "成为最值得信赖的爸爸 + 影响 100 万产品人的设计师"
-          </div>
-          <div class="text-[10px] text-pulse-text-3 mt-2">设定于 2026-05-12 · 把握度 0.7</div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 mb-4">
-          <button class="rounded-xl py-2.5 bg-pulse-card border border-pulse-line text-[11px] font-semibold">编辑北极星</button>
-          <button class="rounded-xl py-2.5 bg-pulse-card border border-pulse-line text-[11px] font-semibold">历史版本（2）</button>
-        </div>
-
-        <div class="text-[12px] font-semibold text-pulse-text mb-2">小 P 的观察（30 天）</div>
-        <div class="rounded-2xl p-3.5 bg-pulse-card border border-pulse-line mb-3">
-          <div class="text-[11px] text-pulse-text-2 leading-relaxed">
-            观察到你最常说的不是"100 万产品人"，是"<strong class="text-pulse-text">让初级 PM 不再走弯路</strong>"。
-            要不要把北极星改写为更精准的版本？
-          </div>
-          <div class="flex gap-2 mt-3">
-            <button class="flex-1 py-1.5 rounded-lg text-[11px] bg-pulse-purple text-white">看建议</button>
-            <button class="flex-1 py-1.5 rounded-lg text-[11px] bg-pulse-card-2 text-pulse-text-2 border border-pulse-line">先不</button>
-          </div>
-        </div>
-
-        <div class="text-[10px] text-pulse-text-3 leading-relaxed">
-          💡 北极星是你的<strong>方向</strong>，不是<strong>终点</strong>——你永远不会到达，但每个夜晚它都在给你方向。
-          可以任意修改，旧版本会自动归档。<br>
-          首次没填？小 P 默认陪你跑 2 周，再用她的观察帮你起草。
-        </div>
-      </div>
-
-      <!-- ============= TAB: MAINLINES ============= -->
-      <div id="pi-tab-mainlines" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <div class="text-[13px] font-semibold">🎯 我的主线</div>
-            <div class="text-[10px] text-pulse-text-3">3 条进行中 · 推荐上限 5 条</div>
-          </div>
-          <button class="text-[11px] px-2.5 py-1.5 rounded-lg bg-pulse-purple/15 text-pulse-purple-2 border border-pulse-purple/30 font-semibold">+ 新建</button>
-        </div>
-
-        <div id="pi-mainlines-list" class="space-y-2.5"></div>
-
-        <div class="mt-4 text-[10px] text-pulse-text-3 leading-relaxed">
-          💡 每条主线必须有「为什么」——它要能连回北极星。
-          系统不会强求 3 条，但超过 5 条小 P 会提醒你失焦风险。
         </div>
       </div>
 
@@ -1966,11 +1679,7 @@
       </div>
 
       <!-- Tabbar -->
-      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-3">
-        <button data-tab="today" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span class="text-[10px] font-semibold">今日</span>
-        </button>
+      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-6">
         <button data-tab="inbox" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span class="text-[10px] font-semibold">消息</span>
@@ -2071,14 +1780,13 @@
   <!-- Side annotation right (shortcuts) -->
   <div class="hidden lg:block absolute right-12 bottom-12 max-w-xs text-pulse-text-3 text-[11px] leading-relaxed">
     <div class="text-pulse-text-2 mb-2 font-semibold">建议体验路径</div>
-    <div>① <strong class="text-pulse-purple-2">今日驾驶舱</strong> → 看北极星 + 三件事</div>
-    <div>② 点「跟小 P 商量今天」追问</div>
-    <div>③ 切到消息 → 看主线徽章</div>
-    <div>④ 选 hint → 看草稿 chips</div>
-    <div>⑤ 「跟小 P 商量这条」→ 含主线理由</div>
-    <div>⑥ 底部 tabbar → 关系网</div>
-    <div>⑦ 底部 tabbar → <span class="text-pulse-purple-2">小 P</span> → 北极星 / 主线</div>
-    <div>⑧ 回今日 → 点「今晚复盘」</div>
+    <div>① 收件箱 → 切换不同联系人</div>
+    <div>② 选 hint → 看草稿下方 chips</div>
+    <div>③ 点 chip → 草稿即时变化</div>
+    <div>④ 「跟小 P 商量」→ 看历史 + 追问</div>
+    <div>⑤ 底部 tabbar → 关系网</div>
+    <div>⑥ 底部 tabbar → <span class="text-pulse-purple-2">小 P</span></div>
+    <div>　对话 / 风格 / 权限 / 已学到</div>
   </div>
 
   <script>
@@ -2372,62 +2080,14 @@
   // ===================== STATE =====================
   let currentContact = 'mira';
   let currentHintIdx = null;
-  let currentScreen = 'today';
-
-  // ===================== LIFE COPILOT DATA =====================
-  const NORTH_STAR = "成为最值得信赖的爸爸 + 影响 100 万产品人的设计师";
-
-  const MAINLINES = [
-    {
-      id: 'A', code: 'A', title: '转型 PM',
-      motivation: '服务身份「设计师 → 产品人」',
-      criteria: '30 天通过 OKR 模板做完 5 个真实需求',
-      progress: 0.4, streak: 0,
-      color: '#8B5CF6', windowDays: 30,
-      relatedContacts: ['mira','ava']
-    },
-    {
-      id: 'B', code: 'B', title: '身体素质',
-      motivation: '服务身份「能撑住未来 30 年」',
-      criteria: '90 天体脂率 24% → 18%',
-      progress: 0.6, streak: 12,
-      color: '#10B981', windowDays: 90,
-      relatedContacts: []
-    },
-    {
-      id: 'C', code: 'C', title: '女儿的睡前 30 分钟',
-      motivation: '服务身份「最值得信赖的爸爸」',
-      criteria: '每日 19:30 - 20:00 不缺席',
-      progress: 1.0, streak: 47,
-      color: '#F472B6', windowDays: 365,
-      relatedContacts: []
-    }
-  ];
-
-  const DAILY_3 = [
-    { id:'t1', mainline:'A', title:'写完支付模块 OKR', detail:'2 个案例 · 上午', energy:90, slot:'上午', status:'pending' },
-    { id:'t2', mainline:'C', title:'19:30 陪女儿讲故事', detail:'《青蛙弗洛格》第 3 章', energy:30, slot:'晚间', status:'pending' },
-    { id:'t3', mainline:'B', title:'跑 3km', detail:'公园慢跑 · 下午', energy:60, slot:'下午', status:'pending' }
-  ];
-
-  // Mainline badges per inbox contact
-  const MAINLINE_BADGES = {
-    mira: { code:'C-临', label:'朋友强连接', color:'#8B5CF6' },
-    dad:  { code:'C-家', label:'家人陪伴', color:'#10B981' },
-    ava:  { code:'A-高', label:'主线高价值', color:'#F59E0B' },
-    boss: { code:'A-工', label:'工作主线', color:'#3B82F6' },
-    rena: { code:'A-客', label:'客户关系', color:'#F59E0B' },
-    jules:{ code:'A-同', label:'同行连接', color:'#8B5CF6' },
-    noa:  { code:'?-中', label:'立场分歧', color:'#6B7280' }
-  };
+  let currentScreen = 'inbox';
 
   // ===================== ROUTING =====================
   function showScreen(name) {
-    const screens = ['today','inbox','chat','profile','network','pi'];
-    const order = { today:0, inbox:1, chat:2, profile:3, network:4, pi:5 };
+    const screens = ['inbox','chat','profile','network','pi'];
+    const order = { inbox:0, chat:1, profile:2, network:3, pi:4 };
     screens.forEach(s => {
       const el = document.getElementById('screen-'+s);
-      if (!el) return;
       if (s === name) {
         el.classList.remove('is-hidden-right','is-hidden-left');
       } else {
@@ -2441,145 +2101,8 @@
       }
     });
     currentScreen = name;
-    if (name === 'today') renderToday();
     if (name === 'network') renderNetwork();
     if (name === 'pi') renderPiOpening();
-  }
-
-  // ===================== RENDER: TODAY COCKPIT =====================
-  function renderToday() {
-    const list = document.getElementById('today-3-list');
-    if (!list) return;
-    list.innerHTML = DAILY_3.map(t => {
-      const ml = MAINLINES.find(m => m.id === t.mainline);
-      const done = t.status === 'done';
-      return `
-        <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line flex items-start gap-3">
-          <button onclick="toggleDaily3('${t.id}')" class="flex-shrink-0 w-5 h-5 rounded-full border-2 ${done ? 'bg-pulse-emerald border-pulse-emerald':'border-pulse-text-3'} flex items-center justify-center mt-0.5">
-            ${done ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
-          </button>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5 mb-0.5">
-              <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:${ml.color}25;color:${ml.color}">主线 ${ml.code}</span>
-              <span class="text-[9px] text-pulse-text-3">${t.slot}</span>
-            </div>
-            <div class="text-[13px] font-semibold ${done?'line-through text-pulse-text-3':'text-pulse-text'}">${t.title}</div>
-            <div class="text-[10px] text-pulse-text-3 mt-0.5">${t.detail}</div>
-          </div>
-          <div class="text-right flex-shrink-0">
-            <div class="text-[9px] text-pulse-text-3">精力</div>
-            <div class="text-[11px] font-semibold ${t.energy>=70?'text-pulse-amber':t.energy>=40?'text-pulse-purple-2':'text-pulse-emerald'}">${t.energy}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-    const completed = DAILY_3.filter(t => t.status === 'done').length;
-    document.getElementById('today-3-count').textContent = `${completed} / 3 已完成`;
-  }
-
-  function toggleDaily3(id) {
-    const t = DAILY_3.find(x => x.id === id);
-    if (!t) return;
-    t.status = t.status === 'done' ? 'pending' : 'done';
-    renderToday();
-    if (t.status === 'done') {
-      showToast(`✓ ${t.title}`);
-      const completed = DAILY_3.filter(x => x.status === 'done').length;
-      if (completed === 3) {
-        setTimeout(() => showPiInsight('今天三件事全部完成 — 主线 A/B/C 都推进了一格 ✨'), 600);
-      }
-    }
-  }
-
-  function openConsultToday() {
-    showToast('小 P：今天剩 2 件事，建议先做主线 A（精力充沛时）');
-  }
-
-  // ===================== REFLECTION SHEET =====================
-  function openReflection() {
-    // Build Q1 task list
-    const q1 = document.getElementById('reflect-q1');
-    if (q1) {
-      q1.innerHTML = DAILY_3.map(t => {
-        const ml = MAINLINES.find(m => m.id === t.mainline);
-        const isDone = t.status === 'done';
-        return `
-          <div class="reflect-task flex items-center gap-2.5 rounded-lg p-2 ${isDone?'bg-pulse-emerald/10':'bg-pulse-card-2'}" data-task="${t.id}" data-status="${isDone?'done':'pending'}">
-            <span class="text-[14px]">${isDone?'✓':'✗'}</span>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1 mb-0.5">
-                <span class="text-[9px] px-1 rounded font-semibold" style="background:${ml.color}25;color:${ml.color}">${ml.code}</span>
-                <span class="text-[12px] ${isDone?'line-through text-pulse-text-3':'text-pulse-text'}">${t.title}</span>
-              </div>
-              ${!isDone ? `
-                <div class="flex gap-1 mt-1">
-                  <button onclick="pickReason(this,'busy')" class="reflect-reason text-[9px] px-2 py-0.5 rounded bg-pulse-card border border-pulse-line text-pulse-text-2">太忙</button>
-                  <button onclick="pickReason(this,'no-energy')" class="reflect-reason text-[9px] px-2 py-0.5 rounded bg-pulse-card border border-pulse-line text-pulse-text-2">没动力</button>
-                  <button onclick="pickReason(this,'other-thing')" class="reflect-reason text-[9px] px-2 py-0.5 rounded bg-pulse-card border border-pulse-line text-pulse-text-2">别的事</button>
-                </div>
-              `:''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-    // reset state
-    document.getElementById('reflect-pi-feedback').classList.add('hidden');
-    document.getElementById('reflect-submit-btn').textContent = '完成复盘 · 喂给小 P 的长期记忆';
-    document.getElementById('reflect-submit-btn').disabled = false;
-    document.querySelectorAll('.reflect-moment').forEach(b => b.classList.remove('active'));
-    document.getElementById('reflect-sheet') || document.getElementById('reflection-sheet').classList.add('show');
-    document.getElementById('reflection-sheet').classList.add('show');
-  }
-
-  function closeReflection() {
-    document.getElementById('reflection-sheet').classList.remove('show');
-  }
-
-  function pickBestMoment(btn) {
-    document.querySelectorAll('.reflect-moment').forEach(b => {
-      b.classList.remove('active');
-      b.style.borderColor = '#2A2B33';
-      b.style.background = '#1E1F26';
-    });
-    btn.classList.add('active');
-    btn.style.borderColor = 'rgba(139,92,246,0.5)';
-    btn.style.background = 'rgba(139,92,246,0.15)';
-  }
-
-  function pickReason(btn, reason) {
-    const parent = btn.parentElement;
-    parent.querySelectorAll('.reflect-reason').forEach(b => {
-      b.classList.remove('active');
-      b.style.background = '#16171D';
-      b.style.color = '#A0A4AD';
-      b.style.borderColor = '#2A2B33';
-    });
-    btn.classList.add('active');
-    btn.style.background = 'rgba(139,92,246,0.18)';
-    btn.style.color = '#A78BFA';
-    btn.style.borderColor = 'rgba(139,92,246,0.4)';
-  }
-
-  function submitReflection() {
-    const completed = DAILY_3.filter(t => t.status === 'done').length;
-    let feedback;
-    if (completed === 3) {
-      feedback = '今天三件事全部完成 — 主线 A/B/C 都推进了一格。我把"周二上午精力最佳"这个观察记进了你的长期偏好。';
-    } else if (completed === 2) {
-      feedback = '本周第二次延期主线 B（跑步）。要不要把强度先调到 2km？我把这个延期模式记进了你的长期偏好。';
-    } else if (completed === 1) {
-      feedback = '今天只完成 1/3。这种节奏不可持续，明天我会建议你把三件事的精力总量降到 < 150。';
-    } else {
-      feedback = '今天没完成主线 — 不指责。我会观察是不是你的精力曲线最近有变化，明早简报会给你建议。';
-    }
-    document.getElementById('reflect-pi-text').textContent = feedback;
-    document.getElementById('reflect-pi-feedback').classList.remove('hidden');
-    const btn = document.getElementById('reflect-submit-btn');
-    btn.textContent = '✓ 已喂给小 P 长期记忆 · 关闭';
-    btn.disabled = true;
-    btn.onclick = () => closeReflection();
-    showPiInsight('复盘 → 长期记忆 · 我学到的偏好今天又完整了一点 ✨');
   }
 
   // ===================== RENDER: INBOX =====================
@@ -2587,7 +2110,6 @@
     const buildItem = (msg) => {
       const c = CONTACTS[msg.id];
       const isUrgent = msg.priority === '立刻回';
-      const badge = MAINLINE_BADGES[msg.id];
       return `
         <button onclick="openChat('${c.id}')" class="w-full bg-pulse-card hover:bg-pulse-card-2 transition rounded-2xl p-3 border border-pulse-line flex items-center gap-3 text-left">
           <div class="relative flex-shrink-0">
@@ -2603,16 +2125,10 @@
               <span class="text-[10px] text-pulse-text-3 flex-shrink-0 ml-2">${msg.time}</span>
             </div>
             <div class="text-[12px] text-pulse-text-2 truncate leading-relaxed">${msg.preview}</div>
-            <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
-              ${msg.action ? `<div class="inline-flex items-center gap-1 text-[10px] text-pulse-purple-2 bg-pulse-purple/10 px-2 py-0.5 rounded-md border border-pulse-purple/20">
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13 8L19 7L15 11L19 15L13 14L12 20L11 14L5 15L9 11L5 7L11 8L12 2Z"/></svg>
-                小 P 推荐：${msg.action}
-              </div>`:''}
-              ${badge ? `<div class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md font-semibold" style="background:${badge.color}20;color:${badge.color};border:1px solid ${badge.color}40">
-                <span>主线 ${badge.code}</span>
-                <span class="opacity-70">· ${badge.label}</span>
-              </div>`:''}
-            </div>
+            ${msg.action ? `<div class="mt-1.5 inline-flex items-center gap-1 text-[10px] text-pulse-purple-2 bg-pulse-purple/10 px-2 py-0.5 rounded-md border border-pulse-purple/20">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13 8L19 7L15 11L19 15L13 14L12 20L11 14L5 15L9 11L5 7L11 8L12 2Z"/></svg>
+              小 P 推荐：${msg.action}
+            </div>` : ''}
           </div>
         </button>
       `;
@@ -3040,13 +2556,6 @@
   function renderPiOpening() {
     const thread = document.getElementById('pi-thread');
     if (!thread) return;
-    // Ensure default tab is chat (correct indicator position with new 6-tab layout)
-    if (!document.querySelector('.pi-seg-btn.active') || document.querySelector('.pi-seg-btn.active').dataset.pi !== 'chat') {
-      showPiTab('chat');
-    } else {
-      const indicator = document.getElementById('pi-seg-indicator');
-      if (indicator && !indicator.style.transform) indicator.style.transform = 'translateX(200%)';
-    }
     if (thread.querySelector('[data-pi-opening]')) return; // already rendered
     const op = getPiOpening();
     thread.innerHTML = `
@@ -3134,51 +2643,15 @@
 
   // Switch Pi sub-tabs
   function showPiTab(name) {
-    const tabs = ['northstar','mainlines','chat','style','perm','learn'];
+    const tabs = ['chat','style','perm','learn'];
     const idx = tabs.indexOf(name);
     document.querySelectorAll('.pi-seg-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.pi === name);
     });
     tabs.forEach(t => {
-      const el = document.getElementById('pi-tab-' + t);
-      if (el) el.classList.toggle('hidden', t !== name);
+      document.getElementById('pi-tab-' + t).classList.toggle('hidden', t !== name);
     });
-    if (name === 'mainlines') renderPiMainlines();
-    const indicator = document.getElementById('pi-seg-indicator');
-    if (indicator) indicator.style.transform = `translateX(${idx * 100}%)`;
-  }
-
-  function renderPiMainlines() {
-    const list = document.getElementById('pi-mainlines-list');
-    if (!list) return;
-    list.innerHTML = MAINLINES.map(m => {
-      const todayActions = DAILY_3.filter(t => t.mainline === m.id);
-      const progressPct = Math.round(m.progress * 100);
-      return `
-        <div class="rounded-2xl p-3.5 bg-pulse-card border border-pulse-line">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-[10px] px-1.5 py-0.5 rounded font-bold" style="background:${m.color}25;color:${m.color}">${m.code}</span>
-            <span class="text-[13px] font-semibold flex-1">${m.title}</span>
-            ${m.streak > 0 ? `<span class="text-[10px] text-pulse-amber">🔥 ${m.streak}</span>` : ''}
-          </div>
-          <div class="text-[10px] text-pulse-text-3 mb-2 leading-relaxed">↳ ${m.motivation}</div>
-          <div class="text-[10px] text-pulse-text-2 mb-2.5">完成标准：${m.criteria}</div>
-          <div class="h-1.5 bg-pulse-card-2 rounded-full overflow-hidden mb-2">
-            <div class="h-full rounded-full" style="background:${m.color};width:${progressPct}%"></div>
-          </div>
-          <div class="flex items-center justify-between text-[10px] text-pulse-text-3 mb-2.5">
-            <span>进度 ${progressPct}%</span>
-            <span>${m.windowDays} 天窗口</span>
-          </div>
-          ${todayActions.length > 0 ? `
-            <div class="rounded-lg p-2 bg-pulse-card-2 border border-pulse-line">
-              <div class="text-[9px] text-pulse-purple-2 font-semibold mb-1">今日动作</div>
-              ${todayActions.map(a => `<div class="text-[11px] ${a.status==='done'?'line-through text-pulse-text-3':'text-pulse-text'}">· ${a.title}</div>`).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
+    document.getElementById('pi-seg-indicator').style.transform = `translateX(${idx * 100}%)`;
   }
 
   // 3-state slider control
@@ -3714,7 +3187,6 @@
     document.querySelectorAll('.tab-btn').forEach(b => {
       b.addEventListener('click', () => {
         const tab = b.dataset.tab;
-        if (tab === 'today') showScreen('today');
         if (tab === 'inbox') showScreen('inbox');
         if (tab === 'network') showScreen('network');
         if (tab === 'pi') showScreen('pi');
@@ -3860,7 +3332,6 @@
 
   // ===================== INIT =====================
   document.addEventListener('DOMContentLoaded', () => {
-    renderToday();
     renderInbox();
     bindEvents();
     showProfileTab('overview');

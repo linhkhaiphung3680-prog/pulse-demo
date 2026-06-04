@@ -384,6 +384,63 @@
       pointer-events: none;
     }
 
+    /* Pi insight toast (learning signal) */
+    .pi-insight {
+      position: absolute;
+      top: 80px;
+      left: 16px;
+      right: 16px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.95), rgba(109,40,217,0.95));
+      backdrop-filter: blur(20px);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 8px 32px rgba(139,92,246,0.4), 0 0 0 1px rgba(167,139,250,0.4);
+      z-index: 150;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transform: translateY(-12px);
+      opacity: 0;
+      transition: opacity 320ms ease, transform 320ms ease;
+      pointer-events: none;
+    }
+    .pi-insight.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .pi-insight-avatar {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Times New Roman", "Georgia", serif;
+      font-style: italic;
+      font-weight: 700;
+      color: #fff;
+      font-size: 14px;
+    }
+    .pi-insight-body { flex: 1; min-width: 0; }
+    .pi-insight-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #E9D5FF;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+    .pi-insight-text { font-size: 12.5px; color: #fff; line-height: 1.45; }
+    .pi-insight-close {
+      flex-shrink: 0;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      padding: 2px;
+    }
+
     /* Network legend dot */
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
@@ -858,6 +915,18 @@
 
       <div class="toast" id="toast">
         <div class="bg-pulse-card border border-pulse-line rounded-full px-4 py-2 text-[12px] text-pulse-text shadow-xl"></div>
+      </div>
+
+      <!-- Pi insight (learning signal) -->
+      <div id="pi-insight" class="pi-insight">
+        <div class="pi-insight-avatar">π</div>
+        <div class="pi-insight-body">
+          <div class="pi-insight-title">小 P 学到了</div>
+          <div class="pi-insight-text" id="pi-insight-text">—</div>
+        </div>
+        <div class="pi-insight-close" id="pi-insight-close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </div>
       </div>
 
       <!-- Pi-in-context chat sheet (summon Pi to discuss current chat reply) -->
@@ -2096,6 +2165,8 @@
     }
 
     showScreen('chat');
+    // Pi learning: occasional insight when entering certain contacts (B)
+    maybeLearnFromContact(contactId);
   }
 
   // Populate the 2 dynamic hints
@@ -2188,13 +2259,14 @@
     if (wasActive) {
       // revert to base
       draftEl.innerText = draftEl.dataset.baseDraft || hint.draft;
-      // animate
       flashDraft(draftEl);
       return;
     }
     target.classList.add('active');
     draftEl.innerText = chip.text;
     flashDraft(draftEl);
+    // Pi learning: occasional insight about chip preference (B)
+    maybeLearnFromChip(chipId);
   }
 
   // Flash animation when draft updates
@@ -2250,6 +2322,8 @@
     document.getElementById('copilot-draft').classList.add('hidden');
     document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
     showToast('已发送 · 小 P 已记录');
+    // Pi learning: occasionally surface what she just learned (B)
+    maybeLearnFromSend();
   }
 
   // ===================== DEEP ANALYSIS (deprecated, merged into Pi context sheet) =====================
@@ -2265,6 +2339,90 @@
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ===================== PI LEARNING INSIGHTS (B) =====================
+  // Pi notices patterns in real-time and surfaces them as floating insights.
+  // These should feel like genuine "she's watching" moments, not random toasts.
+  let piInsightTimer;
+
+  function showPiInsight(text) {
+    const el = document.getElementById('pi-insight');
+    if (!el) return;
+    document.getElementById('pi-insight-text').innerHTML = text;
+    el.classList.add('show');
+    clearTimeout(piInsightTimer);
+    piInsightTimer = setTimeout(() => el.classList.remove('show'), 5500);
+  }
+
+  // Insight pools by trigger type. Pi cycles through these for variety.
+  const INSIGHT_POOLS = {
+    // Triggered when user clicks 'shorter' chip
+    shortChip: [
+      '你又点了「更短」——我开始相信「偏爱简短回复」是你的真实偏好（已第 24 次）。',
+      '又是「更短」。我会让默认草稿先短一截，省你一步。',
+    ],
+    // Triggered when user clicks 'warm' or '更暖' chip
+    warmChip: [
+      '回家人时点「更暖」+1。我把这个偏好升级为高置信度。',
+      '你对家人都加暖色——我会记得对妈妈、爸爸、妹妹默认更暖一档。',
+    ],
+    // Triggered when user adopts Pi's recommendation
+    adopted: [
+      '你信任了我的判断 ✨ 这次的成功反馈我也学进去了——下次类似场景我会更确定地推荐。',
+      '采纳了我的建议。我把今天的「Mira × 8pm 邀约」存为成功样本。',
+    ],
+    // Triggered when user sends draft after editing
+    edited: [
+      '你删掉了我加的「✨」——对 Mira 的 emoji 频率，我会再观察一下。',
+      '你把"准时"改成了"按时"——细微措辞差异我也在记。',
+    ],
+    // Triggered when user sends drafts repeatedly
+    sent: [
+      '今天你已发了 4 条草稿，全部都点了「采纳」。你的语言指纹我又清晰了一点。',
+      '已记录 187 → 188 次互动样本。',
+    ],
+    // Triggered when user enters Noa context
+    noaCaution: [
+      'Noa 这种立场分歧场景，我每次的建议你都会反复想——所以我把这类对话的 chip 排序调整了。',
+    ],
+  };
+
+  // Get a random insight from a pool, prefer first item
+  function pickInsight(poolKey) {
+    const pool = INSIGHT_POOLS[poolKey] || [];
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // Triggers for learning signals (called from key user actions)
+  let sendCount = 0;
+  function maybeLearnFromSend() {
+    sendCount++;
+    // 50% chance, OR every 3rd send for sure
+    if (sendCount % 3 === 0 || Math.random() < 0.5) {
+      const text = pickInsight('sent');
+      if (text) setTimeout(() => showPiInsight(text), 1400);
+    }
+  }
+  function maybeLearnFromAdopt(verdict) {
+    const text = pickInsight('adopted');
+    if (text) setTimeout(() => showPiInsight(text), 600);
+  }
+  function maybeLearnFromChip(chipId) {
+    let pool = null;
+    if (/short|brief/.test(chipId)) pool = 'shortChip';
+    else if (/warm/.test(chipId)) pool = 'warmChip';
+    if (pool) {
+      const text = pickInsight(pool);
+      if (text && Math.random() < 0.45) setTimeout(() => showPiInsight(text), 800);
+    }
+  }
+  function maybeLearnFromContact(contactId) {
+    if (contactId === 'noa') {
+      const text = pickInsight('noaCaution');
+      if (text && Math.random() < 0.35) setTimeout(() => showPiInsight(text), 1200);
+    }
   }
 
   // ===================== PROFILE =====================
@@ -2696,10 +2854,23 @@
         ? `你倾向「${hint.label}」对吧？我看了下你们的历史，给你三个判断点：<br>· 上次你迟到 15 分钟，她表面没事但回复变短<br>· 她今天朋友圈预告了"惊喜礼物"<br>· 你过去 5 次回 Mira 都用了 emoji<br><br>哪里不确定？`
         : '想跟我商量怎么回 Mira 吗？我看到她在确认 8pm，态度积极，准备了礼物。\n\n核心 trade-off：你今晚是否有时间专注享受。',
       chips: ['选这个会不会太冷？', '该带什么回礼？', '上次她真的不开心吗？'],
+      recommend: {
+        hintIdx: 0,
+        confidence: 'high',
+        verdict: '热情确认',
+        reasoning: [
+          'Mira 主动备礼物 + 朋友圈预告，她重视这次见面',
+          '老朋友间冷淡反而违和，会让她疑心',
+          '上次迟到的失望今晚正好用一句温暖弥补',
+        ],
+        agreedNote: '你已经选了我推荐的「热情确认」，方向对的。可以再调一档「更长」让她感到被珍视。',
+        disagreedNote: '你选了「小调整」也不是不行，但要小心：晚 20 分钟对她而言是第二次"你不够重视"信号。如果一定要这样，建议加一句"先到先点酒"主动补偿。',
+        debate: '好。你哪里不确定？是觉得太热情她会觉得有目的，还是别的？我能帮你权衡。',
+      },
       qa: {
-        '太冷': '不会，「热情确认」对老友刚好。她今天主动 + 带礼物，你冷淡反而违和。如果真担心，把"好啊"换成"等你"会更暖。',
-        '回礼': '建议带一瓶 Bourbon——你们 4/2 在 Westlight 喝过她说"这酒能配 trio"。她记得给你的玻璃杯，你也记得她喜欢的酒，对等。',
-        '不开心': '5/15 她原话"没事下次记得"。AI 跨语境判断：表面平静实际失望（你们 5/16 聊天她回复变短，且没主动起话题）。但今天主动找你，说明她已经过去了。',
+        '太冷': '不会，「热情确认」对老友刚好。她今天主动 + 带礼物，你冷淡反而违和。',
+        '回礼': '建议带一瓶 Bourbon——你们 4/2 在 Westlight 喝过她说"这酒能配 trio"。',
+        '不开心': '5/15 她原话"没事下次记得"。我跨语境判断：表面平静实际失望（你们 5/16 聊天她回复变短）。但今天主动找你=她已经过去了。',
         '默认':   '基于你们 5 年互动史，我可以从「礼物 / 时间 / 历史 / 情绪 / 朋友圈」任意一个角度给你看法。',
       }
     },
@@ -2709,10 +2880,23 @@
         ? `你想用「${hint.label}」对吧？专业对她合适。一个细节：她周三（今天）情绪中性，发草稿避开她早会时段（10:00-11:30）就行。`
         : '商量怎么回 Ava 吗？她在催，时间窗口紧。两条路：①给具体时间承诺 ②请求快速会议对齐。',
       chips: ['几点发她最合适？', '她最在意什么？', '会不会显得太客气？'],
+      recommend: {
+        hintIdx: 0,
+        confidence: 'high',
+        verdict: '承诺时间',
+        reasoning: [
+          '她最敏感「拖延 + 不明确」，上次拖 3 天她内部被批',
+          '具体时间承诺=对她 SLA 文化的回应',
+          '请求会议虽稳，但今天这条她要的是"先给我一个具体时间"',
+        ],
+        agreedNote: '你已选「承诺时间」，正确。建议再加一句"如果有调整下午 5 点前我会再确认一次"——给她留缓冲。',
+        disagreedNote: '你选「请求会议」会让她感觉你在拖时间。如果合同细节真复杂，先承诺时间，之后在邮件里一并约会议——而不是当下回复就抛回会议。',
+        debate: '行，跟我说说你顾虑什么？是合同条款真的没想清楚，还是其他？',
+      },
       qa: {
-        '几点': '基于过往：她周一情绪最佳，周五最赶。今天周三 → 中性。建议下午 14:00-16:00 发，避开早会和午饭。',
-        '在意': '过往 12 次沟通：她最敏感「付款节奏」（影响她现金流报表）和「验收标准」（她背 KPI）。其他条款她基本不细看。',
-        '客气': '不会。她吃专业语调，反而你太轻松她会觉得你不够重视。「您 + 具体时间 + 主动 follow-up」是她舒服的节奏。',
+        '几点': '她周一情绪最佳，周五最赶。今天周三 → 中性。建议下午 14:00-16:00 发，避开早会和午饭。',
+        '在意': '过往 12 次沟通：她最敏感「付款节奏」和「验收标准」（她背 KPI）。其他条款她基本不细看。',
+        '客气': '不会。她吃专业语调，太轻松她会觉得你不够重视。',
         '默认':   '我可以从「她的内部 KPI / 时间偏好 / 历史敏感点」任意维度展开。',
       }
     },
@@ -2722,11 +2906,24 @@
         ? `「${hint.label}」是对的，他要的是你主动。两个细节：①别问"你需要我陪吗"，他面子上会说不需要 ②直接说"我陪你去"。`
         : '商量怎么回爸爸吗？这条比看起来重要。他从不主动求陪，这次开口=他需要。',
       chips: ['他真的希望我陪？', '该带什么去医院？', '怎么不让他觉得是负担？'],
+      recommend: {
+        hintIdx: 0,
+        confidence: 'high',
+        verdict: '主动陪同',
+        reasoning: [
+          '爸从不主动开口，这次"有空吗"= 他真需要',
+          '老人最怕被当成"添麻烦"，主动 = 比承诺更温暖',
+          '妈妈昨天朋友圈是关键信号，她希望你看出来',
+        ],
+        agreedNote: '你选「主动陪同」是对的。提醒：别加"我特意挪了会议"——会让他有压力。换成"我反正没事"。',
+        disagreedNote: '「确认+接送」也行，但少了"我陪你"这句关键话。家人间，"轻描淡写的在场"比细节安排更重要。',
+        debate: '理解你的犹豫。是这周二真有挪不开的事，还是别的？',
+      },
       qa: {
-        '陪': '高度肯定。基于他近 30 天对话：膝盖痛 6 次提及，提到"上下楼有点费劲"。妈妈昨天朋友圈是关键信号——他自己不会开口，妈妈"逼"他发的。',
-        '带什么': '他爱吃的：山楂糕、核桃。检查日空腹，可以带温水 + 软糕点等检查后吃。别带苹果（他牙不好）。',
-        '负担': '别用"我特意挪开了会议"——会让他有压力。换成"下周二我反正没事"，他更舒服。家人之间，"轻描淡写的在场"是最大的爱。',
-        '默认':   '关于爸的关系动态，我都有完整记录。继续问。',
+        '陪': '高度肯定。膝盖痛他 30 天提了 6 次。妈妈昨天朋友圈是关键信号——他自己不会开口。',
+        '带什么': '他爱吃的：山楂糕、核桃。检查日空腹，带温水 + 软糕点等检查后吃。别带苹果（他牙不好）。',
+        '负担': '别用"我特意挪开了会议"——会让他有压力。换成"下周二反正没事"。',
+        '默认':   '关于爸的关系动态，我都有完整记录。',
       }
     },
     jules: {
@@ -2735,10 +2932,23 @@
         ? `「${hint.label}」对——他要的是支持不是分析。提醒一句：千万别说"想清楚了吗 / 现在 timing 不好"，他这 3 个月已经想了 100 遍。`
         : '商量怎么回 Jules 吗？这条很关键。3 个月犹豫已过，他要的是确认，不是建议。',
       chips: ['说"风险高"会怎样？', '他可能找我帮什么？', '太热情会不会假？'],
+      recommend: {
+        hintIdx: 0,
+        confidence: 'high',
+        verdict: '支持 + 庆祝',
+        reasoning: [
+          '3 个月犹豫已过，他要的是确认而非分析',
+          '此时给建议=不信他，会损伤友谊',
+          '主动说"需要 connect 喊我" = 高情商支持的标志',
+        ],
+        agreedNote: '你选「支持+庆祝」最稳。建议加一句具体的："周末或下周一起吃个饭聊聊"——比单纯祝贺更有温度。',
+        disagreedNote: '「询问方向」也不错，但要避开"为什么 / 想清楚了吗"句式。换成"想做哪类客户"这种实操问题，他会觉得你在认真听。',
+        debate: '可以聊聊。你是觉得他这个决定 risky 想劝劝他，还是别的？',
+      },
       qa: {
-        '风险': '会被解读为不支持。他经历过 3 次重大决定（裸辞 / 异地恋 / 买房），你都先支持后聊细节。这次保持节奏。',
-        '帮': '高概率：①让你帮转发招人帖 ②介绍他认识投资人/客户。建议主动说"需要 connect 喊我"=最高情商。',
-        '假': '不会。他 5/15 提过"想找几个人一起做点东西"——你今天热情=印证他的判断。冷淡反而显假。',
+        '风险': '会被解读为不支持。他经历过 3 次重大决定，你都先支持后聊细节。这次保持节奏。',
+        '帮': '高概率：①帮转发招人帖 ②介绍投资人/客户。主动说"需要 connect 喊我"=最高情商。',
+        '假': '不会。他 5/15 提过"想找几个人一起做点东西"，你今天热情=印证他的判断。冷淡反而显假。',
         '默认':   '我对你们的友谊轨迹很熟，可以从任何角度展开。',
       }
     },
@@ -2748,10 +2958,23 @@
         ? `「${hint.label}」要小心。${hint.label === '温和分歧' ? '友谊优先但不能太软——他会识别敷衍。' : '这次转移可能让他失望，建议至少回应"我读了你的长文"。'}`
         : '商量怎么回 Noa 吗？说实话——这是最难的场景。直接反对损友谊，敷衍他识别得出来。',
       chips: ['完全不回会怎样？', '怎么礼貌结束？', '他真的能识别敷衍？'],
+      recommend: {
+        hintIdx: 0,
+        confidence: 'medium',
+        verdict: '温和分歧',
+        reasoning: [
+          '直接转移=他这次大概率会再发一次（朋友圈刚发完长文）',
+          '温和分歧 + 强调友谊 = 他这套吃，6 年记录都验证',
+          '5/20 你没点赞他已经记下，这次再回避会累积',
+        ],
+        agreedNote: '你选了「温和分歧」，难但对。关键是把"我们想法不同"和"我珍惜跟你聊"放在同一句里——他会记住后半句。',
+        disagreedNote: '我理解你想转移。但他现在情绪点上，转移会被解读为第二次回避。如果不想正面聊，至少加一句"我读了你的长文，想找时间当面聊"。',
+        debate: '好，这是最难的场景，应该反复推。你担心什么？是怕又像 4/8 那次聊崩，还是别的？',
+      },
       qa: {
-        '不回': '70% 概率他会再发一次（朋友圈长文刚发完，正在情绪点上）。建议简短回应而非完全沉默——但简短≠敷衍，要带"我读过"的细节。',
-        '结束': '最有效话术："我们在这上面想法不同，但这正是我珍惜跟你聊天的原因"——表达分歧 + 强调关系价值。他这套吃。',
-        '识别': '能。基于你们 6 年对话：他对"嗯""有道理"这类词的回复速度会变慢，且后续主动起话题频率下降。他已经训练自己识别敷衍了。',
+        '不回': '70% 概率他会再发一次（朋友圈长文刚发完，正在情绪点）。建议简短回应而非完全沉默。',
+        '结束': '最有效话术："我们在这上面想法不同，但这正是我珍惜跟你聊天的原因"——他这套吃。',
+        '识别': '能。基于你们 6 年对话：他对"嗯""有道理"这类词的回复速度会变慢。他已经训练自己识别敷衍了。',
         '默认':   '这个关系最复杂，多问我几个问题再决定也好。',
       }
     },
@@ -2763,16 +2986,16 @@
     const da = ai.deepAnalysis || {};
     const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
     const hint = currentHintIdx !== null ? (ai.hints || [])[currentHintIdx] : null;
+    const rec = preset.recommend;
+    const recHint = rec ? (ai.hints || [])[rec.hintIdx] : null;
 
     document.getElementById('pi-ctx-subtitle').textContent = `${c.name} · ${c.tag}`;
 
-    // Top context preview = the actual message
     document.getElementById('pi-ctx-preview').innerHTML = `
       <div class="text-[10px] uppercase tracking-wider text-pulse-text-3 mb-1.5">她说的</div>
       <div class="text-[13px] text-pulse-text leading-relaxed">"${da.message || preset.preview}"</div>
     `;
 
-    // Pi delivers the structured analysis IN HER OWN VOICE through 4 bubbles
     const thread = document.getElementById('pi-ctx-thread');
     const historyHtml = (da.history || []).map(h =>
       `<div class="flex gap-2"><span class="text-pulse-text-3 flex-shrink-0">·</span><span><span class="text-pulse-text-3 mr-1">${h.date}</span>${h.text}</span></div>`
@@ -2782,9 +3005,54 @@
       `<div class="flex gap-2"><span class="text-pulse-purple-2">·</span><span>${e}</span></div>`
     ).join('');
 
-    const pivotMessage = hint
-      ? `⚠️ ${da.risk || ''}<br><br>你倾向「<b>${hint.label}</b>」对吧？我有几个看法...`
-      : `⚠️ ${da.risk || ''}<br><br>你想怎么回？`;
+    // Pivot bubble adapts to whether user agreed/disagreed/no-choice with Pi's recommendation
+    let pivotHtml = '';
+    if (rec && recHint) {
+      const reasoningHtml = rec.reasoning.map(r => `<div class="flex gap-2"><span class="text-pulse-amber">·</span><span>${r}</span></div>`).join('');
+      let stanceText;
+      if (currentHintIdx === null) {
+        stanceText = '你还没选。我建议——';
+      } else if (currentHintIdx === rec.hintIdx) {
+        stanceText = '你选了我推荐的方向。';
+      } else {
+        stanceText = '你选的不是我推荐的。我说说为什么我倾向另一个——';
+      }
+      pivotHtml = `
+        <div class="pi-bubble pi-bubble-pi slide-up" style="background:linear-gradient(135deg, rgba(139,92,246,0.22), rgba(139,92,246,0.08)); border-color:rgba(139,92,246,0.4)">
+          <div class="flex items-center gap-1.5 mb-2">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="text-pulse-purple-2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>
+            <span class="text-[11px] uppercase tracking-wider text-pulse-purple-2 font-bold">小 P 的建议</span>
+            <span class="text-[10px] text-pulse-text-3 ml-auto">${rec.confidence === 'high' ? '高把握' : '中等把握'}</span>
+          </div>
+          <div class="text-[13px] mb-2">${stanceText}</div>
+          <div class="text-[14px] font-semibold text-pulse-text mb-2">「${rec.verdict}」${recHint.emoji || ''}</div>
+          <div class="text-[12px] text-pulse-text-2 leading-relaxed mb-3">${reasoningHtml}</div>
+          ${currentHintIdx !== null && currentHintIdx === rec.hintIdx ? `
+            <div class="text-[11px] text-pulse-text-2 italic mb-3 leading-relaxed border-l-2 border-pulse-purple-2 pl-2">${rec.agreedNote}</div>
+          ` : ''}
+          ${currentHintIdx !== null && currentHintIdx !== rec.hintIdx ? `
+            <div class="text-[11px] text-pulse-amber italic mb-3 leading-relaxed border-l-2 border-pulse-amber pl-2">${rec.disagreedNote}</div>
+          ` : ''}
+          <div class="flex gap-2" id="pi-rec-actions">
+            <button id="pi-rec-adopt" class="flex-1 py-2 rounded-lg bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[12px] font-semibold flex items-center justify-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              采用「${rec.verdict}」
+            </button>
+            <button id="pi-rec-debate" class="flex-1 py-2 rounded-lg border border-pulse-line text-pulse-text-2 text-[12px] font-semibold flex items-center justify-center gap-1.5 hover:bg-pulse-card-2 transition">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              辩论一下
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      // fallback risk-only bubble
+      pivotHtml = `
+        <div class="pi-bubble pi-bubble-pi slide-up" style="background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(139,92,246,0.10)); border-color:rgba(245,158,11,0.3)">
+          ⚠️ ${da.risk || ''}<br><br>你想怎么回？
+        </div>
+      `;
+    }
 
     thread.innerHTML = `
       <div class="pi-bubble pi-bubble-pi slide-up">
@@ -2801,12 +3069,21 @@
         <div class="text-[10px] text-pulse-purple-2 font-semibold mb-1.5 uppercase tracking-wider">历史里值得看的</div>
         ${historyHtml}
       </div>` : ''}
-      <div class="pi-bubble pi-bubble-pi slide-up" style="background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(139,92,246,0.10)); border-color:rgba(245,158,11,0.3)">
-        ${pivotMessage}
-      </div>
+      ${da.risk ? `
+      <div class="pi-bubble pi-bubble-pi slide-up" style="background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04)); border-color:rgba(245,158,11,0.3)">
+        <div class="text-[10px] text-pulse-amber font-semibold mb-1.5 uppercase tracking-wider">⚠️ 风险点</div>
+        ${da.risk}
+      </div>` : ''}
+      ${pivotHtml}
     `;
 
-    // Combined chips: ctx-specific + deepAnalysis followups (de-duped, max 4)
+    // Wire recommendation action buttons
+    const adoptBtn = document.getElementById('pi-rec-adopt');
+    if (adoptBtn) adoptBtn.addEventListener('click', () => adoptPiRecommendation());
+    const debateBtn = document.getElementById('pi-rec-debate');
+    if (debateBtn) debateBtn.addEventListener('click', () => debatePiRecommendation());
+
+    // Combined chips
     const allChips = [...preset.chips, ...(da.followups || [])];
     const uniqueChips = [...new Set(allChips)].slice(0, 4);
     const chipsEl = document.getElementById('pi-ctx-chips');
@@ -2818,8 +3095,43 @@
     });
 
     document.getElementById('pi-context-sheet').classList.add('show');
-    // scroll to top
     setTimeout(() => { thread.scrollTop = 0; }, 50);
+  }
+
+  // Adopt Pi's recommended hint -> auto-select + close sheet
+  function adoptPiRecommendation() {
+    const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
+    if (!preset.recommend) return;
+    closePiContext();
+    setTimeout(() => {
+      selectHint(preset.recommend.hintIdx);
+      showToast(`小 P 帮你选了「${preset.recommend.verdict}」`);
+      // Pi learning trigger (B): user trusted Pi's call
+      maybeLearnFromAdopt(preset.recommend.verdict);
+    }, 200);
+  }
+
+  // Open debate flow: Pi asks user for their concern
+  function debatePiRecommendation() {
+    const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
+    if (!preset.recommend) return;
+    // disable the action buttons
+    const adoptBtn = document.getElementById('pi-rec-adopt');
+    const debateBtn = document.getElementById('pi-rec-debate');
+    if (adoptBtn) adoptBtn.disabled = true;
+    if (debateBtn) debateBtn.disabled = true;
+    if (adoptBtn) adoptBtn.style.opacity = '0.4';
+    if (debateBtn) debateBtn.style.opacity = '0.4';
+
+    // append Pi's debate-opener bubble
+    const thread = document.getElementById('pi-ctx-thread');
+    const bubble = document.createElement('div');
+    bubble.className = 'pi-bubble pi-bubble-pi slide-up';
+    bubble.innerHTML = preset.recommend.debate;
+    thread.appendChild(bubble);
+    setTimeout(() => { thread.scrollTop = thread.scrollHeight; }, 30);
+    // focus input
+    document.getElementById('pi-ctx-input').focus();
   }
 
   function closePiContext() {
@@ -2997,6 +3309,14 @@
         if (b.dataset.view === 'list') showToast('列表视图开发中');
       });
     });
+
+    // Pi insight close (learning toast B)
+    const piInsightClose = document.getElementById('pi-insight-close');
+    if (piInsightClose) {
+      piInsightClose.addEventListener('click', () => {
+        document.getElementById('pi-insight').classList.remove('show');
+      });
+    }
 
     // Inline greeting (mom one-tap)
     document.querySelectorAll('.inline-greeting').forEach(b => {

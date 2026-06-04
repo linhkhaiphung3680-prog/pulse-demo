@@ -2,7 +2,7 @@
 
 > 让 AI 替你记住关键的人、理解关系、起草回复。
 
-[Live Demo](https://linhkhaiphung3680-prog.github.io/pulse-demo/) · [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md) · [Product Notes](PRODUCT_NOTES.md)
+[Live Demo](https://linhkhaiphung3680-prog.github.io/pulse-demo/) · [PRD](PRD.md) · [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md) · [Product Notes](PRODUCT_NOTES.md)
 
 ---
 
@@ -124,8 +124,9 @@ open index.html         # macOS
 pulse-demo/
 ├── index.html          # 全部 demo（170 KB）
 ├── README.md           # 本文件
+├── PRD.md              # 产品需求文档（v0.4 → v1.0 可执行规格）
 ├── CHANGELOG.md        # 详细的版本演进
-├── ROADMAP.md          # v0.4+ 模型 / 引擎 / 理想态规划
+├── ROADMAP.md          # v0.4 → v2.0 的 44 模块完整规划
 └── PRODUCT_NOTES.md    # 产品决策的"为什么"
 ```
 

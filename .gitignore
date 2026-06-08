@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+evals/reports/*.md
+evals/reports/*.jsonl
+!evals/reports/.gitkeep

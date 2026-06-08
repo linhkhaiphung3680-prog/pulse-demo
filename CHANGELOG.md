@@ -4,6 +4,46 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.4-pre.3] - 2026-06-08
+
+**Eval pipeline 参考实现**——把 EVAL_TAXONOMY.md 的方法论落到端到端可跑的代码。
+
+### 新增
+
+- **evals/** 目录 · L3.25 Hint 生成的完整 eval 参考实现
+  - `datasets/L3_25_hint_generation.gold.jsonl` · **40 条 Gold dataset**（覆盖家人 / 朋友 / 客户 / 同事 / 陌生人 / 工作场景 / 情绪场景 / scope creep / 边界场景 / 重大事件等 typical + edge cases）
+  - `judges/L3_25_hint_quality.md` · LLM-as-Judge prompt（5 维度 rubric + 抗 bias 设计 + 校准要求）
+  - `schemas/L3_25_io.json` · 输入输出 JSON Schema + metric 权重
+  - `pipeline/evaluate.py` · 单文件可读的 Python runner（≈ 634 行，含 candidate 调用 / judge 调用 / schema 校验 / 聚合 / launch gate / markdown report）
+  - `pipeline/requirements.txt` · 仅依赖 `anthropic>=0.40.0`
+  - `evals/README.md` · 5 分钟跑通指南 + pipeline 设计原则 + 复制到其他 51 能力的清单
+
+### Pipeline 特性
+
+- **三档 eval 集成**：A 程序化（schema 校验）+ B LLM-judge（5 维度评分）+ C 抽样人工
+- **Launch gate 内置**：avg ≥ 3.75 / 5、schema valid ≥ 95%、must-reject ≤ 5%
+- **报告自动生成**：含 summary / 维度均值 / 上线 gate / worst-10 / 下一步建议
+- **抗 bias 设计**：被测匿名 + 多裁判 + 抽样人工对照 + 校准 r ≥ 0.7
+
+### 设计意图
+
+L3.25 是**参考实现**——其他 51 个 L3 能力照这个模式 copy + specialize：
+1. 改 candidate prompt 适配该能力
+2. 写新的 dataset / judge / schema 三个文件
+3. 跑同一个 evaluate.py（仅改路径参数）
+
+### 文件大小
+
+- evaluate.py：634 行（30 分钟可读完，复杂工程化推迟到 v0.5）
+- Gold dataset：40 条（v0.4 sprint 0 内扩到 100-200）
+
+### 变更
+
+- README 加 evals/ 目录说明
+- 项目结构同步
+
+---
+
 ## [0.4-pre.2] - 2026-06-08
 
 **评测体系铺底**——为 v0.4 真 LLM 接入做准备。

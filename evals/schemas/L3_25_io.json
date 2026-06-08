@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_25_hint_generation",
+  "title": "L3.25 · Hint 生成 · 输入输出 schema",
+  "description": "供副驾驶面板使用：基于关系 × 对方话语生成 2 个互不相同的回复方向。",
+
+  "input": {
+    "type": "object",
+    "required": ["contact", "current_message", "user_preferences"],
+    "properties": {
+      "contact": {
+        "type": "object",
+        "required": ["name", "relationship_type", "intimacy_score", "cluster"],
+        "properties": {
+          "name":               { "type": "string" },
+          "relationship_type":  { "type": "array", "items": { "type": "string" } },
+          "intimacy_score":     { "type": "number", "minimum": 0, "maximum": 1 },
+          "cluster":            { "enum": ["family", "friends", "work", "clients"] },
+          "topics":             { "type": "array", "items": { "type": "string" } },
+          "last_seen":          { "type": "string" }
+        }
+      },
+      "current_message": {
+        "type": "object",
+        "required": ["text", "timestamp"],
+        "properties": {
+          "text":      { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "recent_history": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["sender", "text", "timestamp"],
+          "properties": {
+            "sender":    { "enum": ["user", "contact"] },
+            "text":      { "type": "string" },
+            "timestamp": { "type": "string", "format": "date-time" }
+          }
+        }
+      },
+      "user_preferences": {
+        "type": "object",
+        "properties": {
+          "emoji_frequency":   { "enum": ["rare", "moderate", "frequent"] },
+          "length_preference": { "enum": ["short", "medium", "long"] },
+          "directness":        { "enum": ["soft", "balanced", "direct"] },
+          "warmth":            { "enum": ["cool", "neutral", "warm"] }
+        }
+      },
+      "active_mainlines": {
+        "type": "array",
+        "description": "用户当前活跃的主线 (Life Copilot)",
+        "items": {
+          "type": "object",
+          "properties": {
+            "code":  { "type": "string" },
+            "title": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["hints"],
+    "properties": {
+      "hints": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "object",
+          "required": ["id", "emoji", "label", "sub"],
+          "properties": {
+            "id":    { "type": "string", "pattern": "^h[0-9]+$" },
+            "emoji": { "type": "string", "minLength": 1, "maxLength": 4 },
+            "label": { "type": "string", "minLength": 2, "maxLength": 8 },
+            "sub":   { "type": "string", "minLength": 4, "maxLength": 24 },
+            "stance": { "enum": ["agree", "ask", "soften", "decline", "delay", "redirect", "celebrate", "support", "boundary"] }
+          }
+        }
+      },
+      "intent_summary": {
+        "type": "string",
+        "description": "对方话语的一句话意图摘要"
+      }
+    }
+  },
+
+  "metrics": {
+    "diversity":          { "target": "lex_similarity ≤ 0.4", "weight": 0.25 },
+    "relevance":          { "target": "≥ 4/5", "weight": 0.25 },
+    "relationship_fit":   { "target": "≥ 4/5", "weight": 0.20 },
+    "brevity":            { "target": "label ≤ 6 chars (P95)", "weight": 0.10 },
+    "actionability":      { "target": "≥ 4/5", "weight": 0.20 }
+  }
+}

@@ -157,6 +157,12 @@ pulse-demo/
 ├── LIFE_COPILOT.md        # ★ Life Copilot 战略蓝图（ground truth）
 ├── PRD.md                 # 产品需求文档（v0.4 → v1.0 可执行规格）
 ├── EVAL_TAXONOMY.md       # ★ AI 能力评测分类树（52 个叶子能力）
+├── evals/                 # ★ Eval pipeline 参考实现
+│   ├── datasets/          #   Gold dataset（JSONL）
+│   ├── judges/            #   LLM-as-Judge prompt
+│   ├── schemas/           #   IO JSON Schema
+│   ├── pipeline/          #   evaluate.py runner
+│   └── reports/           #   跑完产出的 markdown 报告
 ├── CHANGELOG.md           # 详细的版本演进
 ├── ROADMAP.md             # v0.4 → v2.0 完整规划（含 49 模块）
 └── PRODUCT_NOTES.md       # 产品决策的"为什么"

@@ -2,7 +2,7 @@
 
 > 让 AI 替你记住关键的人、看见重要的事、活出想成为的样子。
 
-[Live Demo](https://linhkhaiphung3680-prog.github.io/pulse-demo/) · [战略蓝图](LIFE_COPILOT.md) · [PRD](PRD.md) · [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md) · [Product Notes](PRODUCT_NOTES.md)
+[Live Demo](https://linhkhaiphung3680-prog.github.io/pulse-demo/) · [战略蓝图](LIFE_COPILOT.md) · [PRD](PRD.md) · [Eval Taxonomy](EVAL_TAXONOMY.md) · [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md) · [Product Notes](PRODUCT_NOTES.md)
 
 ---
 
@@ -152,9 +152,11 @@ open index.html         # macOS
 ```
 pulse-demo/
 ├── index.html             # 全部 demo（170 KB）
+├── legacy.html            # v0.3 历史版本（社交副驾驶）
 ├── README.md              # 本文件
 ├── LIFE_COPILOT.md        # ★ Life Copilot 战略蓝图（ground truth）
 ├── PRD.md                 # 产品需求文档（v0.4 → v1.0 可执行规格）
+├── EVAL_TAXONOMY.md       # ★ AI 能力评测分类树（52 个叶子能力）
 ├── CHANGELOG.md           # 详细的版本演进
 ├── ROADMAP.md             # v0.4 → v2.0 完整规划（含 49 模块）
 └── PRODUCT_NOTES.md       # 产品决策的"为什么"

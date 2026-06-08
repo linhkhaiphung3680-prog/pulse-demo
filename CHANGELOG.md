@@ -4,6 +4,32 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.4-pre.2] - 2026-06-08
+
+**评测体系铺底**——为 v0.4 真 LLM 接入做准备。
+
+### 新增
+
+- **EVAL_TAXONOMY.md**（1901 行）· AI 能力评测分类树
+  - 9 个一级能力 / 17 个二级 / **52 个 L3 叶子**全覆盖
+  - 每个叶子含：任务定义 / 输入输出 schema / 理想态（正例 + 反例）/ 量化指标 / eval 方法（A 程序化 / B LLM-judge / C 人工）/ 数据生产策略
+  - 三档 eval 方法论 + 选择决策树
+  - 数据生产 playbook（Gold / Broad / Live 三层数据集 + IAA 标注规范 + 数据 governance）
+  - 上线门禁（按能力类别 + 按版本）
+  - v0.4 sprint 0 P0 优先级清单
+
+### 用途
+
+- AI 工程：知道每个能力要满足什么 schema 和 metric
+- 数据生产：知道按什么来源 / 数量 / 标注策略产数据
+- 模型评测：知道按什么跑 eval、聚合分数、判断能否上线
+
+### 变更
+
+- README 加 EVAL_TAXONOMY 链接 + 项目结构同步
+
+---
+
 ## [0.4-pre] - 2026-06-04
 
 **Life Copilot 战略升级**——产品定位级重塑：从「社交副驾驶」升级为「**生活副驾驶**」。

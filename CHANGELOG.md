@@ -4,6 +4,65 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.4-pre.5] - 2026-06-09
+
+**Judge 校准脚本就位**——任何 LLM-as-Judge 上线前必经的 r/Kappa ≥ 0.7 验证。
+
+### 新增
+
+- **tools/judge_calibration.py**（678 行）· 跨 archetype 通用的校准脚本
+  - 生成型 → 每维度 Pearson r（人工算 vs 加权算）
+  - 分类型 → Cohen's Kappa + linear-weighted Kappa（处理 ordinal）
+  - hand-rolled 数学（不依赖 scipy / numpy）
+  - 单元测试覆盖：完美相关 / 反相关 / 零相关 / Kappa 完美 / Kappa 负
+  - 输出：人读 markdown 报告 + 机读 JSON summary
+  - `--threshold` 默认 0.7（来自 EVAL_TAXONOMY §4.3）
+  - 不达标时给具体诊断（哪个维度偏 / over-rate vs under-rate / 最常见的 disagreement pattern）
+  - 分类型对"high 漏检"加 ⛔ critical 警告（隐私优先）
+
+- **tools/examples/human_eval_L3_25.example.jsonl** · 3 条生成型 human-eval 模板
+  - 含好例（hint_001 高分）+ 中例（hint_009 标准）+ 反例（合成的 hint_032_synthetic_bad，让远亲借钱直接答应——human 给 ~2 分，验证 judge 也能给低分）
+- **tools/examples/human_eval_L3_49.example.jsonl** · 4 条分类型 human-eval 模板
+  - 含完美一致（sens_001）+ 模型漏检（sens_034 把 high 标 medium）+ 模型误报（sens_046 把减肥标敏感）+ 谐音陷阱（sens_065 HTML 当 HIV）
+
+- **tools/README.md**（300+ 行）· 完整使用指南
+  - 为什么必须做（错位 judge → 错决策 → 烧信任）
+  - 7 步验证流程
+  - 两种 archetype 的命令行示例
+  - human-eval JSON schema
+  - 已知 bias + 重校准时机
+  - 数学细节（Pearson / Cohen / linear-weighted Kappa）
+
+### 设计要点
+
+- **同一脚本两种 archetype**：用 `--archetype generation|classification` 切换
+- **不依赖 scipy**：hand-roll 数学，单文件即可跑
+- **保守原则贯穿**：分类型出 verdict 时，"high 漏检"特别警告（隐私阻断器逻辑）
+- **诊断驱动**：不达标时报告自动给"修哪个维度 / 怎么修"建议
+
+### 验证
+
+- ✅ Python AST clean（678 lines）
+- ✅ Pearson r 数学单测：完美 = 1.0 / 反相关 = -1.0 / 常数 = 0.0
+- ✅ Cohen's Kappa 单测：完美一致 = 1.0 / 完全冲突 < 0
+- ✅ 两个 archetype 的 human-eval example 都 schema-valid
+
+### 部署 judge 的强制流程（现在）
+
+```
+建 judge prompt
+   ↓
+建 30+ 条 human-eval（3 人独立标注，IAA Kappa ≥ 0.7）
+   ↓
+跑 tools/judge_calibration.py
+   ↓
+✅ DEPLOYABLE → judge 可进 evaluate.py / evaluate_L3_49.py
+❌ NOT DEPLOYABLE → 修 judge prompt 重做（最多 3 次）
+                  → 仍不达标 → 该能力降级到 C 档（必须人工）
+```
+
+---
+
 ## [0.4-pre.4] - 2026-06-09
 
 **第二个 eval archetype 建好**——分类型能力的参考实现。和 L3.25（生成型）一起，覆盖了 52 个 L3 叶子的两大形态。

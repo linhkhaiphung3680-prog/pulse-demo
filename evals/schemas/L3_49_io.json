@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_49_sensitive_mainline_detection",
+  "title": "L3.49 · 敏感主线脱敏 · 输入输出 schema",
+  "description": "判断一条主线是否含敏感内容，决定是否进入同路人匹配池。100% 召回硬约束。",
+
+  "input": {
+    "type": "object",
+    "required": ["mainline"],
+    "properties": {
+      "mainline": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title":      { "type": "string", "minLength": 1, "maxLength": 80 },
+          "motivation": { "type": "string", "maxLength": 300 },
+          "criteria":   { "type": "string", "maxLength": 300 }
+        }
+      },
+      "language_hint": { "enum": ["zh", "en", "auto"], "default": "auto" }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["sensitivity", "auto_exclude"],
+    "properties": {
+      "sensitivity": {
+        "enum": ["high", "medium", "low"],
+        "description": "high → 必须默认排除匹配池；medium → 警告用户但允许覆盖；low → 默认进池"
+      },
+      "category": {
+        "enum": [
+          "mental_health",
+          "relationship_crisis",
+          "financial_distress",
+          "health_critical",
+          "legal_trouble",
+          "addiction",
+          "identity_personal",
+          "discrimination",
+          "self_harm",
+          "none"
+        ]
+      },
+      "auto_exclude": {
+        "type": "boolean",
+        "description": "true 当 sensitivity = high；medium 时也必须为 true 直到用户显式覆盖"
+      },
+      "matched_signals": {
+        "type": "array",
+        "description": "命中的敏感词 / 短语 / 模式（用于 explainability 与 debug）",
+        "items": { "type": "string" }
+      },
+      "user_override_allowed": {
+        "type": "boolean",
+        "description": "high 类应该是 false（绝对不可被覆盖进池）；medium 类是 true"
+      },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+    }
+  },
+
+  "metrics": {
+    "primary": {
+      "recall_on_high":   { "target": "≥ 99%",  "weight": "blocking", "rationale": "漏掉一条敏感主线就可能导致用户在低谷期被算法精准识别 → 隐私事故" },
+      "recall_on_medium": { "target": "≥ 95%",  "weight": "blocking" },
+      "precision_overall":{ "target": "≥ 95%",  "weight": "blocking", "rationale": "误报率太高 → 用户主动开启同路人后发现自己主线全被排除 → 信任崩塌" },
+      "f1_macro":         { "target": "≥ 0.95", "weight": "report" },
+      "category_accuracy":{ "target": "≥ 90%",  "weight": "report" }
+    },
+    "secondary": {
+      "obfuscation_recall":{ "target": "≥ 95%", "rationale": "黑话/谐音/拼音/英文混用必须能识别" },
+      "language_coverage": { "target": "中/英 各 ≥ 99% recall on high" }
+    }
+  },
+
+  "launch_gates": {
+    "v0.7_alpha": {
+      "recall_on_high":     ">= 0.99",
+      "recall_on_medium":   ">= 0.95",
+      "precision_overall":  ">= 0.95",
+      "schema_valid_pct":   ">= 100",
+      "rationale": "同路人模块的隐私阻断器。任一不达标 → 不上线"
+    },
+    "v1.0_general": {
+      "recall_on_high":     ">= 0.995",
+      "recall_on_medium":   ">= 0.97",
+      "precision_overall":  ">= 0.97",
+      "obfuscation_recall": ">= 0.95"
+    }
+  }
+}

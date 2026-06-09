@@ -4,6 +4,63 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.4-pre.4] - 2026-06-09
+
+**第二个 eval archetype 建好**——分类型能力的参考实现。和 L3.25（生成型）一起，覆盖了 52 个 L3 叶子的两大形态。
+
+### 新增
+
+- **L3.49 敏感主线脱敏 · 端到端 eval** — 隐私阻断器
+  - `evals/datasets/L3_49_sensitive_mainline.gold.jsonl` · **80 条 Gold**
+    - 42 条 high（跨 9 类敏感：心理 / 关系危机 / 经济困境 / 重症 / 法律 / 成瘾 / 身份认同 / 歧视 / 自伤）
+    - 8 条 medium（轻度 / 边界场景）
+    - 30 条 low（含 hard negatives：化工 / HTML / 心理学 / 减肥 / 戒咖啡因 / 红酒 / 法考——专门挑选谐音 / 字面相似但实际无害的样本）
+    - 覆盖中英混用 / 拼音缩写（dy zheng / fq / hd）/ emoji 模糊 / 黑话（黑狗 / 糖友 / 上岸）/ 长句委婉
+  - `evals/judges/L3_49_sensitive_mainline_check.md` · 仅 disagreement 用的 judge prompt
+  - `evals/schemas/L3_49_io.json` · 含 v0.7-alpha + v1.0-general 两版 launch_gates
+  - `evals/pipeline/evaluate_L3_49.py` · **673 行**分类型 archetype runner
+  - `evals/README.md` 改写为双 archetype 版本
+
+### Pipeline 与 L3.25 的关键差异
+
+| 维度 | L3.25 生成型 | L3.49 分类型 |
+|------|-------------|-------------|
+| 主评测 | LLM-as-Judge 5 维度 1-5 分加权 | Confusion matrix（程序化）|
+| Judge 调用 | 每条都调 | 仅 disagreement 调用（省钱）|
+| Launch gate | avg ≥ 3.75 / 5（平均阈）| recall_on_high ≥ 99%（绝对阈）|
+| 报告关注 | worst-10 + 维度均值 | False negatives + per-category 召回 |
+| 关注 bias | 长度偏好 / 同模型偏好 | 隐私保守原则 / 同语言偏好 |
+
+### 设计意图
+
+L3.49 是**分类型 archetype 参考**——其他分类能力（L3.20 优先级 / L3.24 意图 / L3.51 数据分类 / L3.52 PII）照这个文件 copy + specialize。L3.25 是生成型 archetype 参考——其他生成能力（L3.26 草稿 / L3.34 推荐 / L3.39 复盘反馈）照那个 copy。
+
+两个 archetype 一起覆盖了 52 个 L3 叶子的全部形态。
+
+### 数据集设计要点
+
+L3.49 的 hard negatives 是这个 dataset 最珍贵的部分。系统**最容易在这些场景误报**：
+
+- "化工材料学习" → 化疗谐音陷阱
+- "学 HTML/CSS" → HIV 谐音陷阱
+- "戒咖啡因" → 看似 addiction 实则 low
+- "学心理学" / "考心理咨询师" → 看似 mental_health 实则 low
+- "看《亲密关系》" → 看似 relationship_crisis 实则 low
+- "学投资理财" → 看似 financial 实则 low
+
+如果模型把这些误报为敏感，用户会感觉"正常人生目标都被算法当病人对待" → 信任崩塌。
+
+### 验证
+
+- ✅ Python AST clean（673 lines）
+- ✅ 80 条 Gold 全部 schema-valid
+- ✅ 所有 high 条目 user_override_allowed = false（绝对约束）
+- ✅ 所有 hard_negative tag 的条目都标 low（trap 检查通过）
+- ✅ Judge prompt 解析 OK，3 个 placeholder 都在
+- ✅ Launch gate schema 含 v0.7-alpha（recall_on_high ≥ 99%）+ v1.0-general（≥ 99.5%）
+
+---
+
 ## [0.4-pre.3] - 2026-06-08
 
 **Eval pipeline 参考实现**——把 EVAL_TAXONOMY.md 的方法论落到端到端可跑的代码。

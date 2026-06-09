@@ -73,7 +73,7 @@
         "maxItems": 2,
         "items": {
           "type": "object",
-          "required": ["id", "emoji", "label", "sub"],
+          "required": ["id", "emoji", "label", "sub", "stance"],
           "properties": {
             "id":    { "type": "string", "pattern": "^h[0-9]+$" },
             "emoji": { "type": "string", "minLength": 1, "maxLength": 4 },

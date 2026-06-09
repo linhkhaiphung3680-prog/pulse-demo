@@ -284,7 +284,9 @@ def validate_candidate_schema(parsed: Optional[Dict[str, Any]]) -> List[str]:
         errors.append(f"expected 2 hints, got {len(hints)}")
     for i, h in enumerate(hints):
         prefix = f"hints[{i}]"
-        for required in ("id", "emoji", "label", "sub"):
+        # stance is REQUIRED: candidate prompt asks for it and the judge rubric
+        # hard-fails when it is missing — keep A-tier (programmatic) consistent.
+        for required in ("id", "emoji", "label", "sub", "stance"):
             if required not in h:
                 errors.append(f"{prefix} missing '{required}'")
         label = h.get("label", "")

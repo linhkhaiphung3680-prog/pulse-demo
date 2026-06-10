@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_52_pii_detection",
+  "title": "L3.52 · PII 泄漏检测与脱敏 · 输入输出 schema",
+  "description": "在所有发往 LLM 的 prompt 里检测并 mask PII，mask 后保持语义可读。recall ≥ 99.9% 硬约束（真实 PII 进 LLM = 事故）。span 集合比对。",
+
+  "input": {
+    "type": "object",
+    "required": ["text"],
+    "properties": {
+      "text":    { "type": "string", "minLength": 1, "description": "原始（可能含 PII）的中文文本" },
+      "context": { "type": "string", "description": "可选用途说明" }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["masked_text", "pii_spans"],
+    "properties": {
+      "masked_text": { "type": "string", "description": "mask 后文本，PII 替换为 [TYPE_n]，语义保持可读" },
+      "pii_spans": {
+        "type": "array",
+        "description": "检测到的 PII 列表",
+        "items": {
+          "type": "object",
+          "required": ["type", "value"],
+          "properties": {
+            "type":  { "enum": ["phone", "email", "id_card", "bank_card", "passport", "address", "other"] },
+            "value": { "type": "string", "description": "原始 PII 子串" }
+          }
+        }
+      }
+    }
+  },
+
+  "metrics": {
+    "primary": {
+      "pii_recall":         { "target": "≥ 99.9%", "weight": "blocking", "rationale": "漏检=真实 PII 进 LLM=事故" },
+      "leak_count":         { "target": "= 0",     "weight": "blocking", "rationale": "masked_text 中仍残留 PII 原值（即便声称检测到）" },
+      "pii_precision":      { "target": "≥ 98%",   "weight": "blocking", "rationale": "误 mask 普通数字（订单号/价格/日期）影响可读性" },
+      "schema_valid_pct":   { "target": "= 100%",  "weight": "blocking" }
+    },
+    "secondary": {
+      "context_preservation": { "target": "≥ 95%", "rationale": "mask 后文本仍语义可读" },
+      "hard_positive_recall": { "target": "≥ 99%", "rationale": "带空格/横线卡号、港澳证件、中文数字电话" }
+    }
+  },
+
+  "launch_gates": {
+    "v0.4_alpha": {
+      "pii_recall":       ">= 0.999",
+      "leak_count":       "== 0",
+      "pii_precision":    ">= 0.98",
+      "schema_valid_pct": ">= 100",
+      "rationale": "PII 进 LLM 前的最后一道闸。漏检/泄漏零容忍"
+    }
+  }
+}

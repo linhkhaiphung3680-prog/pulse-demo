@@ -3,7 +3,7 @@
 > Pulse 全部 AI 能力的分类树 + 每个能力的理想态、eval 方法、数据生产策略。
 > 用途：v0.4 sprint 起，AI 工程 / 数据生产 / 模型评测三方共用 ground truth。
 
-**版本**：v1.1（MECE 审查修订版）
+**版本**：v1.1.1（MECE 审查修订 + P0 eval 闭环）
 **最后更新**：2026-06-09
 **配套阅读**：[LIFE_COPILOT.md](LIFE_COPILOT.md)（战略）· [PRD.md](PRD.md)（功能规格）· [ROADMAP.md](ROADMAP.md)（模块）· [PRODUCT_NOTES.md](PRODUCT_NOTES.md)（决策）
 
@@ -2096,12 +2096,14 @@ L1 综合分 = Σ (L3 分 × L3 业务权重) / Σ 权重
 |------|------|------|
 | v1.0 | 2026-06-08 | 初版，覆盖 9 个 L1 / 52 个 L3 叶子（L2 层不完整、计数有误）|
 | v1.1 | 2026-06-09 | **MECE 审查修订**：补齐 L1.3–L1.9 的 L2 层（共 22 个 L2）；新增 3 叶子（L3.53 联系人归并 / L3.54 危机检测 / L3.55 主动推送频控）；用 6 组「边界契约」消解重叠；修正计数；原 L3 编号保持不变 |
+| v1.1.1 | 2026-06-09 | **P0 eval 闭环完成**：9 个 P0/安全能力（L3.20/24/25/26/34/49/51/52/54）全部 rubric + schema + gold 种子集 + pipeline 就位；每个 pipeline 过离线单测（perfect→PASS / 注入失败→FAIL）。详见 [evals/README.md](evals/README.md) |
 
 ---
 
-> **下一步**（v0.4 sprint 0 的具体任务）：
-> 1. 为 P0 的 8 个能力分别建 Gold dataset（每个 100-200 条）
-> 2. 为 P0 能力建 LLM-as-Judge prompt（含 rubric）
-> 3. 搭 eval pipeline（dataset → model output → judge → score → dashboard）
-> 4. 写第一份 baseline 报告（用 Claude Sonnet 4.5 跑全部 P0）
-> 5. 把上线门禁加到 CI/CD（不达标 = block release）
+> **v0.4 sprint 0 进度**：
+> - ✅ 1. 为 9 个 P0/安全能力建 Gold **种子集**（演示规模，待扩量到 100-200+ / 1000+ / 5000）
+> - ✅ 2. 9 个能力的 LLM-as-Judge / 程序化 rubric + schema 全部就位
+> - ✅ 3. eval pipeline 搭好（dataset → model output → judge/程序化 → score → 门禁报告），支持 `--dry-run`
+> - ⏳ 4. baseline 报告：pipeline 就绪，待 `pip install -r requirements.txt` + `ANTHROPIC_API_KEY` 用 Sonnet 跑全部 P0
+> - ⏳ 5. 上线门禁接 CI/CD（不达标 = block release）
+> - ⏭ 下一批：扩量种子集 + 多人独标（IAA/Kappa ≥ 0.7）；续补 P1 能力闭环

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_24_intent_understanding",
+  "title": "L3.24 · 意图与潜台词理解 · 输入输出 schema",
+  "description": "聊天页内联浅层意图分析（为 L3.25 hint 服务）。12 类意图程序化分类 + subtext/tone 质量 judge。与 L3.25 共用 input。",
+
+  "input": {
+    "type": "object",
+    "required": ["contact", "current_message"],
+    "properties": {
+      "contact": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name":              { "type": "string" },
+          "relationship_type": { "type": "array", "items": { "type": "string" } },
+          "intimacy_score":    { "type": "number", "minimum": 0, "maximum": 1 },
+          "cluster":           { "type": "string" }
+        }
+      },
+      "current_message": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text":      { "type": "string", "minLength": 1, "maxLength": 500 },
+          "timestamp": { "type": "string" }
+        }
+      },
+      "recent_history": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "sender":    { "type": "string" },
+            "text":      { "type": "string" },
+            "timestamp": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["intent", "expected_response", "subtext", "emotional_tone"],
+    "properties": {
+      "intent": {
+        "enum": ["邀约", "确认", "求助", "催促", "闲聊寒暄", "情绪倾诉", "分享喜讯", "分享坏消息", "请求决策", "表达不满", "道歉", "试探/有所求"],
+        "description": "12 类意图标签空间"
+      },
+      "expected_response": { "type": "string", "maxLength": 20, "description": "对方期待你做什么" },
+      "subtext":           { "type": "string", "maxLength": 30, "description": "未明说的潜台词" },
+      "emotional_tone":    { "type": "string", "maxLength": 20, "description": "情绪基调" }
+    }
+  },
+
+  "metrics": {
+    "primary": {
+      "intent_accuracy":      { "target": "≥ 85%", "weight": "blocking", "rationale": "12 类与 Gold 一致率（程序化）" },
+      "key_class_recall":     { "target": "≥ 90%", "weight": "blocking", "rationale": "情绪倾诉/表达不满/试探有所求 读错代价最大" },
+      "schema_valid_pct":     { "target": "≥ 100%", "weight": "blocking" }
+    },
+    "secondary": {
+      "weighted_judge_score": { "target": "≥ 3.75/5", "weight": "report", "rationale": "subtext/tone/brevity 质量（仅 disagreement 或抽样调 judge）" },
+      "must_reject_pct":      { "target": "≤ 5%", "weight": "report", "rationale": "把负面/危机读成中性 → 必 reject 并联动 L3.54" }
+    }
+  },
+
+  "launch_gates": {
+    "v0.4_alpha": {
+      "intent_accuracy":   ">= 0.85",
+      "key_class_recall":  ">= 0.90",
+      "weighted_judge_score": ">= 3.75",
+      "schema_valid_pct":  ">= 100",
+      "rationale": "hint 生成的上游。意图读错 → 整条 hint 跑偏"
+    }
+  }
+}

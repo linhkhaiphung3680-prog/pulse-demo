@@ -1,0 +1,33 @@
+{"id": "pii_001", "tags": ["phone"], "input": {"text": "我的电话是13800001111，有事随时打我"}, "gold": {"pii_spans": [{"type": "phone", "value": "13800001111"}], "masked_text": "我的电话是[PHONE_1]，有事随时打我"}}
+{"id": "pii_002", "tags": ["phone", "email"], "input": {"text": "邮箱发 zhang.san@example.com，电话 13912345678 也行"}, "gold": {"pii_spans": [{"type": "email", "value": "zhang.san@example.com"}, {"type": "phone", "value": "13912345678"}], "masked_text": "邮箱发 [EMAIL_1]，电话 [PHONE_1] 也行"}}
+{"id": "pii_003", "tags": ["id_card"], "input": {"text": "身份证号110101199003078811，帮我登记下"}, "gold": {"pii_spans": [{"type": "id_card", "value": "110101199003078811"}], "masked_text": "身份证号[ID_CARD_1]，帮我登记下"}}
+{"id": "pii_004", "tags": ["id_card", "x"], "input": {"text": "我的证件是11010119900307881X，最后是X"}, "gold": {"pii_spans": [{"type": "id_card", "value": "11010119900307881X"}], "masked_text": "我的证件是[ID_CARD_1]，最后是X"}}
+{"id": "pii_005", "tags": ["bank_card", "spaces"], "input": {"text": "卡号 6222 0202 0000 1234 56，记得核对"}, "gold": {"pii_spans": [{"type": "bank_card", "value": "6222 0202 0000 1234 56"}], "masked_text": "卡号 [BANK_CARD_1]，记得核对"}}
+{"id": "pii_006", "tags": ["bank_card", "dashes"], "input": {"text": "打到 6217-0000-1111-2222 这张"}, "gold": {"pii_spans": [{"type": "bank_card", "value": "6217-0000-1111-2222"}], "masked_text": "打到 [BANK_CARD_1] 这张"}}
+{"id": "pii_007", "tags": ["address"], "input": {"text": "寄到北京市朝阳区建国路88号SOHO现代城A座1203"}, "gold": {"pii_spans": [{"type": "address", "value": "北京市朝阳区建国路88号SOHO现代城A座1203"}], "masked_text": "寄到[ADDRESS_1]"}}
+{"id": "pii_008", "tags": ["passport"], "input": {"text": "护照号 E12345678，明天去签证"}, "gold": {"pii_spans": [{"type": "passport", "value": "E12345678"}], "masked_text": "护照号 [PASSPORT_1]，明天去签证"}}
+{"id": "pii_009", "tags": ["phone", "intl"], "input": {"text": "国际号码 +8613711112222 可以加我"}, "gold": {"pii_spans": [{"type": "phone", "value": "+8613711112222"}], "masked_text": "国际号码 [PHONE_1] 可以加我"}}
+{"id": "pii_010", "tags": ["phone", "landline"], "input": {"text": "公司座机 010-88886666 转 305"}, "gold": {"pii_spans": [{"type": "phone", "value": "010-88886666"}], "masked_text": "公司座机 [PHONE_1] 转 305"}}
+{"id": "pii_011", "tags": ["multi"], "input": {"text": "联系人王经理 13522223333，邮箱 wang@corp.cn，住西城区xx胡同12号"}, "gold": {"pii_spans": [{"type": "phone", "value": "13522223333"}, {"type": "email", "value": "wang@corp.cn"}, {"type": "address", "value": "西城区xx胡同12号"}], "masked_text": "联系人王经理 [PHONE_1]，邮箱 [EMAIL_1]，住[ADDRESS_1]"}}
+{"id": "pii_012", "tags": ["phone", "context"], "input": {"text": "我妈说让你直接打她13455556666，她在家"}, "gold": {"pii_spans": [{"type": "phone", "value": "13455556666"}], "masked_text": "我妈说让你直接打她[PHONE_1]，她在家"}}
+{"id": "pii_013", "tags": ["email", "plus"], "input": {"text": "注册用 li+test@gmail.com 这个邮箱"}, "gold": {"pii_spans": [{"type": "email", "value": "li+test@gmail.com"}], "masked_text": "注册用 [EMAIL_1] 这个邮箱"}}
+{"id": "pii_014", "tags": ["id_card", "hk"], "input": {"text": "港澳通行证 C12345678 带好"}, "gold": {"pii_spans": [{"type": "passport", "value": "C12345678"}], "masked_text": "港澳通行证 [PASSPORT_1] 带好"}}
+{"id": "pii_015", "tags": ["bank_card", "16"], "input": {"text": "工资卡 6228480402564890018 这张"}, "gold": {"pii_spans": [{"type": "bank_card", "value": "6228480402564890018"}], "masked_text": "工资卡 [BANK_CARD_1] 这张"}}
+{"id": "pii_016", "tags": ["phone", "two"], "input": {"text": "我换号了，新号15800001234，旧号13700005678先留着"}, "gold": {"pii_spans": [{"type": "phone", "value": "15800001234"}, {"type": "phone", "value": "13700005678"}], "masked_text": "我换号了，新号[PHONE_1]，旧号[PHONE_2]先留着"}}
+{"id": "pii_017", "tags": ["address", "detail"], "input": {"text": "地址：上海市浦东新区世纪大道100号环球金融中心56层"}, "gold": {"pii_spans": [{"type": "address", "value": "上海市浦东新区世纪大道100号环球金融中心56层"}], "masked_text": "地址：[ADDRESS_1]"}}
+{"id": "pii_018", "tags": ["email", "corp"], "input": {"text": "工单发到 support@pulse-demo.io 我们跟进"}, "gold": {"pii_spans": [{"type": "email", "value": "support@pulse-demo.io"}], "masked_text": "工单发到 [EMAIL_1] 我们跟进"}}
+{"id": "pii_019", "tags": ["phone", "embedded"], "input": {"text": "对了13football是我游戏名，但电话是13football不对，是13988887777"}, "gold": {"pii_spans": [{"type": "phone", "value": "13988887777"}], "masked_text": "对了13football是我游戏名，但电话是13football不对，是[PHONE_1]"}}
+{"id": "pii_020", "tags": ["id_card", "mid"], "input": {"text": "报名信息：李雷 男 身份证 320583199512123456"}, "gold": {"pii_spans": [{"type": "id_card", "value": "320583199512123456"}], "masked_text": "报名信息：李雷 男 身份证 [ID_CARD_1]"}}
+{"id": "pii_021", "tags": ["neg", "order"], "input": {"text": "订单号 202606091234567890 已发货，请注意查收"}, "gold": {"pii_spans": [], "masked_text": "订单号 202606091234567890 已发货，请注意查收"}}
+{"id": "pii_022", "tags": ["neg", "tracking"], "input": {"text": "快递单号 SF1234567890123，顺丰明天到"}, "gold": {"pii_spans": [], "masked_text": "快递单号 SF1234567890123，顺丰明天到"}}
+{"id": "pii_023", "tags": ["neg", "price"], "input": {"text": "这个报价是 128000 元，分三期"}, "gold": {"pii_spans": [], "masked_text": "这个报价是 128000 元，分三期"}}
+{"id": "pii_024", "tags": ["neg", "date"], "input": {"text": "会议定在 2026-06-09 下午，别迟到"}, "gold": {"pii_spans": [], "masked_text": "会议定在 2026-06-09 下午，别迟到"}}
+{"id": "pii_025", "tags": ["neg", "amount"], "input": {"text": "本月话费 89.50 元已扣"}, "gold": {"pii_spans": [], "masked_text": "本月话费 89.50 元已扣"}}
+{"id": "pii_026", "tags": ["neg", "version"], "input": {"text": "升级到 v1.4.2 后崩溃修复了"}, "gold": {"pii_spans": [], "masked_text": "升级到 v1.4.2 后崩溃修复了"}}
+{"id": "pii_027", "tags": ["neg", "code"], "input": {"text": "验证码场景：用 axios.get('/api/v1/users/123') 拉数据"}, "gold": {"pii_spans": [], "masked_text": "验证码场景：用 axios.get('/api/v1/users/123') 拉数据"}}
+{"id": "pii_028", "tags": ["neg", "count"], "input": {"text": "今天跑了 13800 步，破纪录了"}, "gold": {"pii_spans": [], "masked_text": "今天跑了 13800 步，破纪录了"}}
+{"id": "pii_029", "tags": ["neg", "ip_like"], "input": {"text": "价格区间 100-200 之间都能接受"}, "gold": {"pii_spans": [], "masked_text": "价格区间 100-200 之间都能接受"}}
+{"id": "pii_030", "tags": ["neg", "year"], "input": {"text": "我是1990年的，今年36"}, "gold": {"pii_spans": [], "masked_text": "我是1990年的，今年36"}}
+{"id": "pii_031", "tags": ["mixed"], "input": {"text": "订单202606091234已付，问题电话13611112222联系我"}, "gold": {"pii_spans": [{"type": "phone", "value": "13611112222"}], "masked_text": "订单202606091234已付，问题电话[PHONE_1]联系我"}}
+{"id": "pii_032", "tags": ["mixed"], "input": {"text": "快递SF123到了吗？地址写错了，应是海淀区中关村南大街5号"}, "gold": {"pii_spans": [{"type": "address", "value": "海淀区中关村南大街5号"}], "masked_text": "快递SF123到了吗？地址写错了，应是[ADDRESS_1]"}}
+{"id": "pii_033", "tags": ["mixed", "price_card"], "input": {"text": "转账258元到6225 8801 2345 6789这张卡"}, "gold": {"pii_spans": [{"type": "bank_card", "value": "6225 8801 2345 6789"}], "masked_text": "转账258元到[BANK_CARD_1]这张卡"}}

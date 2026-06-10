@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_34_recommendation_quality",
+  "title": "L3.34 · 推荐决策（含身份/关系/主线层理由）· 输入输出 schema",
+  "description": "在『跟小P商量这条』sheet 末尾给出明确推荐 + 3 条跨层理由 + confidence。产品差异化核心：理由必须体现 Life Copilot 三轴（身份/关系/主线）。",
+
+  "input": {
+    "type": "object",
+    "required": ["north_star", "mainline_pool", "hint_options", "conversation_analysis"],
+    "properties": {
+      "north_star": { "type": "string", "description": "用户北极星陈述（身份层依据）" },
+      "mainline_pool": {
+        "type": "array",
+        "description": "当前主线池（主线层依据），含进度",
+        "items": {
+          "type": "object",
+          "required": ["code", "title"],
+          "properties": {
+            "code":     { "type": "string" },
+            "title":    { "type": "string" },
+            "progress": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      },
+      "contact": {
+        "type": "object",
+        "properties": {
+          "name":              { "type": "string" },
+          "relationship_type": { "type": "array", "items": { "type": "string" } },
+          "history_note":      { "type": "string", "description": "关系层依据，如『上次迟到她有失望』" }
+        }
+      },
+      "conversation_analysis": { "type": "string", "description": "对当前对话/对方意图的分析" },
+      "hint_options": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+          "type": "object",
+          "required": ["hintId", "label"],
+          "properties": {
+            "hintId": { "type": "string", "pattern": "^h[0-9]+$" },
+            "label":  { "type": "string" },
+            "stance": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["recommendation"],
+    "properties": {
+      "recommendation": {
+        "type": "object",
+        "required": ["hintId", "confidence", "reasoning"],
+        "properties": {
+          "hintId":     { "type": "string", "pattern": "^h[0-9]+$", "description": "必须是 hint_options 之一" },
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "reasoning": {
+            "type": "array", "minItems": 3, "maxItems": 3,
+            "description": "恰好 3 条；须覆盖 ≥1 身份/主线层 + ≥1 关系层",
+            "items": { "type": "string", "minLength": 4, "maxLength": 60 }
+          }
+        }
+      }
+    }
+  },
+
+  "programmatic_checks": {
+    "hintId_in_options":  { "rule": "recommendation.hintId ∈ input.hint_options[].hintId", "weight": "hard_fail" },
+    "exactly_3_reasons":  { "rule": "len(reasoning) == 3", "weight": "hard_fail" },
+    "confidence_enum":    { "rule": "confidence ∈ {high,medium,low}", "weight": "hard_fail" }
+  },
+
+  "judge_dimensions": {
+    "decisiveness":           { "weight": 0.20 },
+    "three_layer_coverage":   { "weight": 0.30 },
+    "grounding":              { "weight": 0.20 },
+    "confidence_calibration": { "weight": 0.15 },
+    "persuasiveness":         { "weight": 0.15 }
+  },
+
+  "launch_gates": {
+    "v0.4_alpha": {
+      "avg_weighted_score":   ">= 3.75",
+      "three_layer_pass_pct": ">= 0.85",
+      "schema_valid_pct":     ">= 95",
+      "must_reject_pct":      "<= 5",
+      "rationale": "three_layer_coverage 是差异化核心；缺身份/主线层即 must_reject（退化成普通聊天机器人）"
+    }
+  }
+}

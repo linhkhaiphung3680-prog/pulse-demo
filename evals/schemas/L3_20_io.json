@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_20_priority_scoring",
+  "title": "L3.20 · 优先级评分 · 输入输出 schema",
+  "description": "对一批待回消息逐条打 3 档（now/later/ignore）。两条硬约束：每批 now ≤ 5；家人/伴侣绝不进 ignore。输入按『批』组织，以便测 now_count 约束。",
+
+  "input": {
+    "type": "object",
+    "required": ["batch_id", "messages"],
+    "properties": {
+      "batch_id": { "type": "string" },
+      "context": {
+        "type": "object",
+        "description": "整批消息共享的用户上下文",
+        "properties": {
+          "user_mainlines": { "type": "array", "items": { "type": "string" }, "description": "用户当前主线，用于判断消息是否与主线相关" },
+          "energy": { "enum": ["low", "medium", "high"], "description": "用户当前精力，low 时更倾向把非紧急降级" },
+          "local_time": { "type": "string", "description": "ISO8601；深夜/工作时间影响紧急度" }
+        }
+      },
+      "messages": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["id", "sender", "text"],
+          "properties": {
+            "id":   { "type": "string", "pattern": "^m[0-9]+$" },
+            "sender": {
+              "type": "object",
+              "required": ["relation"],
+              "properties": {
+                "name":        { "type": "string" },
+                "relation":    { "enum": ["family", "partner", "friend", "boss", "client", "colleague", "stranger", "service"] },
+                "tie_strength":{ "enum": ["strong", "weak"] }
+              }
+            },
+            "is_group": { "type": "boolean", "default": false },
+            "at_me":    { "type": "boolean", "default": false },
+            "channel":  { "type": "string" },
+            "text":     { "type": "string", "minLength": 1, "maxLength": 500 }
+          }
+        }
+      }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["results"],
+    "properties": {
+      "results": {
+        "type": "array",
+        "description": "与 input.messages 一一对应（按 id 匹配），逐条打档",
+        "items": {
+          "type": "object",
+          "required": ["id", "priority"],
+          "properties": {
+            "id":           { "type": "string", "pattern": "^m[0-9]+$" },
+            "priority":     { "enum": ["now", "later", "ignore"] },
+            "urgencyScore": { "type": "number", "minimum": 0, "maximum": 1 },
+            "reason":       { "type": "string", "maxLength": 80 }
+          }
+        }
+      }
+    }
+  },
+
+  "invariants": {
+    "now_count_per_batch": { "rule": "count(priority==now) <= 5", "weight": "blocking", "rationale": "即使一批 50 条，立刻回也 ≤ 5；超出说明分诊失效" },
+    "family_never_ignore": { "rule": "relation in {family,partner} => priority != ignore", "weight": "blocking", "rationale": "漏看妈妈/伴侣消息是产品信任红线" }
+  },
+
+  "metrics": {
+    "primary": {
+      "accuracy_overall": { "target": "≥ 80%", "weight": "blocking", "rationale": "逐条 3 档与 Gold 一致率" },
+      "now_precision":    { "target": "≥ 80%", "weight": "blocking", "rationale": "标 now 的真该 now，避免狼来了" },
+      "now_recall":       { "target": "≥ 90%", "weight": "blocking", "rationale": "真该 now 的别被降级（漏看家人/紧急）" },
+      "now_count_p95":    { "target": "≤ 5",   "weight": "blocking" },
+      "ignore_on_family_rate": { "target": "= 0%", "weight": "blocking" }
+    },
+    "secondary": {
+      "later_f1":        { "target": "≥ 0.7", "weight": "report" },
+      "group_ignore_recall": { "target": "≥ 0.85", "rationale": "非 @你 的群聊应默认 ignore/later" }
+    }
+  },
+
+  "launch_gates": {
+    "v0.4_alpha": {
+      "accuracy_overall":      ">= 0.80",
+      "now_recall":            ">= 0.90",
+      "now_precision":         ">= 0.80",
+      "now_count_p95":         "<= 5",
+      "ignore_on_family_rate": "== 0",
+      "schema_valid_pct":      ">= 100",
+      "rationale": "收件箱分诊核心循环。家人 invariant + now 数量约束任一不过 → 不上线"
+    },
+    "v1.0_general": {
+      "accuracy_overall": ">= 0.88",
+      "now_recall":       ">= 0.95",
+      "now_precision":    ">= 0.88"
+    }
+  }
+}

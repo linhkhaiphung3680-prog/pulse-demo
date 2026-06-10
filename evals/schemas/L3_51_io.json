@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_51_data_classification",
+  "title": "L3.51 · 数据分类（上传策略）· 输入输出 schema",
+  "description": "给一段数据+上下文，判定上传策略。系统级 invariant：policy_exact_match=100%，任一破坏=隐私阻断器。从严默认：local > vector > encrypted > plaintext。",
+
+  "input": {
+    "type": "object",
+    "required": ["data_type", "content_sample"],
+    "properties": {
+      "data_type":      { "type": "string", "description": "数据类型标识（如 mainline_title / reflection_content）" },
+      "content_sample": { "type": "string", "description": "脱敏后的内容样例" },
+      "context":        { "type": "string", "description": "用途上下文（如『用于同路人匹配』）" }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["uploadPolicy"],
+    "properties": {
+      "uploadPolicy": {
+        "enum": ["local_only", "vector_only", "encrypted_blob", "plaintext"],
+        "description": "local_only=绝不出端；vector_only=仅向量化上传；encrypted_blob=零知识加密；plaintext=明文可接受"
+      },
+      "reason":     { "type": "string", "maxLength": 80 },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+    }
+  },
+
+  "strictness_order": ["local_only", "vector_only", "encrypted_blob", "plaintext"],
+
+  "metrics": {
+    "primary": {
+      "policy_exact_match":   { "target": "= 100%", "weight": "blocking", "rationale": "系统级 invariant，0 容错" },
+      "invariant_violations": { "target": "= 0",    "weight": "blocking", "rationale": "invariant 行任一错判（尤其判松=暴露）→ 直接 fail" },
+      "schema_valid_pct":     { "target": "= 100%", "weight": "blocking" }
+    },
+    "secondary": {
+      "exposure_violations":  { "target": "= 0", "rationale": "判得比 Gold 更松（更暴露）的次数——比判严更危险" },
+      "borderline_accuracy":  { "target": "≥ 90%", "rationale": "lookup 未覆盖的新型数据从严判定" }
+    }
+  },
+
+  "launch_gates": {
+    "v0.4_alpha": {
+      "policy_exact_match_on_invariant": "== 1.0",
+      "exposure_violations":             "== 0",
+      "schema_valid_pct":                ">= 100",
+      "rationale": "数据治理阻断器。invariant 行 100% 精确 + 0 暴露 才可上线"
+    }
+  }
+}

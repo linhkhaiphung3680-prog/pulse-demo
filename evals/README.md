@@ -22,25 +22,32 @@ L3 能力按形态分两大类，每类一份参考实现：
 ```
 evals/
 ├── README.md                                          # 本文件
-├── datasets/
-│   ├── L3_25_hint_generation.gold.jsonl               # 40 条（生成型）
-│   └── L3_49_sensitive_mainline.gold.jsonl            # 80 条（分类型）
-├── judges/
-│   ├── L3_25_hint_quality.md                          # 生成型 · 5 维度评分 rubric（含 gold + 数据集）
-│   ├── L3_49_sensitive_mainline_check.md              # 分类型 · 仅 disagreement 用（含 gold + 数据集）
-│   ├── L3_20_priority_scoring.md                      # 分类型 · 收件箱三档（rubric only，数据集待建）
-│   ├── L3_24_intent_understanding.md                  # 混合 · 意图 12 类 + 潜台词（rubric only）
-│   ├── L3_26_draft_quality.md                         # 生成型 · 草稿质量（rubric only）
-│   ├── L3_34_recommendation_quality.md                # 生成型 · 三层理由推荐（rubric only）
-│   ├── L3_51_data_classification.md                   # 分类型 · 数据上传策略 invariant（rubric only）
-│   ├── L3_52_pii_detection.md                         # 分类型 · PII 检测 invariant（rubric only）
-│   └── L3_54_crisis_detection.md                      # 分类型 · 危机检测安全 invariant（NEW · rubric only）
-├── schemas/
-│   ├── L3_25_io.json                                  # IO + metric 权重
-│   └── L3_49_io.json                                  # IO + 多版本 launch_gates
+├── datasets/                                          # 8 个能力有 gold（见下表）
+│   ├── L3_20_priority.gold.jsonl                      # 12 批 / 69 条（分类型·批量）
+│   ├── L3_24_intent.gold.jsonl                        # 42 条（混合·12 意图类）
+│   ├── L3_25_hint_generation.gold.jsonl               # 46 条（生成型）
+│   ├── L3_26_draft.gold.jsonl                         # 20 条（生成型·草稿）
+│   ├── L3_34_recommendation.gold.jsonl                # 7 条（生成型·三层理由）
+│   ├── L3_49_sensitive_mainline.gold.jsonl            # 103 条（分类型）
+│   ├── L3_51_data_policy.gold.jsonl                   # 42 条（分类型·invariant lookup）
+│   ├── L3_52_pii.gold.jsonl                           # 33 条（span 检测）
+│   └── L3_54_crisis.gold.jsonl                        # 56 条（分类型·安全 invariant）
+├── judges/                                            # 9 个 rubric，每个对应一个能力
+│   ├── L3_20_priority_scoring.md   L3_24_intent_understanding.md   L3_25_hint_quality.md
+│   ├── L3_26_draft_quality.md      L3_34_recommendation_quality.md L3_49_sensitive_mainline_check.md
+│   └── L3_51_data_classification.md L3_52_pii_detection.md         L3_54_crisis_detection.md
+├── schemas/                                           # 8 个 io.json（除 L3.25/49 外，6 个本轮新增）
+│   ├── L3_20_io.json  L3_24_io.json  L3_25_io.json  L3_26_io.json
+│   └── L3_34_io.json  L3_49_io.json  L3_51_io.json  L3_52_io.json  L3_54_io.json
 ├── pipeline/
-│   ├── evaluate.py                                    # 生成型 archetype（634 行）
-│   ├── evaluate_L3_49.py                              # 分类型 archetype（673 行）
+│   ├── evaluate.py                                    # 生成型 archetype（L3.25 参考实现）
+│   ├── evaluate_L3_49.py                              # 分类型 archetype（参考实现）
+│   ├── evaluate_L3_20.py                              # 收件箱分诊：批量 3 类 + now_count_p95 + 家人 invariant
+│   ├── evaluate_L3_24.py                              # 意图：12 类程序化分类 + subtext judge（混合）
+│   ├── evaluate_L3_26.py                              # 草稿：生成型 5 维 + 占位符/emoji 程序化校验
+│   ├── evaluate_L3_34.py                              # 推荐：生成型 5 维 + three_layer_pass + 3-理由硬校验
+│   ├── evaluate_L3_51.py                              # 数据分类：4 策略 invariant + exposure（判松）检测
+│   ├── evaluate_L3_52.py                              # PII：span 集合 recall/precision + leak 检测
 │   ├── evaluate_L3_54.py                              # 危机检测：severity 4 类 + safeMode invariant
 │   └── requirements.txt                               # anthropic>=0.40.0
 └── reports/
@@ -96,6 +103,26 @@ python evaluate_L3_54.py --dry-run \
 ```
 
 门禁（v0.4-alpha 安全 invariant）：`recall_on_imminent ≥ 99%` + `light_hint_leak_rate_in_safemode = 0` + `schema_valid = 100%`，任一不过即 FAIL。
+
+## 5 分钟跑通：L3.20（收件箱分诊 · 批量 + 数量约束）
+
+```bash
+python evaluate_L3_20.py \
+  --candidate-model claude-sonnet-4-5 \
+  --judge-model claude-opus-4-5 \
+  --dataset ../datasets/L3_20_priority.gold.jsonl \
+  --judge-prompt ../judges/L3_20_priority_scoring.md \
+  --output ../reports/baseline_L3_20_$(date +%Y%m%d).md \
+  --use-judge   # 仅逐条 disagreement 调 judge
+
+# 离线验证装载 + 评分逻辑（不耗 token）：
+python evaluate_L3_20.py --dry-run \
+  --dataset ../datasets/L3_20_priority.gold.jsonl \
+  --judge-prompt ../judges/L3_20_priority_scoring.md \
+  --output /tmp/l320.md
+```
+
+输入按「批」组织（每批 N 条消息共享上下文），因为 `now_count ≤ 5` 只能在批级度量。门禁（v0.4-alpha）：`accuracy ≥ 80%` + `now_recall ≥ 90%` + `now_precision ≥ 80%` + `now_count_p95 ≤ 5` + `ignore_on_family_rate = 0` + `schema_valid = 100%`，任一不过即 FAIL。
 
 ---
 
@@ -204,25 +231,36 @@ A 档失败的 entry 直接 skip judge —— schema 都不对谈何质量。
 
 ---
 
-## v0.4 Sprint 0 P0 复制清单
+## v0.4 Sprint 0 P0 复制清单 · 全部完成 ✅
 
-按 EVAL_TAXONOMY.md §4.5 优先级，下一批要建：
+按 EVAL_TAXONOMY.md §4.5 优先级的 9 个 P0/安全能力，rubric + schema + gold + pipeline 已全部就位（pipeline 列即对应可跑文件）：
 
-| 能力 | Archetype | 数据集起点 | rubric | 备注 |
-|------|-----------|------------|--------|------|
-| L3.20 优先级评分 | 分类型 | demo INBOX 三档 = 21 条 | ✅ `L3_20_priority_scoring.md` | now ≤ 5 + 家人不进 ignore |
-| L3.24 意图理解 | 混合 | demo deepAnalysis = 7 条 | ✅ `L3_24_intent_understanding.md` | 12 类 + 潜台词；可复用 L3.25 input |
-| L3.26 草稿生成 | 生成型 | demo hints[].draft = 49 条 | ✅ `L3_26_draft_quality.md` | 重点测偏好保真 |
-| L3.34 推荐决策 | 生成型 | demo recommend = 7 条 | ✅ `L3_34_recommendation_quality.md` | 三层理由覆盖 |
-| L3.51 数据分类 | 分类型 | 自建 30 行 lookup | ✅ `L3_51_data_classification.md` | 100% 匹配硬约束 |
-| L3.52 PII 检测 | 分类型 | 自建 5000 条合成 | ✅ `L3_52_pii_detection.md` | 99.9% 召回硬约束 |
-| **L3.54 危机检测**（NEW）| 分类型 | ✅ **42 条 gold** + schema 已建 | ✅ `L3_54_crisis_detection.md` | imminent 召回 ≥ 99% + safeMode invariant |
+| 能力 | Archetype | gold | rubric | pipeline | 关键门禁 |
+|------|-----------|------|--------|----------|----------|
+| L3.20 优先级评分 | 分类·批量 | ✅ 69 | ✅ | ✅ `evaluate_L3_20.py` | now≤5 + 家人不进 ignore |
+| L3.24 意图理解 | 混合 | ✅ 42 | ✅ | ✅ `evaluate_L3_24.py` | intent≥85% + key_class≥90% |
+| L3.25 Hint 生成 | 生成 | ✅ 46 | ✅ | ✅ `evaluate.py` | avg≥3.75 |
+| L3.26 草稿生成 | 生成 | ✅ 20 | ✅ | ✅ `evaluate_L3_26.py` | 偏好保真 + 无占位符 |
+| L3.34 推荐决策 | 生成 | ✅ 7 | ✅ | ✅ `evaluate_L3_34.py` | three_layer_pass≥85% |
+| L3.49 敏感主线 | 分类 | ✅ 103 | ✅ | ✅ `evaluate_L3_49.py` | recall_on_high≥99% |
+| L3.51 数据分类 | 分类·invariant | ✅ 42 | ✅ | ✅ `evaluate_L3_51.py` | invariant 100% + 0 exposure |
+| L3.52 PII 检测 | span 检测 | ✅ 33 | ✅ | ✅ `evaluate_L3_52.py` | recall≥99.9% + leak=0 |
+| L3.54 危机检测 | 分类·安全 | ✅ 56 | ✅ | ✅ `evaluate_L3_54.py` | recall_on_imminent≥99% |
 
-> **状态**：
-> - **完整闭环**（rubric + schema + gold + pipeline）：L3.25 / L3.49（参考实现）；**L3.54**（新增，pipeline = `pipeline/evaluate_L3_54.py`，可直接跑）。
-> - **仅 rubric 就绪，待建数据集 + schema**：L3.20 / L3.24 / L3.26 / L3.34 / L3.51 / L3.52。
+> **状态：9 个 P0/安全能力全部完整闭环**（rubric + schema + gold + pipeline）。
+> 所有 pipeline 均支持 `--dry-run`（不依赖 anthropic SDK / 不耗 token），且每个评分逻辑都过了离线单测（perfect candidate → 门禁 PASS；注入对应失败 → 门禁 FAIL）。
 >
-> L3.54 现有 56 条 gold（imminent 15 / elevated 9 / watch 7 / none 25）。pipeline 已通过离线单测：perfect candidate → recall_on_imminent=100% / 0 leak；注入漏检+泄漏 → 正确把门禁判 FAIL。
+> | 能力 | archetype | gold | 关键门禁 | 离线单测 |
+> |------|-----------|------|----------|----------|
+> | L3.20 优先级 | 分类·批量 | 12 批/69 | now_count_p95≤5 + 家人不进 ignore | ✅ 注入家人误判+now 溢出→FAIL |
+> | L3.24 意图 | 混合 | 42 | intent_acc≥85% + key_class_recall≥90% | ✅ 注入 key 类误判+非法 intent→FAIL |
+> | L3.25 hint | 生成 | 46 | avg≥3.75 + stance required | ✅（参考实现）|
+> | L3.26 草稿 | 生成 | 20 | avg≥3.75 + 无占位符 + emoji 保真 | ✅ 占位符/emoji 溢出检测 |
+> | L3.34 推荐 | 生成 | 7 | three_layer_pass≥85% + 3 理由硬校验 | ✅ 注入坏 hintId/缺层→FAIL |
+> | L3.49 敏感 | 分类 | 103 | recall_on_high≥99% | ✅（参考实现）|
+> | L3.51 数据分类 | 分类·invariant | 42 | invariant 100% + 0 exposure | ✅ 注入判松(暴露)→FAIL |
+> | L3.52 PII | span 检测 | 33 | recall≥99.9% + leak=0 | ✅ 注入漏检+泄漏→FAIL |
+> | L3.54 危机 | 分类·安全 | 56 | recall_on_imminent≥99% + 0 leak | ✅ 注入漏检+泄漏→FAIL |
 
 ---
 
@@ -250,12 +288,20 @@ A 档失败的 entry 直接 skip judge —— schema 都不对谈何质量。
 
 ### 仍待处理（规模型数据债）
 
+> **9 个 P0/安全能力闭环已就位，但所有 gold 均为「演示规模种子集」，需扩量到生产规模 + 多人独标（IAA/Kappa ≥ 0.7）后才能做真正的发布门禁判定。**
+
 | 项 | 现状 | 目标 |
 |----|------|------|
+| L3.20 规模 | 69（12 批）| 200+（含更多 ≥10 条大批量测 now-cap）|
+| L3.24 规模 | 42（12 类全覆盖）| 500（每类 ≥30，复用 L3.25 input 补标）|
 | L3.25 规模 | 46 | 100–200（多人独标 + IAA ≥ 0.7）|
+| L3.26 规模 | 20 | 100+（每 hint × 5 偏好组合 + 危机/砍价难例）|
+| L3.34 规模 | 7 | 150 深度场景（每条带北极星+主线池；身份层不显然的难例）|
 | L3.49 规模 | 103 | 1000+（200 高 / 800 非敏）|
+| L3.51 规模 | 42（28 invariant + 14 borderline）| 全数据类型覆盖 + 新型数据持续补 borderline |
+| L3.52 规模 | 33（23 PII + 10 hard-neg）| 5000 合成（真实对话语境）+ regex 预过滤双保险 |
 | L3.54 规模 | 56 | 200（80 危机 + 120 hard negative）；imminent 样本需临床/心理顾问复核 |
-| 覆盖率 | 55 叶子中 3 个有 gold（L3.25/49/54），9 个有 rubric | 按 §4.5 P0 优先补 L3.20/24/26/34/51/52 数据集 |
+| 覆盖率 | 55 叶子中 **9 个完整闭环**（L3.20/24/25/26/34/49/51/52/54）| 续补 P1（L3.12/13/14/39/40/53/55 等）|
 
 ### 与修订后分类树的一致性
 

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "L3_26_draft_generation",
+  "title": "L3.26 · 草稿生成 · 输入输出 schema",
+  "description": "输入=选定 hint + 用户偏好 + 对话场景；输出=一段可直接发送的中文草稿。核心：尊重语言指纹（emoji/长度/直接度/温度）。生成型，主评测=LLM-as-Judge 5 维度。",
+
+  "input": {
+    "type": "object",
+    "required": ["contact", "current_message", "selected_hint", "user_preferences"],
+    "properties": {
+      "contact": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name":              { "type": "string" },
+          "relationship_type": { "type": "array", "items": { "type": "string" } },
+          "intimacy_score":    { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      },
+      "current_message": {
+        "type": "object",
+        "required": ["text"],
+        "properties": { "text": { "type": "string" }, "timestamp": { "type": "string" } }
+      },
+      "selected_hint": {
+        "type": "object",
+        "required": ["label", "stance", "sub"],
+        "properties": {
+          "label":  { "type": "string" },
+          "stance": { "enum": ["agree", "ask", "soften", "decline", "delay", "redirect", "celebrate", "support", "boundary"] },
+          "sub":    { "type": "string" }
+        }
+      },
+      "user_preferences": {
+        "type": "object",
+        "properties": {
+          "emoji_frequency":   { "enum": ["none", "rare", "moderate", "frequent"] },
+          "length_preference": { "enum": ["short", "medium", "long"] },
+          "directness":        { "enum": ["soft", "balanced", "direct"] },
+          "warmth":            { "enum": ["cool", "neutral", "warm"] }
+        }
+      }
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "required": ["draft"],
+    "properties": {
+      "draft": { "type": "string", "minLength": 1, "maxLength": 400, "description": "可一字不改直接发送的中文草稿" }
+    }
+  },
+
+  "programmatic_checks": {
+    "no_placeholder":     { "rule": "draft 不含 [..]/｛..｝/{{..}}/（在此..）占位符", "weight": "hard_fail" },
+    "emoji_vs_pref":      { "rule": "emoji_frequency=none→0；rare→≤1；moderate→≤3", "weight": "report" }
+  },
+
+  "judge_dimensions": {
+    "stance_consistency":  { "weight": 0.25 },
+    "preference_fidelity": { "weight": 0.25 },
+    "length_fit":          { "weight": 0.15 },
+    "naturalness":         { "weight": 0.20 },
+    "actionability":       { "weight": 0.15 }
+  },
+
+  "launch_gates": {
+    "v0.4_alpha": {
+      "avg_weighted_score": ">= 3.75",
+      "schema_valid_pct":   ">= 95",
+      "must_reject_pct":    "<= 5",
+      "rationale": "生成型『差不多就行』门槛；但 stance 矛盾/占位符/危机轻佻为 must_reject"
+    }
+  }
+}

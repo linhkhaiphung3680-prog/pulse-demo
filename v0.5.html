@@ -924,25 +924,7 @@
         </div>
       </div>
 
-      <!-- AI summary card -->
-      <div class="px-5 mb-3">
-        <div class="rounded-2xl p-4 ai-listen relative overflow-hidden" style="background: linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(59,130,246,0.10) 100%); border: 1px solid rgba(139,92,246,0.3);">
-          <div class="flex items-start gap-3 relative z-10">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-pulse-purple to-pulse-purple-3 flex items-center justify-center ai-pulse flex-shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
-            </div>
-            <div class="flex-1">
-              <div class="text-xs text-pulse-purple-2 font-medium mb-1">小 P · 早间简报 · 9:32</div>
-              <div class="text-sm text-pulse-text leading-relaxed">
-                7 条未读 · <span class="text-pulse-purple-2 font-semibold">从中拆出 5 件事</span> 入「我的事 · AI 主动挖掘」
-              </div>
-              <button onclick="showScreen('today')" class="mt-1.5 text-[11px] text-pulse-purple-2 font-medium flex items-center gap-1">
-                去查看 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- AI summary card removed in v0.5 (early brief 已上移到「我的事」入口) -->
 
       <!-- Inbox list -->
       <div class="scroll-area flex-1 px-5 pb-24">
@@ -1503,21 +1485,10 @@
         </div>
       </div>
 
-      <!-- Segment tabs -->
-      <div class="px-5 pb-2">
-        <div class="pi-seg" id="pi-seg">
-          <button class="pi-seg-btn" data-pi="northstar">★北极星</button>
-          <button class="pi-seg-btn" data-pi="mainlines">主线</button>
-          <button class="pi-seg-btn active" data-pi="chat">对话</button>
-          <button class="pi-seg-btn" data-pi="style">风格</button>
-          <button class="pi-seg-btn" data-pi="perm">权限</button>
-          <button class="pi-seg-btn" data-pi="learn">已学到</button>
-          <div class="pi-seg-indicator" id="pi-seg-indicator"></div>
-        </div>
-      </div>
+      <!-- Segment tabs (v0.5: 移除 · 改为对话主界面) -->
 
       <!-- ============= TAB: NORTH STAR ============= -->
-      <div id="pi-tab-northstar" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
+      <div id="pi-tab-northstar" class="hidden">
         <div class="text-[11px] uppercase tracking-widest text-pulse-purple-2 font-semibold mb-2">★ 你的北极星</div>
         <div class="rounded-2xl p-4 mb-3" style="background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(59,130,246,0.10)); border: 1px solid rgba(139,92,246,0.3);">
           <div class="text-[13px] leading-relaxed text-pulse-text">
@@ -1551,7 +1522,7 @@
       </div>
 
       <!-- ============= TAB: MAINLINES ============= -->
-      <div id="pi-tab-mainlines" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
+      <div id="pi-tab-mainlines" class="hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
             <div class="text-[13px] font-semibold">🎯 我的主线</div>
@@ -1574,6 +1545,19 @@
           <!-- Pi opening (rendered dynamically based on time) -->
         </div>
 
+        <!-- Topic starter chips (v0.5: 在对话里调一切) -->
+        <div class="px-4 pt-2 pb-1 border-t border-pulse-line/60 bg-pulse-card/20">
+          <div class="text-[9px] uppercase tracking-widest text-pulse-text-3 mb-1.5 px-1">在对话里调整 ↓</div>
+          <div class="flex gap-1.5 overflow-x-auto pb-1.5" style="scrollbar-width:none">
+            <button onclick="piTopic('northstar')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">⭐ 改北极星</button>
+            <button onclick="piTopic('mainlines')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🎯 调主线</button>
+            <button onclick="piTopic('thingrules')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">📜 事的规则</button>
+            <button onclick="piTopic('style')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🎨 改风格</button>
+            <button onclick="piTopic('perm')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🔒 权限</button>
+            <button onclick="piTopic('learn')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🧠 已学到</button>
+          </div>
+        </div>
+
         <!-- Pi chat input -->
         <div class="px-4 pt-2 pb-3 border-t border-pulse-line bg-pulse-card/30">
           <div class="flex items-center gap-2">
@@ -1591,7 +1575,7 @@
       </div>
 
       <!-- ============= TAB: STYLE ============= -->
-      <div id="pi-tab-style" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
+      <div id="pi-tab-style" class="hidden">
         <!-- Default tone -->
         <div class="mb-5">
           <div class="text-[11px] uppercase tracking-wider text-pulse-text-3 font-semibold mb-2">默认语气</div>
@@ -1725,7 +1709,7 @@
       </div>
 
       <!-- ============= TAB: PERMISSIONS ============= -->
-      <div id="pi-tab-perm" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
+      <div id="pi-tab-perm" class="hidden">
         <!-- Locked privacy notice -->
         <div class="mb-4 rounded-2xl p-3.5 border border-pulse-emerald/30" style="background:linear-gradient(135deg,rgba(16,185,129,0.10),rgba(16,185,129,0.03));">
           <div class="flex items-start gap-2.5">
@@ -1849,7 +1833,7 @@
       </div>
 
       <!-- ============= TAB: LEARNED ============= -->
-      <div id="pi-tab-learn" class="hidden scroll-area flex-1 px-5 py-3 pb-24">
+      <div id="pi-tab-learn" class="hidden">
         <!-- Summary -->
         <div class="mb-4 bg-pulse-card border border-pulse-line rounded-2xl p-4">
           <div class="flex items-center justify-between">
@@ -2035,11 +2019,11 @@
     <div class="text-pulse-text-2 mb-2 font-semibold">建议体验路径</div>
     <div>① <strong class="text-pulse-purple-2">我的事</strong> 主屏 → 看 AI 主动挖掘</div>
     <div>② 点 <span class="text-pulse-purple-2">⭐</span> 关注 → 事进我的关注</div>
-    <div>③ 点 <span class="text-pulse-purple-2">👀</span> 看看 → 跳到对应消息</div>
+    <div>③ 点 <span class="text-pulse-purple-2">👀</span> 看看 → 跳到对应消息对话</div>
     <div>④ 我的关注里点 ✓ 完成（5s 内可撤销）</div>
-    <div>⑤ 长按事 → 取消关注 / 归档 / 删除</div>
-    <div>⑥ 切到 <strong class="text-pulse-purple-2">消息</strong> → 看消息底部"拆出 N 件事"</div>
-    <div>⑦ 右上 <span class="text-pulse-purple-2">⚙</span> → 进小 P 设置</div>
+    <div>⑤ 切到 <strong class="text-pulse-purple-2">消息</strong> → 看消息底部"拆出 N 件事"</div>
+    <div>⑥ 右上 <span class="text-pulse-purple-2">⚙</span> → 进 <strong class="text-pulse-purple-2">小 P</strong> 对话</div>
+    <div>⑦ 在小 P 对话里点 <span class="text-pulse-purple-2">话题 chip</span> → 改北极星 / 主线 / 风格 / 规则</div>
   </div>
 
   <script>
@@ -2680,10 +2664,17 @@
         t.container = 'ai';
         undoLabel = `已取消关注「${t.title}」`;
         break;
-      case 'peek':
-        // 不迁移容器，只在 AI 池里短暂高亮 — demo 中给个提示
-        showToast(`👀 已查看 · 留在 AI 挖掘池`);
+      case 'peek': {
+        // 跳到来源：优先关联消息，否则回到该联系人聊天
+        const personId = (t.persons && t.persons[0]) || null;
+        if (personId && CONTACTS[personId]) {
+          showToast(`👀 跳到 ${CONTACTS[personId].name} 的对话`);
+          setTimeout(() => openChat(personId), 240);
+        } else {
+          showToast(`👀 留在 AI 挖掘池 · 这条暂无关联对话`);
+        }
         return;
+      }
       case 'snooze':
         t.folded = true;
         undoLabel = `😴 「${t.title}」收入折叠区`;
@@ -3338,13 +3329,6 @@
   function renderPiOpening() {
     const thread = document.getElementById('pi-thread');
     if (!thread) return;
-    // Ensure default tab is chat (correct indicator position with new 6-tab layout)
-    if (!document.querySelector('.pi-seg-btn.active') || document.querySelector('.pi-seg-btn.active').dataset.pi !== 'chat') {
-      showPiTab('chat');
-    } else {
-      const indicator = document.getElementById('pi-seg-indicator');
-      if (indicator && !indicator.style.transform) indicator.style.transform = 'translateX(200%)';
-    }
     if (thread.querySelector('[data-pi-opening]')) return; // already rendered
     const op = getPiOpening();
     thread.innerHTML = `
@@ -3355,7 +3339,7 @@
         ${op.signal}
       </div>
       <div class="pi-bubble pi-bubble-pi">
-        想调整什么？可以直接跟我说，比如：
+        想调整什么？直接跟我说，或者点下面的话题。
       </div>
       <div class="flex flex-wrap gap-2 mb-2">
         <button class="pi-quick" data-pi-quick="emoji">以后回客户少用 emoji</button>
@@ -3430,10 +3414,74 @@
     'brief': '今天你学到什么了？',
   };
 
-  // Switch Pi sub-tabs
+  // ===================== PI TOPIC STARTERS (v0.5: 在对话里调一切) =====================
+  // 用户点话题 chip → 注入用户消息 + Pi 的脚本式响应（含可点的快捷选项）
+  const PI_TOPIC_STARTERS = {
+    northstar: {
+      userText: '我想改一下你的北极星',
+      piHtml: `当前你的北极星是：<br><b>"成为最值得信赖的爸爸 + 影响 100 万产品人的设计师"</b><br><span class="text-pulse-text-3 text-[11px]">设定于 2026-05-12 · 把握度 0.7</span>`,
+      followUp: `想怎么改？告诉我新的方向就行。比如：<br>· "把'设计师'换成'产品人'"<br>· "再加一条关于身体的"<br>· "我现在觉得 100 万太大，改成 10 万"<br><br>北极星越具体越能驱动主线，模糊也没关系——我们一起聊清楚。`,
+    },
+    mainlines: {
+      userText: '我想调一下你的主线',
+      piHtml: `当前你有 3 条主线：<br><span class="text-[11px]" style="color:#8B5CF6">●</span> <b>A 转型 PM</b> · 30 天通过 OKR 模板做完 5 个真实需求<br><span class="text-[11px]" style="color:#10B981">●</span> <b>B 身体素质</b> · 90 天体脂率 24%→18%<br><span class="text-[11px]" style="color:#F472B6">●</span> <b>C 女儿睡前 30 分钟</b> · 每日 19:30-20:00 不缺席`,
+      followUp: `想动哪条？比如：<br>· "把 A 的窗口改成 60 天"<br>· "B 我觉得太激进，改成 22%"<br>· "再加一条关于读书的"<br>· "C 这条改成每周 5 次就行"<br><br>主线是事的归类标准，调整后所有相关的事会自动重打标签。`,
+    },
+    thingrules: {
+      userText: '改一下事抽取的规则',
+      piHtml: `当前我抽事的规则（你之前定的）：<br>① 包含<b>明确时间 / 地点</b> → 自动标 schedule<br>② 包含<b>"决定 / 想 / 计划"</b> → 标 decision<br>③ 对方<b>提问 + 等回</b> → 标 followup<br>④ 群消息<b>除非 @ 你</b> → 默认折叠<br>⑤ 重复出现的话题 ≥ 3 次 → 推荐升级为 focus`,
+      followUp: `想加 / 改哪条？比如：<br>· "Studio 群除了设计稿都不用抽"<br>· "如果对方是家人，重要度 +1"<br>· "周末抽出来的事统一标 P3"<br>· "出现'报价 / 续约'立刻 P0"<br><br>规则会立刻生效，老的事不动。`,
+    },
+    style: {
+      userText: '改下回复风格',
+      piHtml: `当前你的默认风格：<br>· 长度：<b>中等</b>（15-40 字）<br>· emoji：<b>看人</b>（朋友多 / 客户少）<br>· 称谓：<b>朋友"你" · 客户"您"</b><br>· 直接度：<b>balanced</b>（不太硬不太软）<br>· 暖度：<b>warm</b>（有温度但不肉麻）`,
+      followUp: `想怎么调？比如：<br>· "对所有人都更短一点"<br>· "周末的回复多放一点 emoji"<br>· "对老板别用'您'"<br>· "Mira 那种关系可以更轻松"<br><br>我会马上更新风格库，下一条草稿就生效。`,
+    },
+    perm: {
+      userText: '看一下你的权限',
+      piHtml: `小 P 当前的权限：<br>✓ 读消息内容（仅本地）<br>✓ 读联系人 + 群成员<br>✓ 写入"事池"<br>✗ 自动发送消息（永远关）<br>✗ 上传任何数据到云（永远关）<br>✓ 改你设置的偏好<br><span class="text-pulse-text-3 text-[11px]">数据存储：100% 本地 · 14 天滚动</span>`,
+      followUp: `要关 / 开哪个？比如：<br>· "群消息不要读了"<br>· "把存储缩到 7 天"<br>· "每周给我看一次你都做了啥"<br><br>所有权限都可以反悔，告诉我就行。`,
+    },
+    learn: {
+      userText: '今天你学到了什么',
+      piHtml: `今天 3 件事：<br>① 你 14:23 删掉了我给妈妈的 emoji（第 11 次）→ <b>"对家人也少用 emoji"</b> 升级为高置信度 ✓<br>② 你跟 Ava 用"您"，跟 Jules 用"你"→ 称谓分得更细<br>③ Noa 那条你最终没回 → ignore 计入关系样本`,
+      followUp: `想纠正哪条？比如：<br>· "第 1 条不对，我对妈妈是看心情"<br>· "第 3 条别这么记，我只是忘了"<br>· "全清掉今天的学习"<br><br>你纠正我学得最快。`,
+    },
+  };
+
+  function piTopic(topic) {
+    const starter = PI_TOPIC_STARTERS[topic];
+    if (!starter) return;
+    const thread = document.getElementById('pi-thread');
+    if (!thread) return;
+
+    // user bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = 'pi-bubble pi-bubble-me slide-up';
+    userBubble.innerText = starter.userText;
+    thread.appendChild(userBubble);
+
+    // typing
+    const typing = document.createElement('div');
+    typing.className = 'pi-bubble pi-bubble-pi slide-up';
+    typing.innerHTML = '<span class="ai-shimmer-text">小 P 在拉数据...</span>';
+    thread.appendChild(typing);
+    thread.scrollTop = thread.scrollHeight;
+
+    setTimeout(() => {
+      typing.innerHTML = starter.piHtml;
+      // follow-up bubble
+      const followUp = document.createElement('div');
+      followUp.className = 'pi-bubble pi-bubble-pi slide-up';
+      followUp.innerHTML = starter.followUp;
+      thread.appendChild(followUp);
+      thread.scrollTop = thread.scrollHeight;
+    }, 600);
+  }
+
+  // Switch Pi sub-tabs (v0.5: kept for legacy; chat is always shown)
   function showPiTab(name) {
     const tabs = ['northstar','mainlines','chat','style','perm','learn'];
-    const idx = tabs.indexOf(name);
     document.querySelectorAll('.pi-seg-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.pi === name);
     });
@@ -3442,8 +3490,6 @@
       if (el) el.classList.toggle('hidden', t !== name);
     });
     if (name === 'mainlines') renderPiMainlines();
-    const indicator = document.getElementById('pi-seg-indicator');
-    if (indicator) indicator.style.transform = `translateX(${idx * 100}%)`;
   }
 
   function renderPiMainlines() {

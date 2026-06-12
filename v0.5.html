@@ -669,7 +669,7 @@
     <div class="text-[11px] space-y-2 leading-relaxed">
       <div class="text-pulse-purple-2 font-semibold mb-1">两个容器</div>
       <div class="flex gap-2"><span class="text-pulse-purple">⭐</span> <strong>我的关注</strong>：用户主动承认要跟进的事</div>
-      <div class="flex gap-2"><span class="text-pulse-purple">🔔</span> <strong>AI 主动挖掘</strong>：AI 从消息流抽出来推给你的</div>
+      <div class="flex gap-2"><span class="text-pulse-purple">🔔</span> <strong>小 P 发现</strong>：小 P 从消息流抽出来推给你的</div>
     </div>
 
     <div class="mt-4 text-[11px] space-y-2 leading-relaxed">
@@ -679,7 +679,7 @@
     </div>
 
     <div class="mt-4 text-[11px] space-y-2 leading-relaxed">
-      <div class="text-pulse-purple-2 font-semibold mb-1">AI 主动挖掘的 4 反馈</div>
+      <div class="text-pulse-purple-2 font-semibold mb-1">小 P 发现的 4 反馈</div>
       <div>⭐ 关注 · 移到我的关注</div>
       <div>👀 看看 · 立刻处理</div>
       <div>😴 先不管 · 折叠</div>
@@ -730,7 +730,7 @@
             <div class="pi-avatar-sm flex-shrink-0" style="width:28px;height:28px;font-size:14px">π</div>
             <div class="flex-1 min-w-0">
               <div class="text-[11px] text-pulse-text leading-snug truncate">
-                小 P · 今早挖了 <span class="text-pulse-purple-2 font-semibold">5 件新事</span>，妈妈 28 天未联系
+                小 P · 妈妈 <span class="text-pulse-purple-2 font-semibold">28 天未联系</span>，今天打个电话？
               </div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pulse-text-3 flex-shrink-0"><path d="m9 18 6-6-6-6"/></svg>
@@ -755,18 +755,18 @@
           <div id="focus-list-short" class="space-y-2"></div>
         </div>
 
-        <!-- 🔔 AI DISCOVERED (AI-driven container) -->
+        <!-- 🔔 PI DISCOVERIES (Pi-driven container) -->
         <div class="px-5 mt-5 mb-1">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-[13px] font-semibold flex items-center gap-1.5">
               <span>🔔</span>
-              <span>AI 主动挖掘</span>
+              <span>小 P 发现</span>
               <span id="ai-pool-count" class="text-[10px] text-pulse-text-3 font-normal">5</span>
             </h3>
             <button onclick="openAllThings('ai')" class="text-[10px] text-pulse-purple-2">全部 →</button>
           </div>
           <div class="text-[9px] text-pulse-text-3 mb-2 leading-relaxed">
-            小 P 从消息和动态中提取，<span class="text-pulse-text-2">⭐ 关注</span>会移入「我的关注」 · <span class="text-pulse-text-2">😴 不再推</span>会从这里消失
+            小 P 从消息和动态中发现，<span class="text-pulse-text-2">⭐ 关注</span>会移入「我的关注」 · <span class="text-pulse-text-2">😴 不再推</span>会从这里消失
           </div>
           <div id="ai-pool-list" class="space-y-2"></div>
           <button id="ai-pool-fold" onclick="toggleAiPoolFold()" class="hidden w-full mt-2 text-[10px] text-pulse-text-3 py-2 rounded-lg border border-pulse-line/60 bg-pulse-card/50">还有 <span id="ai-pool-fold-n">0</span> 件 · 展开 ⌄</button>
@@ -787,7 +787,7 @@
         <!-- Footnote: AI boundary -->
         <div class="px-5 mt-4 mb-2 text-center">
           <div class="text-[9px] text-pulse-text-3 leading-relaxed">
-            🔒 状态由你掌控 · AI 只挖掘 + 推荐 + 排序，<strong class="text-pulse-text-2">不算进度</strong>
+            🔒 状态由你掌控 · 小 P 只发现 + 推荐 + 排序，<strong class="text-pulse-text-2">不算进度</strong>
           </div>
         </div>
 
@@ -2017,7 +2017,7 @@
   <!-- Side annotation right (shortcuts) -->
   <div class="hidden lg:block absolute right-12 bottom-12 max-w-xs text-pulse-text-3 text-[11px] leading-relaxed">
     <div class="text-pulse-text-2 mb-2 font-semibold">建议体验路径</div>
-    <div>① <strong class="text-pulse-purple-2">我的事</strong> 主屏 → 看 AI 主动挖掘</div>
+    <div>① <strong class="text-pulse-purple-2">我的事</strong> 主屏 → 看小 P 发现</div>
     <div>② 点 <span class="text-pulse-purple-2">⭐</span> 关注 → 事进我的关注</div>
     <div>③ 点 <span class="text-pulse-purple-2">👀</span> 看看 → 跳到对应消息对话</div>
     <div>④ 我的关注里点 ✓ 完成（5s 内可撤销）</div>
@@ -2377,7 +2377,7 @@
 
   // ===================== THINGS POOL (v0.5 双容器模型) =====================
   // container: 'focus'  → 我的关注 (用户主权)
-  // container: 'ai'     → AI 主动挖掘 (AI 池子，等待用户决策)
+  // container: 'ai'     → 小 P 发现 (Pi 池子，等待用户决策)
   // container: 'archive'/'done'/'deleted' → 归档/完成/删除
   // type: focus(长期关注·打卡) | task(待办) | schedule(日程) | followup(回访) | decision(决定) | habit(习惯)
   // status: active(进行中) | done(完成) | archived(归档) | deleted(删除)  ← 由用户操作驱动，AI 不算进度
@@ -2410,7 +2410,7 @@
       mainline:'A', persons:['ava'], source:{ msgId:'ava_msg_1', preview:'Q3 项目合同细节确认一下' },
       imp:3, urg:2, lastTouchedAt:'今早 9:12' },
 
-    // —— AI 主动挖掘池 (container='ai') · top 5 ——
+    // —— 小 P 发现池 (container='ai') · top 5 ——
     { id:'th_ai_1', container:'ai', type:'followup', status:'active',
       title:'妈妈 28 天未联系', subtitle:'家人 · 上次问候在 5 月 7 日',
       mainline:'C', persons:['mom'], source:{ msgId:null, preview:'AI 从关系图谱中检测' },
@@ -2671,7 +2671,7 @@
           showToast(`👀 跳到 ${CONTACTS[personId].name} 的对话`);
           setTimeout(() => openChat(personId), 240);
         } else {
-          showToast(`👀 留在 AI 挖掘池 · 这条暂无关联对话`);
+          showToast(`👀 留在小 P 发现 · 这条暂无关联对话`);
         }
         return;
       }
@@ -2756,7 +2756,7 @@
   }
 
   function openAllThings(scope) {
-    showToast(scope === 'focus' ? '全部关注的事 (二级页 · TBD)' : '全部 AI 挖掘的事 (二级页 · TBD)');
+    showToast(scope === 'focus' ? '全部关注的事 (二级页 · TBD)' : '全部小 P 发现的事 (二级页 · TBD)');
   }
 
 

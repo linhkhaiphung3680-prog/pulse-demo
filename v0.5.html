@@ -560,6 +560,178 @@
       background: #1E1F26;
     }
 
+    /* v0.5: Inline quick reply chips (after Pi topic response) */
+    .pi-reply-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(139,92,246,0.10);
+      border: 1px solid rgba(139,92,246,0.28);
+      color: #C4B5FD;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 160ms ease;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pi-reply-chip:hover {
+      background: rgba(139,92,246,0.20);
+      border-color: rgba(139,92,246,0.5);
+      color: #ECEDEF;
+    }
+    .pi-reply-chip:active { transform: scale(0.97); }
+
+    /* v0.5: Topic indicator bar (sticky at top of chat) */
+    .pi-topic-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(59,130,246,0.10));
+      border-bottom: 1px solid rgba(139,92,246,0.30);
+      font-size: 11px;
+      color: #ECEDEF;
+      animation: piTopicBarIn 200ms ease-out;
+    }
+    @keyframes piTopicBarIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .pi-topic-bar-close {
+      margin-left: auto;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(139,92,246,0.28);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 160ms ease;
+    }
+    .pi-topic-bar-close:hover { background: rgba(139,92,246,0.45); }
+
+    /* v0.5: Mini edit cards inline in chat */
+    .pi-mini-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(139,92,246,0.20);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      transition: all 160ms ease;
+    }
+    .pi-mini-card:hover {
+      background: rgba(139,92,246,0.08);
+      border-color: rgba(139,92,246,0.40);
+    }
+    .pi-mini-stepper {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #16171D;
+      border: 1px solid #2A2B33;
+      border-radius: 999px;
+      padding: 2px 4px;
+    }
+    .pi-mini-stepper button {
+      width: 22px; height: 22px;
+      border-radius: 999px;
+      background: transparent;
+      color: #C4B5FD;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 140ms ease;
+      border: none;
+    }
+    .pi-mini-stepper button:hover { background: rgba(139,92,246,0.20); }
+    .pi-mini-stepper-val {
+      min-width: 36px;
+      text-align: center;
+      color: #ECEDEF;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pi-mini-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .pi-mini-toggle-row:last-child { border-bottom: 0; }
+    .pi-mini-seg {
+      display: inline-flex;
+      background: #16171D;
+      border: 1px solid #2A2B33;
+      border-radius: 8px;
+      padding: 2px;
+    }
+    .pi-mini-seg button {
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: transparent;
+      color: #6B7280;
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 140ms ease;
+    }
+    .pi-mini-seg button.active {
+      background: rgba(139,92,246,0.25);
+      color: #ECEDEF;
+    }
+
+    /* v0.5: Topic chip strip — fade-out edges */
+    .pi-chip-strip-wrap {
+      position: relative;
+    }
+    .pi-chip-strip-wrap::before,
+    .pi-chip-strip-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 16px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .pi-chip-strip-wrap::before {
+      left: 0;
+      background: linear-gradient(to right, rgba(22,23,29,0.95), transparent);
+    }
+    .pi-chip-strip-wrap::after {
+      right: 0;
+      background: linear-gradient(to left, rgba(22,23,29,0.95), transparent);
+    }
+    .pi-topic-chip {
+      flex-shrink: 0;
+      font-size: 11px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #16171D;
+      border: 1px solid #2A2B33;
+      color: #B8BBC2;
+      transition: all 160ms ease;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .pi-topic-chip:hover {
+      background: rgba(139,92,246,0.12);
+      border-color: rgba(139,92,246,0.45);
+      color: #C4B5FD;
+    }
+    .pi-topic-chip.active {
+      background: rgba(139,92,246,0.20);
+      border-color: rgba(139,92,246,0.55);
+      color: #ECEDEF;
+    }
+
     /* Toggle switch */
     .toggle {
       position: relative;
@@ -1541,6 +1713,13 @@
 
       <!-- ============= TAB: CHAT ============= -->
       <div id="pi-tab-chat" class="flex-1 flex flex-col overflow-hidden">
+        <!-- Active topic indicator bar (v0.5 polish) -->
+        <div id="pi-topic-bar" class="pi-topic-bar hidden">
+          <span id="pi-topic-bar-icon">🎯</span>
+          <span>调整 <b id="pi-topic-bar-name">主线</b> 中</span>
+          <button class="pi-topic-bar-close" onclick="piEndTopic()">完成 ✓</button>
+        </div>
+
         <div id="pi-thread" class="scroll-area flex-1 px-5 py-3 flex flex-col gap-2.5">
           <!-- Pi opening (rendered dynamically based on time) -->
         </div>
@@ -1548,13 +1727,15 @@
         <!-- Topic starter chips (v0.5: 在对话里调一切) -->
         <div class="px-4 pt-2 pb-1 border-t border-pulse-line/60 bg-pulse-card/20">
           <div class="text-[9px] uppercase tracking-widest text-pulse-text-3 mb-1.5 px-1">在对话里调整 ↓</div>
-          <div class="flex gap-1.5 overflow-x-auto pb-1.5" style="scrollbar-width:none">
-            <button onclick="piTopic('northstar')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">⭐ 改北极星</button>
-            <button onclick="piTopic('mainlines')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🎯 调主线</button>
-            <button onclick="piTopic('thingrules')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">📜 事的规则</button>
-            <button onclick="piTopic('style')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🎨 改风格</button>
-            <button onclick="piTopic('perm')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🔒 权限</button>
-            <button onclick="piTopic('learn')" class="flex-shrink-0 text-[11px] px-2.5 py-1.5 rounded-full bg-pulse-card-2 border border-pulse-line text-pulse-text-2 hover:bg-pulse-purple/15 hover:text-pulse-purple-2 transition whitespace-nowrap">🧠 已学到</button>
+          <div class="pi-chip-strip-wrap">
+            <div id="pi-chip-strip" class="flex gap-1.5 overflow-x-auto pb-1.5 px-2" style="scrollbar-width:none">
+              <button data-topic="northstar" onclick="piTopic('northstar')" class="pi-topic-chip">⭐ 改北极星</button>
+              <button data-topic="mainlines" onclick="piTopic('mainlines')" class="pi-topic-chip">🎯 调主线</button>
+              <button data-topic="thingrules" onclick="piTopic('thingrules')" class="pi-topic-chip">📜 事的规则</button>
+              <button data-topic="style" onclick="piTopic('style')" class="pi-topic-chip">🎨 改风格</button>
+              <button data-topic="perm" onclick="piTopic('perm')" class="pi-topic-chip">🔒 权限</button>
+              <button data-topic="learn" onclick="piTopic('learn')" class="pi-topic-chip">🧠 已学到</button>
+            </div>
           </div>
         </div>
 
@@ -3370,12 +3551,35 @@
   function piMatchResponse(input) {
     const text = input.toLowerCase();
     if (/客户.*emoji|emoji.*客户|对客户.*少|少用.*emoji/.test(text)) return PI_RESPONSES.emoji_clients;
-    if (/别那么长|太长|更短|短点|简短|短一点/.test(text)) return PI_RESPONSES.shorter;
+    if (/别那么长|太长|更短|短点|简短|短一点|更短/.test(text)) return PI_RESPONSES.shorter;
     if (/noa.*话题|noa.*别|话题.*别帮|不要.*noa/.test(text)) return PI_RESPONSES.noa_topic;
     if (/今天学到|今天.*学|学到什么|你学到|今天.*了什么/.test(text)) return PI_RESPONSES.today_learn;
     if (/你是谁|你叫什么|介绍.*自己|你.*功能/.test(text)) return PI_RESPONSES.who_are_you;
     if (/谢谢|感谢|thanks|thx/.test(text)) return PI_RESPONSES.thanks;
     if (/^(hi|嗨|你好|hello|在吗)/.test(text)) return PI_RESPONSES.hi;
+
+    // v0.5: 话题 chip 上下文响应
+    if (/(把|主线)?\s*a\s*(改|成|=)?\s*\d+\s*天/.test(text)) return '收到 ✓ 主线 A 窗口已更新。\n\n挂在 A 下的事会自动重新排期，今天的 OKR 节奏不动。';
+    if (/b\s*(改|成|=)?\s*\d+\s*%|身体.*\d+/.test(text)) return '✓ 主线 B 目标更新。\n\n打卡的 streak 不重置，只换衡量标准。';
+    if (/c\s*(改|成).*周\s*\d+|女儿.*周/.test(text)) return '✓ 主线 C 改为每周节奏。\n\n这周已经达标，下周从周一重新计数。';
+    if (/加.*主线|再加一条|新.*主线|加.*关于/.test(text)) return '可以。新主线我需要 3 件事：<br>① 服务什么身份？<br>② 衡量标准？<br>③ 窗口几天？<br><br>告诉我就行，模糊也 OK。';
+    if (/设计师.*产品人|产品人.*设计师|换成产品人/.test(text)) return '✓ 已替换。北极星更新为：<br><b>"成为最值得信赖的爸爸 + 影响 100 万产品人"</b><br>原版本进入历史，可随时恢复。';
+    if (/100\s*万|10\s*万/.test(text)) return '✓ 北极星数字更新。\n\n小目标的好处是衡量更频繁——我会按月给你看进展。';
+    if (/studio.*群|群.*设计稿/.test(text)) return '✓ 规则已加：Studio 群只抽含"设计稿"的消息。\n\n你今早就少了 8 张卡片要看。';
+    if (/家人.*重要|家人.*\+1/.test(text)) return '✓ 已加权：家人发的事重要度 +1（最高 P0）。\n\n下一条妈妈 / 爸爸 / 妹妹的消息会自动升级。';
+    if (/周末.*p3|周末.*抽/.test(text)) return '✓ 周末抽出来的事统一标 P3，不再打扰你。';
+    if (/报价|续约/.test(text)) return '✓ 关键词触发器已加：出现"报价 / 续约"立刻 P0 + 推送通知。';
+    if (/对所有人.*短|更短.*所有/.test(text)) return '✓ 全局长度 → 短。下一条草稿就生效。';
+    if (/周末.*emoji|emoji.*周末/.test(text)) return '✓ 周末 emoji 频率上调一档。\n\n小细节：周末时间也按你的本地时区算。';
+    if (/老板.*您|别用.*您/.test(text)) return '✓ 对老板的称谓改为"你"。\n\n（你跟他平时也是这么说的，我之前判断错了）';
+    if (/mira.*轻松|更轻松/.test(text)) return '✓ Mira 那一档关系（老朋友 ≥ 5 年）默认更轻松。\n\n会反映在长度短一些 + 更多 emoji + 称呼可以省略。';
+    if (/群.*不要读|群消息.*不/.test(text)) return '✓ 群消息读取已关闭。\n\n你会失去：群讨论的事抽取、群成员关系图。\n你会得到：更安静的发现池。\n\n随时可以打开。';
+    if (/存储.*7\s*天|缩到\s*7/.test(text)) return '✓ 数据滚动周期 14 天 → 7 天。\n\n超过 7 天的原始消息会被丢弃，但抽出来的"事"和你的偏好保留。';
+    if (/每周.*看一次|每周.*报告/.test(text)) return '✓ 已开启周报。\n\n每周日晚 21:00 推送：本周新事数、关注变化、我学到的偏好。';
+    if (/第\s*1\s*条.*不对|妈妈.*看心情/.test(text)) return '✓ 撤回学习：「对家人也少用 emoji」回到中等置信度。\n\n以后我会观察更多样本再下结论。';
+    if (/第\s*3\s*条.*不|noa.*忘了/.test(text)) return '✓ 撤回学习：Noa 那条不计入 ignore 样本。\n\n意图差别：忘了 vs 主动忽略。';
+    if (/清掉.*学习|清.*今天/.test(text)) return '✓ 今天的 3 条学习全部清空。\n\n（这是逃生通道，你可以随时清空我的学习。）';
+
     return PI_RESPONSES.unknown;
   }
 
@@ -3401,7 +3605,13 @@
     thread.scrollTop = thread.scrollHeight;
 
     setTimeout(() => {
-      typing.innerText = piMatchResponse(text);
+      const resp = piMatchResponse(text);
+      // Use innerHTML if response contains HTML markup, otherwise innerText for safety
+      if (/<(b|br|i|span|strong)\b/i.test(resp)) {
+        typing.innerHTML = resp.replace(/\n/g, '<br>');
+      } else {
+        typing.innerText = resp;
+      }
       thread.scrollTop = thread.scrollHeight;
     }, 700);
   }
@@ -3415,50 +3625,173 @@
   };
 
   // ===================== PI TOPIC STARTERS (v0.5: 在对话里调一切) =====================
-  // 用户点话题 chip → 注入用户消息 + Pi 的脚本式响应（含可点的快捷选项）
+  // 可点 chip → 注入用户消息 + Pi 的脚本式响应（含 mini 编辑器 + 快捷回复）
+  // STATE: PI 风格 / 主线 编辑态 (用于 mini 卡的本地修改)
+  const PI_STYLE_STATE = {
+    length:    'medium',  // short | medium | long
+    emoji:     'mixed',   // rare  | mixed  | frequent
+    directness:'balanced',// soft  | balanced | direct
+    warmth:    'warm',    // cool  | neutral  | warm
+  };
+  const PI_MAINLINE_STATE = {
+    A: { window: 30 },  // days
+    B: { window: 90 },
+    C: { window: 365 },
+  };
+
+  let PI_CURRENT_TOPIC = null;
+
+  // Generators for interactive content
+  function piMainlinesEditor() {
+    return `
+      <div class="text-[10px] text-pulse-text-3 mb-1.5">⌁ 直接调整窗口</div>
+      ${MAINLINES.map(ml => `
+        <div class="pi-mini-card">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold flex-shrink-0" style="background:${ml.color}25;color:${ml.color}">主线 ${ml.code}</span>
+            <span class="text-[12px] font-semibold flex-1 truncate">${ml.title}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-pulse-text-3">窗口</span>
+            <div class="pi-mini-stepper">
+              <button onclick="piTunemainline('${ml.id}', -10)">−</button>
+              <span class="pi-mini-stepper-val" id="pi-ml-window-${ml.id}">${PI_MAINLINE_STATE[ml.id].window} 天</span>
+              <button onclick="piTunemainline('${ml.id}', +10)">+</button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function piStyleEditor() {
+    const seg = (key, vals, labels) => `
+      <div class="pi-mini-seg">${vals.map((v,i) => `
+        <button data-style-key="${key}" data-style-val="${v}" onclick="piTuneStyle('${key}','${v}')" class="${PI_STYLE_STATE[key]===v?'active':''}">${labels[i]}</button>
+      `).join('')}</div>`;
+    return `
+      <div class="text-[10px] text-pulse-text-3 mb-1.5">⌁ 直接调风格</div>
+      <div class="pi-mini-card" style="padding:6px 12px">
+        <div class="pi-mini-toggle-row">
+          <span class="text-[11px] text-pulse-text-2">长度</span>
+          ${seg('length', ['short','medium','long'], ['短','中','长'])}
+        </div>
+        <div class="pi-mini-toggle-row">
+          <span class="text-[11px] text-pulse-text-2">emoji</span>
+          ${seg('emoji', ['rare','mixed','frequent'], ['少','看人','多'])}
+        </div>
+        <div class="pi-mini-toggle-row">
+          <span class="text-[11px] text-pulse-text-2">直接度</span>
+          ${seg('directness', ['soft','balanced','direct'], ['软','均衡','直'])}
+        </div>
+        <div class="pi-mini-toggle-row">
+          <span class="text-[11px] text-pulse-text-2">暖度</span>
+          ${seg('warmth', ['cool','neutral','warm'], ['冷','中','暖'])}
+        </div>
+      </div>
+    `;
+  }
+
   const PI_TOPIC_STARTERS = {
     northstar: {
+      icon: '⭐', name: '北极星',
       userText: '我想改一下你的北极星',
       piHtml: `当前你的北极星是：<br><b>"成为最值得信赖的爸爸 + 影响 100 万产品人的设计师"</b><br><span class="text-pulse-text-3 text-[11px]">设定于 2026-05-12 · 把握度 0.7</span>`,
-      followUp: `想怎么改？告诉我新的方向就行。比如：<br>· "把'设计师'换成'产品人'"<br>· "再加一条关于身体的"<br>· "我现在觉得 100 万太大，改成 10 万"<br><br>北极星越具体越能驱动主线，模糊也没关系——我们一起聊清楚。`,
+      followUp: `想怎么改？告诉我新的方向。北极星越具体越能驱动主线，模糊也没关系——我们一起聊清楚。`,
+      replies: [
+        '把"设计师"换成"产品人"',
+        '加一条关于身体的',
+        '100 万太大，改成 10 万',
+      ],
     },
     mainlines: {
+      icon: '🎯', name: '主线',
       userText: '我想调一下你的主线',
       piHtml: `当前你有 3 条主线：<br><span class="text-[11px]" style="color:#8B5CF6">●</span> <b>A 转型 PM</b> · 30 天通过 OKR 模板做完 5 个真实需求<br><span class="text-[11px]" style="color:#10B981">●</span> <b>B 身体素质</b> · 90 天体脂率 24%→18%<br><span class="text-[11px]" style="color:#F472B6">●</span> <b>C 女儿睡前 30 分钟</b> · 每日 19:30-20:00 不缺席`,
-      followUp: `想动哪条？比如：<br>· "把 A 的窗口改成 60 天"<br>· "B 我觉得太激进，改成 22%"<br>· "再加一条关于读书的"<br>· "C 这条改成每周 5 次就行"<br><br>主线是事的归类标准，调整后所有相关的事会自动重打标签。`,
+      interactive: piMainlinesEditor,
+      followUp: `也可以告诉我你的具体想法，比如：`,
+      replies: [
+        '把 A 改成 60 天',
+        'B 改成 22%',
+        '加一条关于读书的',
+        'C 改成每周 5 次',
+      ],
     },
     thingrules: {
+      icon: '📜', name: '事的规则',
       userText: '改一下事抽取的规则',
       piHtml: `当前我抽事的规则（你之前定的）：<br>① 包含<b>明确时间 / 地点</b> → 自动标 schedule<br>② 包含<b>"决定 / 想 / 计划"</b> → 标 decision<br>③ 对方<b>提问 + 等回</b> → 标 followup<br>④ 群消息<b>除非 @ 你</b> → 默认折叠<br>⑤ 重复出现的话题 ≥ 3 次 → 推荐升级为 focus`,
-      followUp: `想加 / 改哪条？比如：<br>· "Studio 群除了设计稿都不用抽"<br>· "如果对方是家人，重要度 +1"<br>· "周末抽出来的事统一标 P3"<br>· "出现'报价 / 续约'立刻 P0"<br><br>规则会立刻生效，老的事不动。`,
+      followUp: `想加 / 改哪条？规则会立刻生效，老的事不动。`,
+      replies: [
+        'Studio 群除了设计稿都不抽',
+        '家人发的，重要度 +1',
+        '周末抽出来的标 P3',
+        '出现"报价 / 续约"立刻 P0',
+      ],
     },
     style: {
+      icon: '🎨', name: '风格',
       userText: '改下回复风格',
-      piHtml: `当前你的默认风格：<br>· 长度：<b>中等</b>（15-40 字）<br>· emoji：<b>看人</b>（朋友多 / 客户少）<br>· 称谓：<b>朋友"你" · 客户"您"</b><br>· 直接度：<b>balanced</b>（不太硬不太软）<br>· 暖度：<b>warm</b>（有温度但不肉麻）`,
-      followUp: `想怎么调？比如：<br>· "对所有人都更短一点"<br>· "周末的回复多放一点 emoji"<br>· "对老板别用'您'"<br>· "Mira 那种关系可以更轻松"<br><br>我会马上更新风格库，下一条草稿就生效。`,
+      piHtml: `当前你的默认风格：<br>· 长度：<b>中等</b>（15-40 字）<br>· emoji：<b>看人</b>（朋友多 / 客户少）<br>· 称谓：<b>朋友"你" · 客户"您"</b><br>· 直接度：<b>balanced</b><br>· 暖度：<b>warm</b>`,
+      interactive: piStyleEditor,
+      followUp: `也可以告诉我具体的场景：`,
+      replies: [
+        '对所有人都更短',
+        '周末多放 emoji',
+        '对老板别用"您"',
+        'Mira 那种关系可以更轻松',
+      ],
     },
     perm: {
+      icon: '🔒', name: '权限',
       userText: '看一下你的权限',
       piHtml: `小 P 当前的权限：<br>✓ 读消息内容（仅本地）<br>✓ 读联系人 + 群成员<br>✓ 写入"事池"<br>✗ 自动发送消息（永远关）<br>✗ 上传任何数据到云（永远关）<br>✓ 改你设置的偏好<br><span class="text-pulse-text-3 text-[11px]">数据存储：100% 本地 · 14 天滚动</span>`,
-      followUp: `要关 / 开哪个？比如：<br>· "群消息不要读了"<br>· "把存储缩到 7 天"<br>· "每周给我看一次你都做了啥"<br><br>所有权限都可以反悔，告诉我就行。`,
+      followUp: `要关 / 开哪个？所有权限都可以反悔。`,
+      replies: [
+        '群消息不要读了',
+        '存储缩到 7 天',
+        '每周给我看一次你都做了啥',
+      ],
     },
     learn: {
+      icon: '🧠', name: '已学到',
       userText: '今天你学到了什么',
       piHtml: `今天 3 件事：<br>① 你 14:23 删掉了我给妈妈的 emoji（第 11 次）→ <b>"对家人也少用 emoji"</b> 升级为高置信度 ✓<br>② 你跟 Ava 用"您"，跟 Jules 用"你"→ 称谓分得更细<br>③ Noa 那条你最终没回 → ignore 计入关系样本`,
-      followUp: `想纠正哪条？比如：<br>· "第 1 条不对，我对妈妈是看心情"<br>· "第 3 条别这么记，我只是忘了"<br>· "全清掉今天的学习"<br><br>你纠正我学得最快。`,
+      followUp: `想纠正哪条？你纠正我学得最快。`,
+      replies: [
+        '第 1 条不对，对妈妈我看心情',
+        '第 3 条别这么记，我就是忘了',
+        '清掉今天的学习',
+      ],
     },
   };
 
   function piTopic(topic) {
     const starter = PI_TOPIC_STARTERS[topic];
     if (!starter) return;
+
+    // Dedup: 同话题连续点击 → 只滚到现有气泡，不再追加
     const thread = document.getElementById('pi-thread');
     if (!thread) return;
+    if (PI_CURRENT_TOPIC === topic) {
+      const last = thread.querySelector(`[data-pi-topic="${topic}"]`);
+      if (last) {
+        last.scrollIntoView({ behavior:'smooth', block:'start' });
+        last.style.animation = 'piTopicBarIn 280ms ease-out';
+        setTimeout(() => { last.style.animation = ''; }, 320);
+        return;
+      }
+    }
+
+    PI_CURRENT_TOPIC = topic;
+    showPiTopicBar(starter);
+    setActiveChip(topic);
 
     // user bubble
     const userBubble = document.createElement('div');
     userBubble.className = 'pi-bubble pi-bubble-me slide-up';
     userBubble.innerText = starter.userText;
+    userBubble.dataset.piTopic = topic;
     thread.appendChild(userBubble);
 
     // typing
@@ -3466,17 +3799,130 @@
     typing.className = 'pi-bubble pi-bubble-pi slide-up';
     typing.innerHTML = '<span class="ai-shimmer-text">小 P 在拉数据...</span>';
     thread.appendChild(typing);
-    thread.scrollTop = thread.scrollHeight;
+    scrollPiThread();
 
     setTimeout(() => {
       typing.innerHTML = starter.piHtml;
-      // follow-up bubble
+      typing.dataset.piTopic = topic;
+
+      // Interactive editor (mini cards) if topic provides one
+      if (typeof starter.interactive === 'function') {
+        const editor = document.createElement('div');
+        editor.className = 'pi-bubble pi-bubble-pi slide-up';
+        editor.style.padding = '10px 12px';
+        editor.style.maxWidth = '92%';
+        editor.dataset.piTopic = topic;
+        editor.innerHTML = starter.interactive();
+        thread.appendChild(editor);
+      }
+
+      // follow-up + quick reply chips
       const followUp = document.createElement('div');
       followUp.className = 'pi-bubble pi-bubble-pi slide-up';
       followUp.innerHTML = starter.followUp;
+      followUp.dataset.piTopic = topic;
       thread.appendChild(followUp);
-      thread.scrollTop = thread.scrollHeight;
+
+      if (Array.isArray(starter.replies) && starter.replies.length) {
+        const chipsRow = document.createElement('div');
+        chipsRow.className = 'flex flex-wrap gap-1.5 mt-1 mb-1 slide-up';
+        chipsRow.dataset.piTopic = topic;
+        chipsRow.innerHTML = starter.replies.map(text =>
+          `<button class="pi-reply-chip" onclick="piSendChip(this, ${JSON.stringify(text).replace(/"/g,'&quot;')})">${text}</button>`
+        ).join('');
+        thread.appendChild(chipsRow);
+      }
+
+      scrollPiThread();
     }, 600);
+  }
+
+  function piSendChip(btn, text) {
+    // 点了 chip → 让它消失（避免重复点），然后 piSend
+    if (btn) {
+      btn.style.transition = 'all 200ms ease';
+      btn.style.opacity = '0';
+      btn.style.transform = 'scale(0.85)';
+      setTimeout(() => { if (btn.parentNode) btn.remove(); }, 220);
+    }
+    piSend(text);
+  }
+
+  function showPiTopicBar(starter) {
+    const bar = document.getElementById('pi-topic-bar');
+    if (!bar) return;
+    document.getElementById('pi-topic-bar-icon').textContent = starter.icon;
+    document.getElementById('pi-topic-bar-name').textContent = starter.name;
+    bar.classList.remove('hidden');
+  }
+
+  function piEndTopic() {
+    if (!PI_CURRENT_TOPIC) return;
+    const starter = PI_TOPIC_STARTERS[PI_CURRENT_TOPIC];
+    const thread = document.getElementById('pi-thread');
+    if (thread && starter) {
+      const summary = document.createElement('div');
+      summary.className = 'pi-bubble pi-bubble-pi slide-up';
+      summary.innerHTML = `${starter.icon} <b>${starter.name}</b> 调整完成 ✓<br><span class="text-pulse-text-3 text-[11px]">已记入小 P 的本地配置 · 下条草稿生效</span>`;
+      thread.appendChild(summary);
+      scrollPiThread();
+    }
+    PI_CURRENT_TOPIC = null;
+    document.getElementById('pi-topic-bar').classList.add('hidden');
+    setActiveChip(null);
+  }
+
+  function setActiveChip(topic) {
+    document.querySelectorAll('.pi-topic-chip').forEach(b => {
+      b.classList.toggle('active', b.dataset.topic === topic);
+    });
+  }
+
+  function piTunemainline(id, delta) {
+    if (!PI_MAINLINE_STATE[id]) return;
+    PI_MAINLINE_STATE[id].window = Math.max(7, PI_MAINLINE_STATE[id].window + delta);
+    const el = document.getElementById('pi-ml-window-' + id);
+    if (el) el.textContent = PI_MAINLINE_STATE[id].window + ' 天';
+    // 在对话里也回应一下
+    piMicroResponse(`主线 ${id} 窗口改成 <b>${PI_MAINLINE_STATE[id].window} 天</b> ✓`);
+  }
+
+  function piTuneStyle(key, val) {
+    PI_STYLE_STATE[key] = val;
+    document.querySelectorAll(`[data-style-key="${key}"]`).forEach(b => {
+      b.classList.toggle('active', b.dataset.styleVal === val);
+    });
+    const labels = {
+      length:    {short:'短', medium:'中', long:'长'},
+      emoji:     {rare:'少', mixed:'看人', frequent:'多'},
+      directness:{soft:'软', balanced:'均衡', direct:'直'},
+      warmth:    {cool:'冷', neutral:'中', warm:'暖'},
+    };
+    const keyLabel = {length:'长度', emoji:'emoji', directness:'直接度', warmth:'暖度'};
+    piMicroResponse(`${keyLabel[key]} → <b>${labels[key][val]}</b> ✓`);
+  }
+
+  function piMicroResponse(html) {
+    const thread = document.getElementById('pi-thread');
+    if (!thread) return;
+    const last = thread.lastElementChild;
+    // 合并连续的 micro 响应到同一气泡
+    if (last && last.dataset && last.dataset.piMicro === '1') {
+      last.innerHTML = last.innerHTML + '<br>' + html;
+    } else {
+      const bubble = document.createElement('div');
+      bubble.className = 'pi-bubble pi-bubble-pi slide-up';
+      bubble.style.fontSize = '11px';
+      bubble.dataset.piMicro = '1';
+      bubble.innerHTML = html;
+      thread.appendChild(bubble);
+    }
+    scrollPiThread();
+  }
+
+  function scrollPiThread() {
+    const thread = document.getElementById('pi-thread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
   }
 
   // Switch Pi sub-tabs (v0.5: kept for legacy; chat is always shown)

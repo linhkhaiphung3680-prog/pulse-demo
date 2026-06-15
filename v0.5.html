@@ -777,6 +777,18 @@
       border-radius: 14px;
     }
 
+    /* v0.5: Persona switcher pill buttons */
+    .persona-btn {
+      background: transparent;
+      color: #6B7280;
+    }
+    .persona-btn:hover { color: #C4B5FD; background: rgba(139,92,246,0.10); }
+    .persona-btn.active {
+      background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(139,92,246,0.45);
+    }
+
     /* v0.5 P7.1: All Things filter chips */
     .allthings-chip {
       background: #16171D;
@@ -888,9 +900,19 @@
 
   <!-- Version banner -->
   <div style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(90deg, #6D28D9, #8B5CF6); color: white; padding: 6px 16px; font-size: 11px; text-align: center; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-    🆕 Pulse <strong>v0.5 我的事 + 消息</strong>（事池 + 容器迁移）·
+    🆕 Pulse <strong>v0.5 我的事 + 消息</strong>（事池 + 双 persona）·
     <a href="index.html" style="color: white; text-decoration: underline;">v0.4-pre Life Copilot</a> ·
     <a href="legacy.html" style="color: white; text-decoration: underline;">v0.3 社交副驾驶</a>
+  </div>
+
+  <!-- Persona switcher (top center, below banner) -->
+  <div style="position:fixed; top:38px; left:50%; transform:translateX(-50%); z-index:50; display:flex; gap:6px; padding:4px; background:#16171D; border:1px solid #2A2B33; border-radius:999px;">
+    <button data-persona-btn="exec" onclick="switchPersona('exec')" class="persona-btn active" style="padding:6px 14px; border-radius:999px; font-size:11px; font-weight:600; border:none; cursor:pointer; transition:all 200ms ease;">
+      🏢 腾讯高管
+    </button>
+    <button data-persona-btn="student" onclick="switchPersona('student')" class="persona-btn" style="padding:6px 14px; border-radius:999px; font-size:11px; font-weight:600; border:none; cursor:pointer; transition:all 200ms ease;">
+      🎓 大四学生
+    </button>
   </div>
 
   <!-- Side annotation (visible on wide screens) -->
@@ -962,8 +984,8 @@
           <button onclick="enterPi('brief')" class="w-full text-left rounded-xl p-2.5 flex items-center gap-2.5" style="background: linear-gradient(135deg, rgba(139,92,246,0.14) 0%, rgba(59,130,246,0.08) 100%); border: 1px solid rgba(139,92,246,0.25);">
             <div class="pi-avatar-sm flex-shrink-0" style="width:28px;height:28px;font-size:14px">π</div>
             <div class="flex-1 min-w-0">
-              <div class="text-[11px] text-pulse-text leading-snug truncate">
-                小 P · 妈妈 <span class="text-pulse-purple-2 font-semibold">28 天未联系</span>，今天打个电话？
+              <div id="brief-strip-text" class="text-[11px] text-pulse-text leading-snug truncate">
+                小 P · 早间简报 ↗
               </div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pulse-text-3 flex-shrink-0"><path d="m9 18 6-6-6-6"/></svg>
@@ -1226,7 +1248,7 @@
             <div id="chat-name" class="text-base font-semibold leading-tight">Mira Tanaka</div>
             <div class="flex items-center gap-1.5 mt-0.5">
               <span class="w-1.5 h-1.5 rounded-full bg-pulse-emerald"></span>
-              <span class="text-[11px] text-pulse-text-2">active now · 老朋友 5 年</span>
+              <span id="chat-subline" class="text-[11px] text-pulse-text-2">active now</span>
             </div>
           </div>
         </button>
@@ -1242,17 +1264,9 @@
         <button onclick="closePeekAndBack()" class="text-pulse-purple-2 font-semibold">← 返回我的事</button>
       </div>
 
-      <!-- Chat messages -->
+      <!-- Chat messages (rendered dynamically by openChat → chatHistory) -->
       <div id="chat-messages" class="scroll-area flex-1 px-3 py-4 flex flex-col gap-2.5" style="background:#1A1B20">
-        <div class="text-center text-[11px] text-pulse-text-3 my-1">今天 20:38</div>
-
-        <div class="bubble bubble-them">嘿！今晚还是 8 点见 Blue Note 吗？</div>
-        <div class="bubble bubble-them">他们今晚有 trio 演出，超期待 🎷</div>
-        <div class="bubble bubble-mine">在的在的</div>
-        <div class="bubble bubble-them">穿你最爱的就好，不用太正式</div>
-        <div class="bubble bubble-them">对了！我前几天淘到那个你说想要的玻璃杯，今晚带给你 ✨</div>
-        <div class="text-center text-[11px] text-pulse-text-3 my-1">20:43</div>
-        <div class="bubble bubble-them">所以 8 点没问题吧？我先去占位</div>
+        <!-- per-persona, per-contact bubbles inserted at runtime -->
       </div>
 
       <!-- AI Copilot panel -->
@@ -2319,7 +2333,7 @@
   <script>
   // ===================== DATA =====================
 
-  const CONTACTS = {
+  let CONTACTS = {
     mira:   { id:'mira',   name:'Mira Tanaka',  initial:'M',  bg:'linear-gradient(135deg,#F472B6,#A855F7)',
               tag:'老朋友', cluster:'friends', strength:'high',  topics:['摄影','爵士'], lastSeen:'3 周前',
               summary:'摄影师 · 5 年老友 · 今晚 8pm 有约' },
@@ -2368,7 +2382,7 @@
   };
 
   // Inbox layout
-  const INBOX = {
+  let INBOX = {
     now: [
       { id:'ava',   preview:'Q3 项目合同细节确认一下', time:'9:12', priority:'立刻回', action:'附和确认' },
       { id:'mira',  preview:'今晚 8 点 Blue Note？带礼物给你 ✨', time:'昨天 20:43', priority:'立刻回', action:'附和' },
@@ -2385,7 +2399,7 @@
   };
 
   // AI suggestions per contact: hints (dynamic, relationship+content driven) + deep analysis
-  const AI_REPLIES = {
+  let AI_REPLIES = {
     mira: {
       analysis: 'Mira 期待你确认 8 点的安排，语气温暖、有礼物想送你。<br><span class="text-pulse-text-2 text-[12px]">建议：积极回应 + 表达期待</span>',
       hints: [
@@ -2619,9 +2633,9 @@
   let currentScreen = 'today';
 
   // ===================== LIFE COPILOT DATA =====================
-  const NORTH_STAR = "成为最值得信赖的爸爸 + 影响 100 万产品人的设计师";
+  let NORTH_STAR = "成为最值得信赖的爸爸 + 影响 100 万产品人的设计师";
 
-  const MAINLINES = [
+  let MAINLINES = [
     {
       id: 'A', code: 'A', title: '转型 PM',
       motivation: '服务身份「设计师 → 产品人」',
@@ -2655,7 +2669,7 @@
   ];
 
   // Mainline badges per inbox contact
-  const MAINLINE_BADGES = {
+  let MAINLINE_BADGES = {
     mira: { code:'C-临', label:'朋友强连接', color:'#8B5CF6' },
     dad:  { code:'C-家', label:'家人陪伴', color:'#10B981' },
     ava:  { code:'A-高', label:'主线高价值', color:'#F59E0B' },
@@ -2747,7 +2761,7 @@
   let PEEK_BACK_TO_TODAY = false; // P3.4: 看看跳转时是否显示"返回我的事"短路
 
   // 消息 → 该消息拆出的事（v0.5: 混合 0/1/2/3 让用户看到 AI 真在判断）
-  const MSG_TO_THINGS = {
+  let MSG_TO_THINGS = {
     ava:    2,   // "Q3 项目合同细节确认一下" → 合同回签 + 备 3 个问题
     mira:   1,   // 8 点 Blue Note
     dad:    2,   // 复查 + 是否陪同
@@ -2757,7 +2771,545 @@
     climb:  0,
   };
 
-  // 事的类型标签
+  // ===================== CHAT HISTORY (per-persona, per-contact) =====================
+  let CHAT_HISTORY = {};
+
+  // ===================== PERSONAS (v0.5: 高管 / 学生) =====================
+  // Each persona has full self-contained data: contacts, inbox, mainlines, things, replies, chat history.
+  // switchPersona(name) reassigns all top-level let vars and re-renders.
+
+  const PERSONA_EXEC = {
+    label: '腾讯高管',
+    sub:   'Pony 老板 · 姚顺雨顾问',
+    northStar: '带团队做出 1 款日活破亿的 AI 产品 · 同时不缺席家庭',
+    contacts: {
+      pony:  { id:'pony',  name:'Pony',         initial:'P',  bg:'linear-gradient(135deg,#3B82F6,#1E3A8A)',
+               tag:'老板', cluster:'work',  strength:'high',   topics:['战略','AI'], lastSeen:'今早 7:42',
+               summary:'Tencent CEO · 7 点丢链接' },
+      yao:   { id:'yao',   name:'姚顺雨',       initial:'姚', bg:'linear-gradient(135deg,#8B5CF6,#5B21B6)',
+               tag:'AI 顾问', cluster:'work', strength:'high', topics:['AI 研究','reasoning'], lastSeen:'凌晨 02:13',
+               summary:'Princeton 出身 · 深夜长 message' },
+      ren:   { id:'ren',   name:'任宇昕',       initial:'任', bg:'linear-gradient(135deg,#10B981,#047857)',
+               tag:'同级', cluster:'work', strength:'high', topics:['BG 协同'], lastSeen:'8:55',
+               summary:'IEG BG 副总 · 每周一对一' },
+      lin:   { id:'lin',   name:'林志立',       initial:'L',  bg:'linear-gradient(135deg,#F59E0B,#B45309)',
+               tag:'投资人', cluster:'clients', strength:'medium', topics:['募资'], lastSeen:'昨天 19:30',
+               summary:'硅谷基金 · Q3 募资节点' },
+      stratteam:{ id:'stratteam', name:'战略小组', initial:'#', bg:'linear-gradient(135deg,#6B7280,#374151)',
+               tag:'群聊', cluster:'work', strength:'low', topics:['周报'], lastSeen:'10 分钟前',
+               summary:'12 人 · 你不在的 90 分钟有 187 条' },
+      wife:  { id:'wife',  name:'老婆',         initial:'婆', bg:'linear-gradient(135deg,#F472B6,#BE185D)',
+               tag:'家人', cluster:'family', strength:'high', topics:['家'], lastSeen:'昨晚',
+               summary:'周末家庭日 · 已 3 周没正经聚' },
+      son:   { id:'son',   name:'儿子',         initial:'子', bg:'linear-gradient(135deg,#A855F7,#6B21A8)',
+               tag:'家人', cluster:'family', strength:'high', topics:['学校','足球'], lastSeen:'昨晚',
+               summary:'10 岁 · 周六足球比赛' },
+      mom:   { id:'mom',   name:'妈妈',         initial:'妈', bg:'linear-gradient(135deg,#10B981,#059669)',
+               tag:'家人', cluster:'family', strength:'medium', topics:['家事'], lastSeen:'30 天前',
+               summary:'已 30 天未联系 · 上次电话 5 月 7 日' },
+      assistant:{ id:'assistant', name:'助理 Lin', initial:'助', bg:'linear-gradient(135deg,#3B82F6,#1D4ED8)',
+               tag:'助理', cluster:'work', strength:'medium', topics:['日历','邮件'], lastSeen:'今早',
+               summary:'你的助理 · 日历 + 邮件中转' },
+    },
+    inbox: {
+      now: [
+        { id:'pony', preview:'看看这个 https://... 怎么落地', time:'今早 7:42', priority:'立刻回', action:'快速过 + 给落地点' },
+        { id:'yao',  preview:'Andy 的 reasoning paper 比 ours 早 1 周 · 要不要重新对线？', time:'凌晨 02:13', priority:'立刻回', action:'肯定 + 提观点' },
+      ],
+      later: [
+        { id:'ren',  preview:'周三晨会能不能挪到 9:30？', time:'8:55', priority:'稍后回', action:'同意 + 给替代' },
+        { id:'lin',  preview:'deck v3 看了，附件批注一下', time:'昨天 19:30', priority:'稍后回', action:'专业承诺' },
+        { id:'mom',  preview:'你最近忙吗', time:'昨天', priority:'稍后回', action:'附和 + 具体计划' },
+      ],
+      ignore: [
+        { id:'stratteam', preview:'周报模板 v2 + 187 条', time:'10 分钟前', priority:'群聊', action:'助理 Lin 已总结' },
+        { id:'assistant', preview:'今日日历 / 待办 12 项', time:'今早 8:00', priority:'摘要', action:'已浏览' },
+      ],
+    },
+    mainlines: [
+      { id:'A', code:'A', title:'混元接入 5 个核心场景', motivation:'服务身份「带团队做出日活破亿 AI 产品」',
+        criteria:'90 天内 5 个场景 GMV ↑ 20%', progress:0.4, streak:0, color:'#8B5CF6', windowDays:90, relatedContacts:['pony','yao','ren'] },
+      { id:'B', code:'B', title:'Q3 OKR 季度对齐', motivation:'服务身份「能撑住组织扩展的领导」',
+        criteria:'Q3 末 12 人团队 OKR 通过率 ≥ 80%', progress:0.55, streak:0, color:'#3B82F6', windowDays:90, relatedContacts:['ren','lin'] },
+      { id:'C', code:'C', title:'周末家庭日', motivation:'服务身份「不缺席的丈夫和爸爸」',
+        criteria:'每周末至少 1 整天 family-only · 不带电脑', progress:0.7, streak:5, color:'#F472B6', windowDays:365, relatedContacts:['wife','son'] },
+    ],
+    mainlineBadges: {
+      pony:    { code:'A-工', label:'AI 战略', color:'#8B5CF6' },
+      yao:     { code:'A-顾', label:'AI 顾问', color:'#8B5CF6' },
+      ren:     { code:'B-同', label:'BG 协同', color:'#3B82F6' },
+      lin:     { code:'B-资', label:'募资节奏', color:'#3B82F6' },
+      mom:     { code:'C-家', label:'家人陪伴', color:'#F472B6' },
+      wife:    { code:'C-家', label:'家庭', color:'#F472B6' },
+      son:     { code:'C-家', label:'家庭', color:'#F472B6' },
+      stratteam:{ code:'B-报', label:'团队周报', color:'#3B82F6' },
+    },
+    things: [
+      // 长期 ⭐
+      { id:'th_long_a', container:'focus', type:'focus', status:'active',
+        title:'混元接入 5 场景', subtitle:'90 天 · 已落地 2 / 5',
+        mainline:'A', persons:['pony','yao'], source:null, streakDays:0, totalDays:32,
+        imp:3, urg:2, lastTouchedAt:'今早' },
+      { id:'th_long_b', container:'focus', type:'focus', status:'active',
+        title:'Q3 OKR 季度对齐', subtitle:'12 人团队 · 1on1 周节奏',
+        mainline:'B', persons:['ren'], source:null, streakDays:6, totalDays:42,
+        imp:2, urg:1, lastTouchedAt:'昨天' },
+      { id:'th_long_c', container:'focus', type:'focus', status:'active',
+        title:'周末家庭日 · 不带电脑', subtitle:'已连续 5 周做到',
+        mainline:'C', persons:['wife','son'], source:null, streakDays:5, totalDays:5,
+        imp:3, urg:2, lastTouchedAt:'上周六' },
+      // 短期
+      { id:'th_short_1', container:'focus', type:'schedule', status:'active',
+        title:'明天 14:00 · Pony 1on1', subtitle:'准备 3 个数（DAU / GMV / churn）',
+        mainline:'A', persons:['pony'], source:null,
+        imp:3, urg:3, lastTouchedAt:'今早' },
+      { id:'th_short_2', container:'focus', type:'followup', status:'active',
+        title:'姚老师 12 页论文回复', subtitle:'他周末发的 reasoning 比对',
+        mainline:'A', persons:['yao'], source:{ msgId:'yao_msg_1', preview:'Andy 的 reasoning paper 比 ours 早 1 周 · 要不要重新对线？' },
+        imp:2, urg:2, lastTouchedAt:'凌晨 02:13' },
+      // 小 P 发现 top 5
+      { id:'th_ai_1', container:'ai', type:'task', status:'active',
+        title:'Pony 早 7:42 转的链接', subtitle:'要快速过 + 给落地点',
+        mainline:'A', persons:['pony'], source:{ msgId:'pony_msg_1', preview:'看看这个 https://... 怎么落地' },
+        imp:3, urg:3, reason:'老板亲发 · 等你态度', lastTouchedAt:'今早 7:42' },
+      { id:'th_ai_2', container:'ai', type:'decision', status:'active',
+        title:'任宇昕想挪周三晨会到 9:30', subtitle:'你跟战略小组 9:00 已订',
+        mainline:'B', persons:['ren'], source:{ msgId:'ren_msg_1', preview:'周三晨会能不能挪到 9:30？' },
+        imp:1, urg:2, reason:'有冲突 · 需要决策', lastTouchedAt:'8:55' },
+      { id:'th_ai_3', container:'ai', type:'followup', status:'active',
+        title:'林志立 deck v3 等批注', subtitle:'Q3 募资 · 投资人决策依据',
+        mainline:'B', persons:['lin'], source:{ msgId:'lin_msg_1', preview:'deck v3 看了，附件批注一下' },
+        imp:3, urg:2, reason:'投资人节奏 · 影响 Q3 节点', lastTouchedAt:'昨天 19:30' },
+      { id:'th_ai_4', container:'ai', type:'followup', status:'active',
+        title:'妈妈 30 天未联系', subtitle:'家人 · 上次电话 5 月 7 日',
+        mainline:'C', persons:['mom'], source:{ msgId:null, preview:'AI 从关系图谱中检测' },
+        imp:3, urg:2, reason:'触达冷却 ≥ 30d', lastTouchedAt:'昨天' },
+      { id:'th_ai_5', container:'ai', type:'task', status:'active',
+        title:'儿子周六足球比赛', subtitle:'老婆昨天发的家长群通知',
+        mainline:'C', persons:['son','wife'], source:{ msgId:null, preview:'家长群转发' },
+        imp:2, urg:2, reason:'家庭仪式 · 缺席代价高', lastTouchedAt:'昨晚' },
+      // 折叠
+      { id:'th_ai_6', container:'ai', type:'task', status:'active', folded:true,
+        title:'战略小组群 187 条未读', subtitle:'助理 Lin 已总结要点',
+        mainline:'B', persons:[], source:{ msgId:null, preview:'群聚合' },
+        imp:1, urg:1, reason:'高频更新 · 助理已抽要点', lastTouchedAt:'10 分钟前' },
+      { id:'th_ai_7', container:'ai', type:'task', status:'active', folded:true,
+        title:'HR 年度评估问卷', subtitle:'12 道题 · 截止周五',
+        mainline:null, persons:[], source:{ msgId:null, preview:'HR 邮件' },
+        imp:1, urg:2, reason:'流程性 · 弱必要', lastTouchedAt:'今早 8:00' },
+      { id:'th_ai_8', container:'ai', type:'decision', status:'active', folded:true,
+        title:'是否参加张老师 AI summit 演讲', subtitle:'对方第 3 次邀请',
+        mainline:'A', persons:[], source:{ msgId:null, preview:'外部活动邀请' },
+        imp:1, urg:1, reason:'品牌曝光机会', lastTouchedAt:'昨天' },
+      { id:'th_ai_9', container:'ai', type:'task', status:'active', folded:true,
+        title:'共享文档 23 条评论', subtitle:'任宇昕 + 同级在 review',
+        mainline:'B', persons:['ren'], source:{ msgId:null, preview:'文档协作' },
+        imp:1, urg:1, reason:'流程协作', lastTouchedAt:'昨天' },
+    ],
+    msgToThings: { pony:1, yao:2, ren:1, lin:1, mom:1, stratteam:0, assistant:0 },
+    aiReplies: {
+      pony: { analysis:'Pony 转链接 + 一句"怎么落地" — 期待你<b>当天给到落地角度</b>，不要长篇分析。',
+              hints:[
+                { emoji:'⚡', label:'快速过', sub:'1 句话 + 落地点',
+                  draft:'看了，3 个落地点：\n1) 微信支付场景 A/B 测试\n2) 视频号创作辅助\n3) 客服替代率 +20%\n下午 5:00 给完整 brief。',
+                  chips:[] },
+                { emoji:'❓', label:'先反问', sub:'确认意图',
+                  draft:'看到了。你最想推的方向是哪个？我按这个方向今晚出 brief。',
+                  chips:[] }
+              ]},
+      yao:  { analysis:'姚老师凌晨发长 message · 学术 + 紧迫感。<b>建议肯定他的发现 + 提自己的观察</b>，避免被推着走。',
+              hints:[
+                { emoji:'🤝', label:'肯定 + 提观点', sub:'同行式平等',
+                  draft:'好观察 ✨ 我注意到 Andy 的 reasoning 在 multi-step planning 上更强，我们的优势在 long-context retrieval。要不周一晚我们 align 一下，不必全推。',
+                  chips:[] },
+                { emoji:'📚', label:'请教式', sub:'保持谦虚',
+                  draft:'谢谢分享！如果让你重新做，会优先攻 Andy 哪一面？我想听你的判断。',
+                  chips:[] }
+              ]},
+      ren:  { analysis:'任宇昕想挪会，但跟战略小组 9:00 冲突 — <b>建议同意 + 给替代时间</b>。',
+              hints:[
+                { emoji:'✓', label:'同意 + 替代', sub:'保护双方时间',
+                  draft:'9:30 你那边比较好，但我跟战略小组 9:00 已经订了，挪到 10:00 怎样？',
+                  chips:[] },
+                { emoji:'🔄', label:'让助理协调', sub:'更轻量',
+                  draft:'让 Lin 跟你那边对一下日历，找你我都方便的 30 分钟。',
+                  chips:[] }
+              ]},
+      lin:  { analysis:'投资人 deck v3 等回复 · <b>专业感 + 准期承诺</b>。Q3 募资节点关键。',
+              hints:[
+                { emoji:'📅', label:'专业承诺', sub:'给具体时间',
+                  draft:'感谢 Lin。我今晚批注后周三上午发回，重点回应你 P3 提的 retention 问题。',
+                  chips:[] },
+                { emoji:'☎', label:'约电话', sub:'当面聊更高效',
+                  draft:'有些 nuance 邮件聊不清楚，约你 30 分钟电话？周二下午我都可以。',
+                  chips:[] }
+              ]},
+      mom:  { analysis:'妈妈"你最近忙吗" — 表面是问候，<b>实际想知道你过得好不好 + 何时能见到</b>。',
+              hints:[
+                { emoji:'💚', label:'附和 + 具体计划', sub:'给确定性',
+                  draft:'最近确实忙，不过这周末我回家吃顿饭，带儿子一起。妈你做你拿手的红烧肉嘛 🍚',
+                  chips:[] },
+                { emoji:'📞', label:'给一通电话', sub:'比文字暖',
+                  draft:'刚看到 妈，今晚 8 点给你打电话好不好？正经聊 20 分钟。',
+                  chips:[] }
+              ]},
+      stratteam:{ analysis:'群消息 187 条 · 助理已总结。<b>不需要逐条看，扫要点即可</b>。',
+              hints:[
+                { emoji:'📋', label:'扫要点', sub:'看 Lin 的总结',
+                  draft:'(已读 Lin 的总结，标了 3 处需要回应)',
+                  chips:[] }
+              ]},
+      assistant:{ analysis:'助理 Lin 的日报 · 礼貌确认即可。',
+              hints:[
+                { emoji:'👍', label:'已收到', sub:'',
+                  draft:'收到 Lin，今天的安排我看过了 ✓',
+                  chips:[] }
+              ]},
+    },
+    chatHistory: {
+      pony: [
+        { kind:'time', text:'今早 7:42' },
+        { from:'them', text:'看看这个 https://blog.example.com/anthropic-claude-3-tools' },
+        { from:'them', text:'怎么落地' },
+      ],
+      yao: [
+        { kind:'time', text:'凌晨 02:13' },
+        { from:'them', text:'醒着么' },
+        { from:'them', text:'刚看 Andy 团队的新论文，他们的 reasoning approach 比 ours 早出来一周' },
+        { from:'them', text:'我们要不要重新对一下线？' },
+        { from:'them', text:'附 12 页详细对比 (PDF)' },
+      ],
+      ren: [
+        { kind:'time', text:'8:55' },
+        { from:'them', text:'兄弟，周三晨会能不能挪到 9:30？' },
+        { from:'them', text:'我那个时间有个 IEG 内部 review 要主持' },
+      ],
+      lin: [
+        { kind:'time', text:'昨天 19:30' },
+        { from:'them', text:'deck v3 看了，整体方向对' },
+        { from:'them', text:'附件批注了 3 处，主要是 P3 retention 那块需要数据支撑' },
+        { from:'them', text:'你方便回我下么' },
+      ],
+      mom: [
+        { kind:'time', text:'昨天' },
+        { from:'them', text:'你最近忙吗' },
+        { kind:'time', text:'30 天前 · 上次电话' },
+        { from:'me',   text:'妈，最近项目压力大，下周给你电话' },
+      ],
+      stratteam: [
+        { kind:'time', text:'10 分钟前' },
+        { from:'them', text:'(187 条 · 已被助理 Lin 总结)' },
+      ],
+      assistant: [
+        { kind:'time', text:'今早 8:00' },
+        { from:'them', text:'早上好。今日：\n· 14:00 Pony 1on1\n· 16:30 战略小组周报\n· 19:00 林志立电话\n· 待办 12 项已分类' },
+      ],
+    },
+  };
+
+  const PERSONA_STUDENT = {
+    label: '大四学生',
+    sub:   '秋招 + 实习 + 论文',
+    northStar: '拿到一个能让我五年不后悔的 offer · 同时不丢实验室和朋友',
+    contacts: {
+      hr:    { id:'hr',    name:'HR 张姐',      initial:'H',  bg:'linear-gradient(135deg,#3B82F6,#1E3A8A)',
+               tag:'字节HR', cluster:'work', strength:'medium', topics:['秋招','薪资'], lastSeen:'14:32',
+               summary:'你的字节秋招对接人' },
+      lu:    { id:'lu',    name:'陆老师',       initial:'陆', bg:'linear-gradient(135deg,#F472B6,#A855F7)',
+               tag:'面试官', cluster:'work', strength:'medium', topics:['面试','项目'], lastSeen:'13:42',
+               summary:'米哈游二面 · 周三 14:00' },
+      cathy: { id:'cathy', name:'Cathy 学姐',   initial:'C',  bg:'linear-gradient(135deg,#10B981,#047857)',
+               tag:'学姐', cluster:'friends', strength:'high', topics:['职场','简历'], lastSeen:'凌晨 1:23',
+               summary:'字节工作 2 年 · 给你内推' },
+      prof:  { id:'prof',  name:'周老师',       initial:'周', bg:'linear-gradient(135deg,#8B5CF6,#5B21B6)',
+               tag:'导师', cluster:'work', strength:'high', topics:['论文','学术'], lastSeen:'今早',
+               summary:'实验室导师 · 论文 6/20 final' },
+      jay:   { id:'jay',   name:'阿杰',         initial:'杰', bg:'linear-gradient(135deg,#F59E0B,#B45309)',
+               tag:'室友', cluster:'friends', strength:'high', topics:['宿舍','爬山'], lastSeen:'昨晚',
+               summary:'同寝 4 年 · 你已经爽约 2 次' },
+      xiaomi:{ id:'xiaomi',name:'小米',         initial:'米', bg:'linear-gradient(135deg,#F472B6,#BE185D)',
+               tag:'女朋友', cluster:'friends', strength:'high', topics:['周末','异地'], lastSeen:'今早',
+               summary:'异地 · 在杭州工作' },
+      mom:   { id:'mom',   name:'妈妈',         initial:'妈', bg:'linear-gradient(135deg,#10B981,#059669)',
+               tag:'家人', cluster:'family', strength:'high', topics:['家事','offer'], lastSeen:'昨天',
+               summary:'每天问 offer 进展' },
+      mentor:{ id:'mentor',name:'实习 mentor',  initial:'M',  bg:'linear-gradient(135deg,#3B82F6,#1D4ED8)',
+               tag:'实习', cluster:'work', strength:'medium', topics:['实习','工作'], lastSeen:'今早',
+               summary:'你最近的实习 mentor · 字节增长部门' },
+      zhao:  { id:'zhao',  name:'赵同学',       initial:'赵', bg:'linear-gradient(135deg,#6B7280,#374151)',
+               tag:'同学', cluster:'work', strength:'low', topics:['offer','算法'], lastSeen:'1 小时前',
+               summary:'同班卷王 · 已 5 个 offer' },
+    },
+    inbox: {
+      now: [
+        { id:'hr', preview:'这两道编程题麻烦今晚 23:59 前提交 ⏰', time:'14:32', priority:'立刻回', action:'专业准时' },
+        { id:'lu', preview:'周三 14:00 二面，请准备简历里那个 RAG 项目', time:'13:42', priority:'立刻回', action:'认真准备' },
+      ],
+      later: [
+        { id:'cathy',  preview:'看了你简历，写了 13 条建议给你（凌晨 1:23 真心写的）', time:'凌晨 1:23', priority:'稍后回', action:'真诚感谢' },
+        { id:'mom',    preview:'今天有进展吗？', time:'昨天', priority:'稍后回', action:'报具体' },
+        { id:'mentor', preview:'周五分享 30 分钟你这两个月做了什么', time:'今早', priority:'稍后回', action:'收到 + 准备' },
+      ],
+      ignore: [
+        { id:'zhao',   preview:'今天又来一个 offer！第 5 个了 [群聊]', time:'1 小时前', priority:'群聊', action:'已忽略' },
+        { id:'prof',   preview:'毕业答辩日期定 6/22 · 教务处通知', time:'今早', priority:'通知', action:'记日历' },
+      ],
+    },
+    mainlines: [
+      { id:'A', code:'A', title:'秋招 · 字节 / 腾讯 / 米哈游', motivation:'服务身份「拿到五年不后悔的 offer」',
+        criteria:'30 天内拿到 ≥ 1 个心仪 offer', progress:0.5, streak:0, color:'#8B5CF6', windowDays:30, relatedContacts:['hr','lu','cathy'] },
+      { id:'B', code:'B', title:'论文 final · 6/20 交稿', motivation:'服务身份「不让导师失望」',
+        criteria:'45 天 · 5 章 · 已写 3 章', progress:0.6, streak:0, color:'#3B82F6', windowDays:45, relatedContacts:['prof','mentor'] },
+      { id:'C', code:'C', title:'跟小米 + 室友的关系', motivation:'服务身份「不丢朋友」',
+        criteria:'每 2 周见 / 通话 ≥ 1 次', progress:0.4, streak:1, color:'#F472B6', windowDays:365, relatedContacts:['xiaomi','jay'] },
+    ],
+    mainlineBadges: {
+      hr:     { code:'A-招', label:'字节秋招', color:'#8B5CF6' },
+      lu:     { code:'A-招', label:'米哈游面试', color:'#8B5CF6' },
+      cathy:  { code:'A-招', label:'内推支援', color:'#8B5CF6' },
+      prof:   { code:'B-论', label:'论文导师', color:'#3B82F6' },
+      mentor: { code:'B-习', label:'实习 mentor', color:'#3B82F6' },
+      jay:    { code:'C-室', label:'室友', color:'#F472B6' },
+      xiaomi: { code:'C-情', label:'女朋友', color:'#F472B6' },
+      mom:    { code:'C-家', label:'家人', color:'#F472B6' },
+    },
+    things: [
+      // 长期 ⭐
+      { id:'th_long_a', container:'focus', type:'focus', status:'active',
+        title:'秋招进度 · 投/笔/面', subtitle:'30 天 · 已投 12 / 笔试 5 / 面试 2',
+        mainline:'A', persons:['hr','lu'], source:null, streakDays:0, totalDays:18,
+        imp:3, urg:3, lastTouchedAt:'今早' },
+      { id:'th_long_b', container:'focus', type:'focus', status:'active',
+        title:'论文 final 节奏', subtitle:'已写 3 / 5 章 · 周节奏 1 章',
+        mainline:'B', persons:['prof'], source:null, streakDays:3, totalDays:21,
+        imp:3, urg:2, lastTouchedAt:'昨天' },
+      { id:'th_long_c', container:'focus', type:'focus', status:'active',
+        title:'跟小米 + 室友的周末', subtitle:'2 周一次 · 别再爽约',
+        mainline:'C', persons:['xiaomi','jay'], source:null, streakDays:1, totalDays:8,
+        imp:2, urg:2, lastTouchedAt:'上周' },
+      // 短期
+      { id:'th_short_1', container:'focus', type:'schedule', status:'active',
+        title:'周三 14:00 · 米哈游二面', subtitle:'要准备 RAG 项目细节',
+        mainline:'A', persons:['lu'], source:{ msgId:'lu_msg_1', preview:'周三 14:00 二面，请准备简历里那个 RAG 项目' },
+        imp:3, urg:3, lastTouchedAt:'13:42' },
+      { id:'th_short_2', container:'focus', type:'task', status:'active',
+        title:'论文 final 6/20 交稿', subtitle:'还差 2 章 · 周老师催了 2 次',
+        mainline:'B', persons:['prof'], source:null,
+        imp:3, urg:2, lastTouchedAt:'今早' },
+      // 小 P 发现 top 5
+      { id:'th_ai_1', container:'ai', type:'task', status:'active',
+        title:'HR 张姐 2 道编程题 · 23:59 截止', subtitle:'字节秋招 · 没退路',
+        mainline:'A', persons:['hr'], source:{ msgId:'hr_msg_1', preview:'这两道编程题麻烦今晚 23:59 前提交' },
+        imp:3, urg:3, reason:'有 deadline + 决定下一轮', lastTouchedAt:'14:32' },
+      { id:'th_ai_2', container:'ai', type:'followup', status:'active',
+        title:'Cathy 学姐 13 条简历建议', subtitle:'她凌晨 1:23 真心写的',
+        mainline:'A', persons:['cathy'], source:{ msgId:'cathy_msg_1', preview:'看了你简历，写了 13 条建议给你' },
+        imp:2, urg:2, reason:'高质量帮助 + 关系积累', lastTouchedAt:'凌晨 1:23' },
+      { id:'th_ai_3', container:'ai', type:'task', status:'active',
+        title:'mentor 让你周五分享 30 分钟', subtitle:'实习总结 · 第一次正式分享',
+        mainline:'B', persons:['mentor'], source:{ msgId:'mentor_msg_1', preview:'周五分享 30 分钟你这两个月做了什么' },
+        imp:2, urg:2, reason:'职场首场分享 · 影响转正', lastTouchedAt:'今早' },
+      { id:'th_ai_4', container:'ai', type:'followup', status:'active',
+        title:'妈妈第 7 次问 offer', subtitle:'昨天问的，还没回',
+        mainline:'C', persons:['mom'], source:{ msgId:'mom_msg_1', preview:'今天有进展吗？' },
+        imp:2, urg:1, reason:'连续 7 天追问 · 情绪积压', lastTouchedAt:'昨天' },
+      { id:'th_ai_5', container:'ai', type:'decision', status:'active',
+        title:'是否回赵同学的群消息', subtitle:'他在晒第 5 个 offer',
+        mainline:null, persons:['zhao'], source:{ msgId:'zhao_msg_1', preview:'今天又来一个 offer！第 5 个了' },
+        imp:1, urg:1, reason:'比较心 vs 关系维护', lastTouchedAt:'1 小时前' },
+      // 折叠
+      { id:'th_ai_6', container:'ai', type:'task', status:'active', folded:true,
+        title:'阿杰约周末爬山', subtitle:'你已经爽约 2 次',
+        mainline:'C', persons:['jay'], source:null, imp:1, urg:1,
+        reason:'关系信号 · 别再爽约', lastTouchedAt:'昨晚' },
+      { id:'th_ai_7', container:'ai', type:'schedule', status:'active', folded:true,
+        title:'毕业答辩日期 6/22', subtitle:'教务处通知',
+        mainline:'B', persons:[], source:null, imp:1, urg:1,
+        reason:'流程性 · 已记日历', lastTouchedAt:'今早' },
+      { id:'th_ai_8', container:'ai', type:'task', status:'active', folded:true,
+        title:'小米发了早安照片', subtitle:'还没回',
+        mainline:'C', persons:['xiaomi'], source:null, imp:1, urg:1,
+        reason:'日常关系 · 不回会冷', lastTouchedAt:'今早' },
+      { id:'th_ai_9', container:'ai', type:'decision', status:'active', folded:true,
+        title:'高中同学群 · XX 结婚', subtitle:'要不要随份子',
+        mainline:null, persons:[], source:null, imp:1, urg:1,
+        reason:'弱关系决策', lastTouchedAt:'昨天' },
+    ],
+    msgToThings: { hr:1, lu:2, cathy:1, mom:0, mentor:1, prof:0, zhao:0 },
+    aiReplies: {
+      hr: { analysis:'HR 张姐工作时间发题 + 紧 deadline · <b>专业 + 准时</b> 是首要。别撒娇也别太僵。',
+            hints:[
+              { emoji:'✓', label:'专业准时', sub:'让她放心',
+                draft:'张姐好，已收到。今晚 23:30 前发到您邮箱，思路 + 代码都会附上 ✨',
+                chips:[] },
+              { emoji:'❓', label:'请教延期', sub:'万不得已',
+                draft:'张姐，今晚我有期末小组答辩可能晚 1 小时，方便延到明早 8 点前么？我会提交完整代码 + 思路文档。',
+                chips:[] }
+            ]},
+      lu: { analysis:'米哈游陆老师指定 RAG 项目 · 他要看你<b>具体决策 + 数字</b>。别背简历。',
+            hints:[
+              { emoji:'📋', label:'认真准备', sub:'数字 + 决策',
+                draft:'陆老师好，收到。我会准备好这几个角度：\n1) 为什么选 RAG 而不是 fine-tune\n2) chunking 策略的 3 次迭代\n3) 召回率从 67% → 89% 的 3 个关键改动\n周三见 ✨',
+                chips:[] },
+              { emoji:'🤔', label:'问需要带啥', sub:'更细心',
+                draft:'陆老师好，请问周三需要带笔记本现场演示，还是直接讲 deck 就行？',
+                chips:[] }
+            ]},
+      cathy:{ analysis:'学姐凌晨 1:23 真心写 13 条 · <b>真诚感谢 + 具体回应一两条</b>，别只说"谢谢学姐"。',
+            hints:[
+              { emoji:'🙏', label:'真诚 + 具体', sub:'尊重她的时间',
+                draft:'学姐 救命谢谢 🥹\n你说的第 3 条（项目要写"我做了"而不是"我们做了"）我立刻改了，第 7 条简历开头那个 case 你说的太对了。\n下周请你喝奶茶（喜茶？）',
+                chips:[] },
+              { emoji:'💭', label:'分享进展', sub:'让她知道有用',
+                draft:'谢谢学姐！按你说的改完发你了。这周已经投了字节、米哈游，米哈游进二面了 ✨',
+                chips:[] }
+            ]},
+      prof: { analysis:'导师催稿 · <b>报具体进度 + 给确定日期</b>，别说"快了"。',
+            hints:[
+              { emoji:'📅', label:'报进度 + 给日期', sub:'让他放心',
+                draft:'周老师，第 4 章实验部分写了 60%，本周日发您初稿。第 5 章争取下周三前出 draft。',
+                chips:[] }
+            ]},
+      mom: { analysis:'妈妈连问 7 天 · <b>给具体进展，但别报喜不报忧</b>。她最怕你焦虑。',
+            hints:[
+              { emoji:'💚', label:'具体进展', sub:'让她有数',
+                draft:'妈，米哈游进二面了，周三面。字节笔试今晚做。腾讯还在等。\n别担心，我吃睡都正常 ✨',
+                chips:[] },
+              { emoji:'📞', label:'给一通电话', sub:'比文字暖',
+                draft:'妈我打给你，今晚 9 点行么',
+                chips:[] }
+            ]},
+      mentor:{ analysis:'mentor 让你做实习总结分享 · <b>这是转正的隐性环节</b>。认真准备。',
+            hints:[
+              { emoji:'✓', label:'收到 + 提纲', sub:'体现规划',
+                draft:'M 哥收到。我准备这 3 块：\n1) 这两个月做了 X 个项目（量化）\n2) 1 个有 insight 的发现\n3) 我还需要在哪些方面成长\n周四先发您审一遍可以吗？',
+                chips:[] }
+            ]},
+      jay:  { analysis:'阿杰第 3 次约爬山 · <b>给替代时间，别再爽约</b>。',
+            hints:[
+              { emoji:'🤝', label:'坦诚 + 替代', sub:'重申友情',
+                draft:'兄弟对不起 🙏 这周末真没法（米哈游二面准备）\n下周六我请客撸串 + 桌游？',
+                chips:[] }
+            ]},
+      xiaomi:{analysis:'小米发早安没回 · <b>关心 + 计划下次见面</b>，异地最怕"被忽视"。',
+            hints:[
+              { emoji:'🌅', label:'回早安 + 计划', sub:'给具体期待',
+                draft:'早呀 ✨ 这周我准备米哈游面试有点忙，周末等结果出来咱们视频好不好？\n端午我去杭州找你 🥟',
+                chips:[] }
+            ]},
+      zhao: { analysis:'卷王晒 offer · <b>不必回，或给中性祝贺</b>。比较心是陷阱。',
+            hints:[
+              { emoji:'👍', label:'中性祝贺', sub:'不内卷',
+                draft:'恭喜恭喜 ✨',
+                chips:[] }
+            ]},
+    },
+    chatHistory: {
+      hr: [
+        { kind:'time', text:'14:32' },
+        { from:'them', text:'同学你好，我是字节张姐 ✨' },
+        { from:'them', text:'笔试通过了，恭喜！' },
+        { from:'them', text:'这两道编程题麻烦今晚 23:59 前提交，链接在下面' },
+        { from:'them', text:'https://bytecode.example.com/test/12345' },
+      ],
+      lu: [
+        { kind:'time', text:'13:42' },
+        { from:'them', text:'同学你好，我是米哈游陆老师' },
+        { from:'them', text:'看到你的一面反馈很不错' },
+        { from:'them', text:'周三 14:00 二面，请准备简历里那个 RAG 项目' },
+        { from:'them', text:'我们会重点问你的技术决策过程' },
+      ],
+      cathy: [
+        { kind:'time', text:'凌晨 1:23' },
+        { from:'them', text:'刚下班看了你的简历' },
+        { from:'them', text:'写了 13 条建议给你（认真版）：' },
+        { from:'them', text:'1. 项目栏目用"我做了 X"，不要写"我们做了"\n2. 量化！每个 bullet 加数字\n3. 把开源项目放最上面\n4. ...' },
+        { from:'them', text:'(完整 PDF · 点击查看)' },
+        { from:'them', text:'加油哦 💪 你比你想的更优秀' },
+      ],
+      prof: [
+        { kind:'time', text:'今早' },
+        { from:'them', text:'同学，论文进度怎么样了？' },
+      ],
+      jay: [
+        { kind:'time', text:'昨晚' },
+        { from:'them', text:'兄弟周末爬山不？' },
+        { from:'them', text:'已经第 3 次问你了 🥲' },
+      ],
+      xiaomi: [
+        { kind:'time', text:'今早' },
+        { from:'them', text:'早呀 ☀️' },
+        { from:'them', text:'(自拍)' },
+      ],
+      mom: [
+        { kind:'time', text:'昨天' },
+        { from:'them', text:'今天有进展吗？' },
+        { kind:'time', text:'前天' },
+        { from:'them', text:'吃饭没啊' },
+        { kind:'time', text:'4 天前' },
+        { from:'them', text:'mama 给你打了 600 块' },
+      ],
+      mentor: [
+        { kind:'time', text:'今早' },
+        { from:'them', text:'周五分享 30 分钟你这两个月做了什么' },
+        { from:'them', text:'团队所有人都会在' },
+      ],
+      zhao: [
+        { kind:'time', text:'1 小时前' },
+        { from:'them', text:'今天又来一个 offer！第 5 个了 [群聊]' },
+      ],
+    },
+  };
+
+  const PERSONAS = { exec: PERSONA_EXEC, student: PERSONA_STUDENT };
+  let CURRENT_PERSONA = 'exec';
+
+  function switchPersona(name) {
+    const p = PERSONAS[name];
+    if (!p) return;
+    CURRENT_PERSONA = name;
+    CONTACTS         = p.contacts;
+    INBOX            = p.inbox;
+    MAINLINES        = p.mainlines;
+    MAINLINE_BADGES  = p.mainlineBadges;
+    THINGS           = JSON.parse(JSON.stringify(p.things));  // deep copy 防修改污染原模板
+    MSG_TO_THINGS    = p.msgToThings;
+    AI_REPLIES       = p.aiReplies;
+    NORTH_STAR       = p.northStar;
+    CHAT_HISTORY     = p.chatHistory || {};
+
+    // reset transient state
+    if (typeof PI_CURRENT_TOPIC !== 'undefined') PI_CURRENT_TOPIC = null;
+    if (typeof LAST_UNDO_ACTION !== 'undefined') LAST_UNDO_ACTION = null;
+    if (typeof PI_TOPIC_CHANGES !== 'undefined') PI_TOPIC_CHANGES = [];
+    if (typeof PI_ENTER_SOURCE !== 'undefined')  PI_ENTER_SOURCE = 'pi';
+    if (typeof PEEK_SOURCE !== 'undefined')      PEEK_SOURCE = null;
+    if (typeof PEEK_BACK_TO_TODAY !== 'undefined') PEEK_BACK_TO_TODAY = false;
+    if (typeof rebuildPiMainlineState === 'function') rebuildPiMainlineState();
+
+    // reset Pi thread (so opening re-renders for new persona)
+    const piThread = document.getElementById('pi-thread');
+    if (piThread) piThread.innerHTML = '';
+    const topicBar = document.getElementById('pi-topic-bar');
+    if (topicBar) topicBar.classList.add('hidden');
+
+    // re-bind active default contact (if old contact doesn't exist in new persona)
+    if (typeof currentContact !== 'undefined' && !CONTACTS[currentContact]) {
+      currentContact = Object.keys(CONTACTS)[0] || null;
+    }
+
+    // re-render visible screens
+    if (typeof renderInbox    === 'function') renderInbox();
+    if (typeof renderMyFocus  === 'function') renderMyFocus();
+    if (typeof showScreen     === 'function') showScreen('today');
+
+    // update toggle UI
+    document.querySelectorAll('[data-persona-btn]').forEach(b => {
+      b.classList.toggle('active', b.dataset.personaBtn === name);
+    });
+  }
+
+
   const TYPE_BADGE = {
     focus:    { icon:'⭐', label:'长期关注', color:'#F59E0B' },
     task:     { icon:'✓', label:'待办',   color:'#8B5CF6' },
@@ -2834,6 +3386,19 @@
       foldBtn.innerHTML = `还有 <span id="ai-pool-fold-n">${aiFolded.length}</span> 件 · 展开 ⌄`;
     } else {
       foldBtn.classList.add('hidden');
+    }
+
+    // v0.5: brief strip — pick the highest-priority active AI thing
+    const briefStrip = document.getElementById('brief-strip-text');
+    if (briefStrip) {
+      const top = aiThings
+        .map(t => ({ t, score:(t.imp||0)*2 + (t.urg||0) }))
+        .sort((a,b) => b.score - a.score)[0];
+      if (top) {
+        briefStrip.innerHTML = `小 P · <span class="text-pulse-purple-2 font-semibold">${top.t.title}</span> · ${top.t.reason || ''}`;
+      } else {
+        briefStrip.innerHTML = `小 P · 早间简报 · 今天没新事 ✨`;
+      }
     }
   }
 
@@ -3329,10 +3894,13 @@
   function openChat(contactId) {
     currentContact = contactId;
     const c = CONTACTS[contactId];
+    if (!c) return;
     document.getElementById('chat-name').textContent = c.name;
     const av = document.getElementById('chat-avatar');
     av.textContent = c.initial;
     av.style.background = c.bg;
+    const subline = document.getElementById('chat-subline');
+    if (subline) subline.textContent = `active now · ${c.tag || ''} · ${c.summary || ''}`;
 
     // v0.5 P3.4: 看看跳转 → 显示"返回我的事"短路 banner
     const peekBanner = document.getElementById('chat-peek-banner');
@@ -3350,15 +3918,21 @@
     document.querySelectorAll('.hint-btn').forEach(b => b.classList.remove('active'));
 
     // update analysis text + hint buttons per contact
-    const ai = AI_REPLIES[contactId] || AI_REPLIES.mira;
+    const aiFallback = Object.values(AI_REPLIES)[0] || { analysis:'—', hints:[] };
+    const ai = AI_REPLIES[contactId] || aiFallback;
     document.querySelector('#copilot-analysis .text-pulse-text.leading-snug').innerHTML = ai.analysis;
     populateHints(ai.hints || []);
 
-    // refresh chat scripted history
-    if (contactId === 'mira') {
-      // already laid out in HTML - leave it
+    // refresh chat history (v0.5: 100% dynamic from persona's chatHistory)
+    const messages = document.getElementById('chat-messages');
+    const ch = (CHAT_HISTORY && CHAT_HISTORY[contactId]) || null;
+    if (ch && ch.length) {
+      messages.innerHTML = ch.map(b => {
+        if (b.kind === 'time') return `<div class="text-center text-[11px] text-pulse-text-3 my-1">${b.text}</div>`;
+        const cls = b.from === 'me' ? 'bubble-mine' : 'bubble-them';
+        return `<div class="bubble ${cls}">${b.text}</div>`;
+      }).join('');
     } else {
-      const messages = document.getElementById('chat-messages');
       const last = INBOX.now.concat(INBOX.later).find(m => m.id === contactId);
       const preview = last ? last.preview : '...';
       messages.innerHTML = `
@@ -3431,7 +4005,7 @@
     document.querySelectorAll('.hint-btn').forEach((b, i) => {
       b.classList.toggle('active', i === idx);
     });
-    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const ai = AI_REPLIES[currentContact] || Object.values(AI_REPLIES)[0];
     const hint = (ai.hints || [])[idx];
     if (!hint) return;
 
@@ -3477,7 +4051,7 @@
 
   // Apply a chip: rewrite draft, toggle active state
   function applyChip(chipId) {
-    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const ai = AI_REPLIES[currentContact] || Object.values(AI_REPLIES)[0];
     const hint = (ai.hints || [])[currentHintIdx];
     if (!hint) return;
     const chip = (hint.chips || []).find(c => c.id === chipId);
@@ -3520,7 +4094,7 @@
       showToast('试试上方快捷调整 chip ↑');
       return;
     }
-    const rewrites = REWRITES[currentContact] || REWRITES.mira;
+    const rewrites = REWRITES[currentContact] || Object.values(REWRITES)[0] || {};
     let style = null;
     if (/幽默|搞笑|逗|皮/.test(q)) style = 'humor';
     else if (/简短|短点|精简|简洁|短一点/.test(q)) style = 'brief';
@@ -3799,20 +4373,28 @@
     let openingHtml = '';
 
     if (PI_ENTER_SOURCE === 'brief') {
-      // 从首屏简报条进 → 接住妈妈话题
+      // 从首屏简报条进 → 接住 top P0 的话题（动态 · persona 自适应）
+      const aiThings = THINGS.filter(t => t.container==='ai' && t.status==='active');
+      const top = aiThings.map(t => ({ t, score:(t.imp||0)*2 + (t.urg||0) })).sort((a,b) => b.score - a.score)[0];
+      const topTitle = top ? top.t.title : '今天的事';
+      const topReason = top && top.t.reason ? top.t.reason : '需要你看一眼';
+      // persona-aware suggestion lines
+      const exec = CURRENT_PERSONA === 'exec';
+      const line1 = exec
+        ? `<b>${topTitle}</b><br>${topReason} · 最好今天给个反馈。`
+        : `<b>${topTitle}</b><br>${topReason} · 别拖。`;
+      const replies = exec
+        ? ['帮我起草一条回复','现在没空，下午再说','为什么这条优先级高']
+        : ['帮我准备应对','今天太累了','为什么这条优先级高'];
       openingHtml = `
         <div class="pi-bubble pi-bubble-pi" data-pi-opening data-opening-source="brief">
-          看到你点了简报 ✨<br>
-          <b>妈妈已经 28 天没联系</b>了，我有点担心。
+          看到你点了简报 ✨<br>${line1}
         </div>
         <div class="pi-bubble pi-bubble-pi">
-          要不今天打个电话？哪怕 1 分钟语音也行——<br>
-          这周连接强度能从 32% 跳到 58%。
+          要不现在处理一下？哪怕花 3 分钟想清楚下一步。
         </div>
         <div class="flex flex-wrap gap-1.5 mb-1">
-          <button class="pi-reply-chip" onclick="piSendChip(this, '帮我起草一条问候')">帮我起草一条问候</button>
-          <button class="pi-reply-chip" onclick="piSendChip(this, '今天太忙，明天吧')">今天太忙，明天吧</button>
-          <button class="pi-reply-chip" onclick="piSendChip(this, '为什么是 28 天就要提醒')">为什么 28 天提醒</button>
+          ${replies.map(r => `<button class="pi-reply-chip" onclick="piSendChip(this, ${JSON.stringify(r).replace(/"/g,'&quot;')})">${r}</button>`).join('')}
         </div>
       `;
     } else if (PI_ENTER_SOURCE === 'consult') {
@@ -3965,11 +4547,16 @@
     directness:'balanced',// soft  | balanced | direct
     warmth:    'warm',    // cool  | neutral  | warm
   };
-  const PI_MAINLINE_STATE = {
-    A: { window: 30 },  // days
-    B: { window: 90 },
-    C: { window: 365 },
-  };
+  // v0.5: PI_MAINLINE_STATE 动态从 MAINLINES 派生（switchPersona 时同步）
+  let PI_MAINLINE_STATE = {};
+  function rebuildPiMainlineState() {
+    PI_MAINLINE_STATE = {};
+    if (Array.isArray(MAINLINES)) {
+      MAINLINES.forEach(m => {
+        PI_MAINLINE_STATE[m.id] = { window: m.windowDays || 30 };
+      });
+    }
+  }
   // v0.5 P6.5: 用于 piEndTopic 总结改了什么
   let PI_TOPIC_BEFORE = null;
   let PI_TOPIC_CHANGES = [];
@@ -4032,18 +4619,25 @@
     northstar: {
       icon: '⭐', name: '北极星',
       userText: '我想改一下你的北极星',
-      piHtml: `当前你的北极星是：<br><b>"成为最值得信赖的爸爸 + 影响 100 万产品人的设计师"</b><br><span class="text-pulse-text-3 text-[11px]">设定于 2026-05-12 · 把握度 0.7</span>`,
+      get piHtml() {
+        return `当前你的北极星是：<br><b>"${NORTH_STAR}"</b><br><span class="text-pulse-text-3 text-[11px]">把握度 0.7 · 可随时调整</span>`;
+      },
       followUp: `想怎么改？告诉我新的方向。北极星越具体越能驱动主线，模糊也没关系——我们一起聊清楚。`,
       replies: [
-        '把"设计师"换成"产品人"',
+        '换成更小的目标',
         '加一条关于身体的',
-        '100 万太大，改成 10 万',
+        '把日活换成留存',
       ],
     },
     mainlines: {
       icon: '🎯', name: '主线',
       userText: '我想调一下你的主线',
-      piHtml: `当前你有 3 条主线：<br><span class="text-[11px]" style="color:#8B5CF6">●</span> <b>A 转型 PM</b> · 30 天通过 OKR 模板做完 5 个真实需求<br><span class="text-[11px]" style="color:#10B981">●</span> <b>B 身体素质</b> · 90 天体脂率 24%→18%<br><span class="text-[11px]" style="color:#F472B6">●</span> <b>C 女儿睡前 30 分钟</b> · 每日 19:30-20:00 不缺席`,
+      get piHtml() {
+        if (!MAINLINES || !MAINLINES.length) return '当前还没有主线。';
+        return '当前你有 ' + MAINLINES.length + ' 条主线：<br>' + MAINLINES.map(m =>
+          `<span class="text-[11px]" style="color:${m.color}">●</span> <b>${m.code} ${m.title}</b> · ${m.criteria}`
+        ).join('<br>');
+      },
       interactive: piMainlinesEditor,
       followUp: `也可以告诉我你的具体想法，比如：`,
       replies: [
@@ -4700,7 +5294,7 @@
   };
 
   function openPiContext() {
-    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const ai = AI_REPLIES[currentContact] || Object.values(AI_REPLIES)[0];
     const c = CONTACTS[currentContact] || CONTACTS.mira;
     const da = ai.deepAnalysis || {};
     const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
@@ -4866,7 +5460,7 @@
     userBubble.innerText = q;
     thread.appendChild(userBubble);
 
-    const ai = AI_REPLIES[currentContact] || AI_REPLIES.mira;
+    const ai = AI_REPLIES[currentContact] || Object.values(AI_REPLIES)[0];
     const preset = PI_CTX_PRESETS[currentContact] || PI_CTX_PRESETS.mira;
 
     // Try preset.qa first, then deepAnalysis.qa
@@ -5046,13 +5640,16 @@
 
   // ===================== INIT =====================
   document.addEventListener('DOMContentLoaded', () => {
-    renderToday();
-    renderInbox();
+    // v0.5 persona: initialize with default exec persona (overwrites default const data)
+    switchPersona('exec');
     bindEvents();
     showProfileTab('overview');
-    // pre-populate Mira's hints so chat screen is ready immediately
-    const initAi = AI_REPLIES.mira;
-    populateHints(initAi.hints);
+    // pre-populate the first contact's hints so chat screen is ready
+    const firstContactId = Object.keys(AI_REPLIES)[0];
+    if (firstContactId && AI_REPLIES[firstContactId]) {
+      populateHints(AI_REPLIES[firstContactId].hints || []);
+      currentContact = firstContactId;
+    }
   });
   </script>
 </body>

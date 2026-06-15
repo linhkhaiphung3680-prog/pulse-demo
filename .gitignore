@@ -7,3 +7,7 @@ venv/
 evals/reports/*.md
 evals/reports/*.jsonl
 !evals/reports/.gitkeep
+
+# Office lock files (auto-generated when xlsx/docx open in Excel/Word)
+~$*
+.~lock.*

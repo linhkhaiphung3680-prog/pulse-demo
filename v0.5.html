@@ -732,6 +732,67 @@
       color: #ECEDEF;
     }
 
+    /* v0.5 P2.5: streak number bump animation */
+    @keyframes streakBump {
+      0%   { transform: scale(1); color: #10B981; }
+      30%  { transform: scale(1.55) translateY(-2px); color: #FBBF24; text-shadow: 0 0 12px rgba(251,191,36,0.6); }
+      60%  { transform: scale(1.15); color: #F59E0B; }
+      100% { transform: scale(1); color: #10B981; }
+    }
+    .streak-num.bump {
+      animation: streakBump 600ms cubic-bezier(0.32,0.72,0.28,1);
+      font-weight: 800;
+    }
+
+    /* v0.5 P3.1: thing card flying away (focus action) */
+    @keyframes thingFlyAway {
+      0%   { transform: translateY(0)    scale(1);    opacity: 1; max-height: 200px; }
+      40%  { transform: translateY(-30px) scale(1.04); opacity: 0.85; }
+      100% { transform: translateY(-80px) scale(0.5); opacity: 0; max-height: 0; padding-top:0; padding-bottom:0; margin:0; border-width:0; }
+    }
+    .thing-flying {
+      animation: thingFlyAway 520ms cubic-bezier(0.55,0.06,0.68,0.19) forwards;
+      overflow: hidden;
+      will-change: transform, opacity, max-height;
+    }
+    /* card landing into focus list */
+    @keyframes thingLanding {
+      0%   { transform: translateY(-30px) scale(0.92); opacity: 0; }
+      55%  { transform: translateY(4px)   scale(1.02); opacity: 1; }
+      100% { transform: translateY(0)     scale(1);    opacity: 1; }
+    }
+    .thing-landing { animation: thingLanding 520ms cubic-bezier(0.32,0.72,0.28,1) 220ms both; }
+
+    /* v0.5 P3.3: highlighted source bubble in chat */
+    @keyframes srcBubblePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+      35%      { box-shadow: 0 0 0 6px rgba(245,158,11,0.25); }
+      70%      { box-shadow: 0 0 0 12px rgba(245,158,11,0.10); }
+    }
+    .src-bubble-highlight {
+      position: relative;
+      animation: srcBubblePulse 1800ms ease-out 200ms 2;
+      outline: 2px solid rgba(245,158,11,0.85);
+      outline-offset: 2px;
+      border-radius: 14px;
+    }
+
+    /* v0.5 P7.1: All Things filter chips */
+    .allthings-chip {
+      background: #16171D;
+      border-color: #2A2B33;
+      color: #6B7280;
+      font-weight: 500;
+      transition: all 160ms ease;
+      white-space: nowrap;
+    }
+    .allthings-chip.active {
+      background: rgba(139,92,246,0.20);
+      border-color: rgba(139,92,246,0.55);
+      color: #ECEDEF;
+    }
+    .allthings-chip:hover { color: #C4B5FD; }
+
     /* Toggle switch */
     .toggle {
       position: relative;
@@ -898,7 +959,7 @@
 
         <!-- Pi morning brief (collapsed strip) -->
         <div class="px-5 pt-3 pb-2">
-          <button onclick="showScreen('pi')" class="w-full text-left rounded-xl p-2.5 flex items-center gap-2.5" style="background: linear-gradient(135deg, rgba(139,92,246,0.14) 0%, rgba(59,130,246,0.08) 100%); border: 1px solid rgba(139,92,246,0.25);">
+          <button onclick="enterPi('brief')" class="w-full text-left rounded-xl p-2.5 flex items-center gap-2.5" style="background: linear-gradient(135deg, rgba(139,92,246,0.14) 0%, rgba(59,130,246,0.08) 100%); border: 1px solid rgba(139,92,246,0.25);">
             <div class="pi-avatar-sm flex-shrink-0" style="width:28px;height:28px;font-size:14px">π</div>
             <div class="flex-1 min-w-0">
               <div class="text-[11px] text-pulse-text leading-snug truncate">
@@ -1177,6 +1238,13 @@
         <button class="w-9 h-9 rounded-lg bg-pulse-purple/15 flex items-center justify-center text-pulse-purple-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.09 8.26L19 7L14.74 11.26L19 15L13.09 13.74L12 20L10.91 13.74L5 15L9.26 11.26L5 7L10.91 8.26L12 2Z"/></svg>
         </button>
+      </div>
+
+      <!-- v0.5 P3.4: 看看跳转后的"返回我的事"短路 -->
+      <div id="chat-peek-banner" class="hidden px-3 py-1.5 flex items-center gap-2 text-[11px]" style="background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(139,92,246,0.10)); border-bottom: 1px solid rgba(245,158,11,0.25);">
+        <span>👀</span>
+        <span class="flex-1 text-pulse-text-2">从「我的事」跳过来 · <span id="chat-peek-thing-title" class="text-pulse-text font-semibold"></span></span>
+        <button onclick="closePeekAndBack()" class="text-pulse-purple-2 font-semibold">← 返回我的事</button>
       </div>
 
       <!-- Chat messages -->
@@ -1513,6 +1581,52 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ============================ ALL THINGS (二级页 · v0.5 P7.1) ============================ -->
+    <div id="screen-allthings" class="screen is-hidden-right">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="flex items-center gap-1">
+          <span class="ml-1 inline-block w-6 h-3 border border-pulse-text rounded-sm relative">
+            <span class="absolute inset-0.5 bg-pulse-text rounded-[1px]" style="width: calc(100% - 4px)"></span>
+          </span>
+        </span>
+      </div>
+      <!-- header -->
+      <div class="px-3 pt-1 pb-2 flex items-center gap-2 border-b border-pulse-line">
+        <button onclick="showScreen('today')" class="w-9 h-9 flex items-center justify-center text-pulse-text-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="flex-1">
+          <div class="text-[15px] font-semibold" id="allthings-title">全部关注的事</div>
+          <div class="text-[10px] text-pulse-text-3" id="allthings-subtitle">5 件 · 按主线分组</div>
+        </div>
+      </div>
+      <!-- Filter chips -->
+      <div class="px-3 pt-2 pb-1 flex gap-1.5 overflow-x-auto" style="scrollbar-width:none">
+        <button data-allthings-filter="all"      onclick="setAllThingsFilter('all')"      class="allthings-chip flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border active">全部</button>
+        <button data-allthings-filter="long"     onclick="setAllThingsFilter('long')"     class="allthings-chip flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border">长期</button>
+        <button data-allthings-filter="short"    onclick="setAllThingsFilter('short')"    class="allthings-chip flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border">短期</button>
+        <button data-allthings-filter="folded"   onclick="setAllThingsFilter('folded')"   class="allthings-chip flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border">已折叠</button>
+        <button data-allthings-filter="archived" onclick="setAllThingsFilter('archived')" class="allthings-chip flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border">已归档</button>
+        <button data-allthings-filter="done"     onclick="setAllThingsFilter('done')"     class="allthings-chip flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border">已完成</button>
+      </div>
+      <!-- Scrollable list -->
+      <div class="scroll-area flex-1 overflow-y-auto px-3 py-3 pb-24" id="allthings-list">
+        <!-- rendered dynamically -->
+      </div>
+      <!-- Tabbar (2-tab v0.5) -->
+      <div class="absolute bottom-0 left-0 right-0 h-20 bg-pulse-card/90 backdrop-blur-xl border-t border-pulse-line flex items-end pb-6 px-12">
+        <button onclick="showScreen('today')" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span class="text-[10px] font-semibold">我的事</span>
+        </button>
+        <button onclick="showScreen('inbox')" class="tab-btn flex-1 flex flex-col items-center gap-0.5 text-pulse-text-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="text-[10px] font-semibold">消息</span>
+        </button>
       </div>
     </div>
 
@@ -2634,14 +2748,18 @@
   // 用户对一条 thing 的反馈 (内存内)
   let THING_FEEDBACK = {};        // id -> 'watch' | 'snooze' | 'mute'
   let LAST_UNDO_ACTION = null;    // {kind, snapshot, timer}
+  let PEEK_SOURCE = null;         // P3.3: 看看跳转时传给 chat 的来源消息预览（用于高亮）
+  let PEEK_BACK_TO_TODAY = false; // P3.4: 看看跳转时是否显示"返回我的事"短路
 
-  // 消息 → 该消息拆出的事（仅用于 inbox 角标）
+  // 消息 → 该消息拆出的事（v0.5: 混合 0/1/2/3 让用户看到 AI 真在判断）
   const MSG_TO_THINGS = {
-    ava:   1,
-    mira:  1,
-    dad:   1,
-    jules: 1,
-    noa:   1,
+    ava:    2,   // "Q3 项目合同细节确认一下" → 合同回签 + 备 3 个问题
+    mira:   1,   // 8 点 Blue Note
+    dad:    2,   // 复查 + 是否陪同
+    jules:  1,   // 离职做工作室
+    noa:    0,   // 5 天前的旧话题，未拆出新事（让用户看到 0 件也合理）
+    studio: 0,   // 群消息 · 已总结但未抽事
+    climb:  0,
   };
 
   // 事的类型标签
@@ -2665,8 +2783,8 @@
 
   // ===================== ROUTING =====================
   function showScreen(name) {
-    const screens = ['today','inbox','chat','profile','network','pi'];
-    const order = { today:0, inbox:1, chat:2, profile:3, network:4, pi:5 };
+    const screens = ['today','inbox','chat','profile','allthings','network','pi'];
+    const order = { today:0, inbox:1, chat:2, profile:3, allthings:3, network:4, pi:5 };
     screens.forEach(s => {
       const el = document.getElementById('screen-'+s);
       if (!el) return;
@@ -2686,6 +2804,7 @@
     if (name === 'today') renderToday();
     if (name === 'network') renderNetwork();
     if (name === 'pi') renderPiOpening();
+    if (name === 'allthings') renderAllThings();
   }
 
   // ===================== RENDER: TODAY COCKPIT =====================
@@ -2732,27 +2851,26 @@
       return `<div class="avatar avatar-tiny" style="background:${p.bg};width:18px;height:18px;font-size:9px">${p.initial}</div>`;
     }).join('');
     return `
-      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line">
+      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line" data-thing-id="${t.id}">
         <div class="flex items-center justify-between mb-1.5">
           <div class="flex items-center gap-1.5 min-w-0">
             ${mlBadge}
             <span class="text-[9px] text-pulse-text-3">长期关注</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="checkInThing('${t.id}')" class="text-[10px] px-2 py-0.5 rounded-md bg-pulse-purple/20 text-pulse-purple-2 font-semibold border border-pulse-purple/30">📍 打卡</button>
-          </div>
+          <button onclick="checkInThing('${t.id}')" class="streak-checkin-btn flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-gradient-to-r from-pulse-purple/30 to-pulse-purple/15 text-pulse-purple-2 font-semibold border border-pulse-purple/40 hover:from-pulse-purple/40 hover:to-pulse-purple/20 transition active:scale-95">
+            <span>📍</span><span>打卡</span>
+          </button>
         </div>
         <div class="text-[13px] font-semibold text-pulse-text mb-0.5 leading-snug">${t.title}</div>
         <div class="text-[10px] text-pulse-text-3 leading-snug mb-1.5">${t.subtitle||''}</div>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-[10px] text-pulse-emerald font-semibold">🔥 连续 ${t.streakDays||0} 天</span>
+            <span class="text-[10px] text-pulse-emerald font-semibold">🔥 连续 <span class="streak-num" id="streak-${t.id}" style="display:inline-block">${t.streakDays||0}</span> 天</span>
             <span class="text-[9px] text-pulse-text-3">累计 ${t.totalDays||0} 天</span>
           </div>
           <div class="flex items-center -space-x-1">${persons}</div>
         </div>
         <div class="flex items-center gap-1 mt-2 pt-2 border-t border-pulse-line/50">
-          <button onclick="thingAction('${t.id}','done')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-emerald/15 hover:text-pulse-emerald transition">✓ 完成</button>
           <button onclick="thingAction('${t.id}','archive')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition">📦 归档</button>
           <button onclick="thingAction('${t.id}','unfocus')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-text-3/20 transition">取消关注</button>
         </div>
@@ -2769,7 +2887,7 @@
       return `<div class="avatar avatar-tiny" style="background:${p.bg};width:16px;height:16px;font-size:8px">${p.initial}</div>`;
     }).join('');
     return `
-      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line">
+      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line" data-thing-id="${t.id}">
         <div class="flex items-center gap-1.5 mb-1 flex-wrap">
           ${mlBadge}
           <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:${tb.color}25;color:${tb.color}">${tb.icon} ${tb.label}</span>
@@ -2804,7 +2922,7 @@
       </span>`;
     }).join('');
     return `
-      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line/80 relative">
+      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line/80 relative" data-thing-id="${t.id}">
         <!-- AI 信号条 -->
         <div class="absolute left-0 top-3 bottom-3 w-1 rounded-r-md bg-gradient-to-b from-pulse-purple to-pulse-purple-3"></div>
         <div class="ml-2">
@@ -2836,20 +2954,26 @@
     if (!t) return;
     const before = JSON.parse(JSON.stringify(t));
     let undoLabel = '';
+    let animateLanding = false;
     switch (action) {
       case 'focus':
         t.container = 'focus';
         undoLabel = `⭐ 已关注「${t.title}」 · 移入「我的关注」`;
+        animateLanding = true;
         break;
       case 'unfocus':
         t.container = 'ai';
         undoLabel = `已取消关注「${t.title}」`;
+        animateLanding = true;
         break;
       case 'peek': {
         // 跳到来源：优先关联消息，否则回到该联系人聊天
         const personId = (t.persons && t.persons[0]) || null;
         if (personId && CONTACTS[personId]) {
           showToast(`👀 跳到 ${CONTACTS[personId].name} 的对话`);
+          // P3.3: 把 source preview 传给 chat 页用于高亮
+          PEEK_SOURCE = t.source && t.source.preview ? t.source.preview : null;
+          PEEK_BACK_TO_TODAY = true;
           setTimeout(() => openChat(personId), 240);
         } else {
           showToast(`👀 留在小 P 发现 · 这条暂无关联对话`);
@@ -2880,6 +3004,23 @@
     }
     LAST_UNDO_ACTION = { id, before, timer: null };
     showThingUndo(undoLabel);
+
+    // v0.5 P3.1: 飞行动画 — focus / unfocus 时让用户看到事去哪了
+    if (animateLanding) {
+      const card = document.querySelector(`[data-thing-id="${id}"]`);
+      if (card) {
+        card.classList.add('thing-flying');
+        setTimeout(() => {
+          renderMyFocus();
+          // landing animation on the new card
+          requestAnimationFrame(() => {
+            const newCard = document.querySelector(`[data-thing-id="${id}"]`);
+            if (newCard) newCard.classList.add('thing-landing');
+          });
+        }, 480);
+        return;
+      }
+    }
     renderMyFocus();
   }
 
@@ -2890,8 +3031,19 @@
     t.streakDays = (t.streakDays||0) + 1;
     t.totalDays  = (t.totalDays||0) + 1;
     LAST_UNDO_ACTION = { id, before, timer: null };
-    showThingUndo(`📍 打卡「${t.title}」 · 连续 ${t.streakDays} 天`);
+    showThingUndo(`📍 打卡「${t.title}」 · 连续 ${t.streakDays} 天 🔥`);
     renderMyFocus();
+    // v0.5 P2.5: streak 数字弹跳动画
+    requestAnimationFrame(() => {
+      const streakEl = document.getElementById('streak-' + id);
+      if (streakEl) {
+        streakEl.classList.remove('bump');
+        // force reflow
+        void streakEl.offsetWidth;
+        streakEl.classList.add('bump');
+        setTimeout(() => streakEl.classList.remove('bump'), 700);
+      }
+    });
   }
 
   function showThingUndo(text) {
@@ -2936,8 +3088,85 @@
     }
   }
 
+  // v0.5 P7.1: 我的关注 / 小 P 发现 全部 二级页
+  let ALLTHINGS_SCOPE  = 'focus';   // focus | ai
+  let ALLTHINGS_FILTER = 'all';     // all | long | short | folded | archived | done
+
   function openAllThings(scope) {
-    showToast(scope === 'focus' ? '全部关注的事 (二级页 · TBD)' : '全部小 P 发现的事 (二级页 · TBD)');
+    ALLTHINGS_SCOPE  = scope || 'focus';
+    ALLTHINGS_FILTER = 'all';
+    showScreen('allthings');
+  }
+
+  function setAllThingsFilter(f) {
+    ALLTHINGS_FILTER = f;
+    document.querySelectorAll('.allthings-chip').forEach(b => {
+      b.classList.toggle('active', b.dataset.allthingsFilter === f);
+    });
+    renderAllThings();
+  }
+
+  function renderAllThings() {
+    const titleEl = document.getElementById('allthings-title');
+    const subEl   = document.getElementById('allthings-subtitle');
+    const listEl  = document.getElementById('allthings-list');
+    if (!listEl) return;
+
+    // 按 scope 选基础集合
+    let base;
+    if (ALLTHINGS_SCOPE === 'focus') {
+      base = THINGS.filter(t => t.container === 'focus');
+      titleEl.textContent = '全部关注的事';
+    } else {
+      base = THINGS.filter(t => t.container === 'ai');
+      titleEl.textContent = '全部小 P 发现的事';
+    }
+
+    // 应用 filter
+    let filtered = base;
+    switch (ALLTHINGS_FILTER) {
+      case 'long':     filtered = base.filter(t => t.type === 'focus' && t.status === 'active'); break;
+      case 'short':    filtered = base.filter(t => t.type !== 'focus' && t.status === 'active'); break;
+      case 'folded':   filtered = base.filter(t => t.folded && t.status === 'active'); break;
+      case 'archived': filtered = base.filter(t => t.status === 'archived'); break;
+      case 'done':     filtered = base.filter(t => t.status === 'done'); break;
+      default:         filtered = base.filter(t => t.status === 'active'); // all = 仅 active
+    }
+
+    subEl.textContent = `${filtered.length} 件`;
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = `<div class="text-center text-[12px] text-pulse-text-3 py-12">这里没有事 🌱<br><span class="text-[10px]">换个 filter 试试</span></div>`;
+      return;
+    }
+
+    // 按 mainline 分组
+    const grouped = {};
+    filtered.forEach(t => {
+      const mlKey = t.mainline || '_none';
+      if (!grouped[mlKey]) grouped[mlKey] = [];
+      grouped[mlKey].push(t);
+    });
+
+    let html = '';
+    const mlOrder = ['A','B','C','_none','?'];
+    mlOrder.forEach(mlKey => {
+      if (!grouped[mlKey]) return;
+      const ml = MAINLINES.find(m => m.id === mlKey);
+      const groupLabel = ml
+        ? `<span class="text-[10px] font-semibold" style="color:${ml.color}">主线 ${ml.code}</span> <span class="text-[10px] text-pulse-text-3">${ml.title} · ${grouped[mlKey].length} 件</span>`
+        : `<span class="text-[10px] text-pulse-text-3">未归线 · ${grouped[mlKey].length} 件</span>`;
+      html += `<div class="mb-1 mt-3 first:mt-0 px-1">${groupLabel}</div>`;
+      html += `<div class="space-y-2 mb-3">`;
+      html += grouped[mlKey].map(t => {
+        if (ALLTHINGS_SCOPE === 'focus' && t.type === 'focus') return buildFocusLongCard(t);
+        if (ALLTHINGS_SCOPE === 'focus') return buildFocusShortCard(t);
+        return buildAiCard(t);
+      }).join('');
+      html += `</div>`;
+    });
+
+    listEl.innerHTML = html;
   }
 
 
@@ -2956,9 +3185,16 @@
   }
 
   function openConsultToday() {
-    const focus = THINGS.filter(t => t.container==='focus' && t.status==='active').length;
-    const ai    = THINGS.filter(t => t.container==='ai' && t.status==='active').length;
-    showToast(`小 P：你有 ${focus} 件在关注 · ${ai} 件待你决策。建议先看 P0`);
+    enterPi('consult');
+  }
+
+  // P1.3: Pi 上下文继承 — 不同入口给不同开场白
+  // brief   = 从首屏简报条进 → 接妈妈 28 天的话题
+  // consult = 从"跟小 P 商量"按钮进 → 列今日待决策
+  // pi      = 从 ⚙ 直接进 → 默认开场白
+  function enterPi(source) {
+    PI_ENTER_SOURCE = source || 'pi';
+    showScreen('pi');
   }
 
   // ===================== REFLECTION SHEET =====================
@@ -3073,7 +3309,9 @@
             <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
               ${thingCount > 0 ? `<div class="inline-flex items-center gap-1 text-[9px] text-pulse-purple-2 bg-pulse-purple/12 px-1.5 py-0.5 rounded-md font-semibold border border-pulse-purple/30">
                 ✨ 拆出 ${thingCount} 件事
-              </div>`:''}
+              </div>` : (MSG_TO_THINGS[msg.id] === 0 ? `<div class="inline-flex items-center gap-1 text-[9px] text-pulse-text-3 bg-pulse-card-2 px-1.5 py-0.5 rounded-md border border-pulse-line">
+                ✦ 寒暄 · 无新事
+              </div>` : '')}
               ${msg.action ? `<div class="inline-flex items-center gap-1 text-[10px] text-pulse-purple-2 bg-pulse-purple/10 px-2 py-0.5 rounded-md border border-pulse-purple/20">
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13 8L19 7L15 11L19 15L13 14L12 20L11 14L5 15L9 11L5 7L11 8L12 2Z"/></svg>
                 小 P 推荐：${msg.action}
@@ -3101,6 +3339,16 @@
     av.textContent = c.initial;
     av.style.background = c.bg;
 
+    // v0.5 P3.4: 看看跳转 → 显示"返回我的事"短路 banner
+    const peekBanner = document.getElementById('chat-peek-banner');
+    if (PEEK_BACK_TO_TODAY && peekBanner) {
+      peekBanner.classList.remove('hidden');
+      const titleEl = document.getElementById('chat-peek-thing-title');
+      if (titleEl) titleEl.textContent = PEEK_SOURCE ? `"${PEEK_SOURCE}"` : '';
+    } else if (peekBanner) {
+      peekBanner.classList.add('hidden');
+    }
+
     // reset copilot
     currentHintIdx = null;
     document.getElementById('copilot-draft').classList.add('hidden');
@@ -3127,6 +3375,39 @@
     showScreen('chat');
     // Pi learning: occasional insight when entering certain contacts (B)
     maybeLearnFromContact(contactId);
+
+    // v0.5 P3.3: peek 跳转后高亮来源消息气泡（如果有）
+    if (PEEK_SOURCE) {
+      const peekTextNeedle = PEEK_SOURCE;
+      setTimeout(() => {
+        const messages = document.getElementById('chat-messages');
+        if (!messages) return;
+        // 找包含来源 preview 关键 substring 的对方气泡
+        const bubbles = messages.querySelectorAll('.bubble.bubble-them');
+        let target = null;
+        // 优先精确包含一段 preview
+        const needles = peekTextNeedle.split(/[?？\s]+/).filter(s => s.length >= 3).slice(0, 4);
+        for (const b of bubbles) {
+          if (needles.some(n => b.textContent.includes(n))) { target = b; break; }
+        }
+        // 兜底：高亮最后一个对方气泡
+        if (!target && bubbles.length) target = bubbles[bubbles.length - 1];
+        if (target) {
+          target.classList.add('src-bubble-highlight');
+          target.scrollIntoView({ behavior:'smooth', block:'center' });
+          setTimeout(() => target.classList.remove('src-bubble-highlight'), 4000);
+        }
+        PEEK_SOURCE = null; // 一次性
+      }, 320);
+    }
+  }
+
+  // v0.5 P3.4: peek 短路返回（banner 上的"← 返回我的事"按钮）
+  function closePeekAndBack() {
+    const peekBanner = document.getElementById('chat-peek-banner');
+    if (peekBanner) peekBanner.classList.add('hidden');
+    PEEK_BACK_TO_TODAY = false;
+    showScreen('today');
   }
 
   // Populate the 2 dynamic hints
@@ -3510,29 +3791,79 @@
   function renderPiOpening() {
     const thread = document.getElementById('pi-thread');
     if (!thread) return;
-    if (thread.querySelector('[data-pi-opening]')) return; // already rendered
+    // v0.5 P1.3: 不同入口 → 不同开场白
+    // 如果上次开场白和这次的 source 不一致，需要重画
+    const existing = thread.querySelector('[data-pi-opening]');
+    const renderedSource = existing && existing.dataset.openingSource;
+    if (existing && renderedSource === PI_ENTER_SOURCE) return; // 同入口已渲染
+    if (existing) {
+      // 不同入口 → 在已有对话末尾追加新开场白（保留历史）
+    }
+
     const op = getPiOpening();
-    thread.innerHTML = `
-      <div class="pi-bubble pi-bubble-pi" data-pi-opening>
-        ${op.greeting} 我是<b>小 P</b> ✨<br>${op.body}
-      </div>
-      <div class="pi-bubble pi-bubble-pi">
-        ${op.signal}
-      </div>
-      <div class="pi-bubble pi-bubble-pi">
-        想调整什么？直接跟我说，或者点下面的话题。
-      </div>
-      <div class="flex flex-wrap gap-2 mb-2">
-        <button class="pi-quick" data-pi-quick="emoji">以后回客户少用 emoji</button>
-        <button class="pi-quick" data-pi-quick="long">回复别那么长</button>
-        <button class="pi-quick" data-pi-quick="noa">Noa 那种话题别再帮我接</button>
-        <button class="pi-quick" data-pi-quick="brief">告诉我你今天学到什么</button>
-      </div>
-    `;
-    // Re-bind quick prompts (they were re-rendered)
-    thread.querySelectorAll('[data-pi-quick]').forEach(b => {
-      b.addEventListener('click', () => piSend(PI_QUICK_TEXT[b.dataset.piQuick]));
-    });
+    let openingHtml = '';
+
+    if (PI_ENTER_SOURCE === 'brief') {
+      // 从首屏简报条进 → 接住妈妈话题
+      openingHtml = `
+        <div class="pi-bubble pi-bubble-pi" data-pi-opening data-opening-source="brief">
+          看到你点了简报 ✨<br>
+          <b>妈妈已经 28 天没联系</b>了，我有点担心。
+        </div>
+        <div class="pi-bubble pi-bubble-pi">
+          要不今天打个电话？哪怕 1 分钟语音也行——<br>
+          这周连接强度能从 32% 跳到 58%。
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-1">
+          <button class="pi-reply-chip" onclick="piSendChip(this, '帮我起草一条问候')">帮我起草一条问候</button>
+          <button class="pi-reply-chip" onclick="piSendChip(this, '今天太忙，明天吧')">今天太忙，明天吧</button>
+          <button class="pi-reply-chip" onclick="piSendChip(this, '为什么是 28 天就要提醒')">为什么 28 天提醒</button>
+        </div>
+      `;
+    } else if (PI_ENTER_SOURCE === 'consult') {
+      // 从"跟小 P 商量"按钮进 → 商量今天的事
+      const focus = THINGS.filter(t => t.container==='focus' && t.status==='active').length;
+      const ai    = THINGS.filter(t => t.container==='ai' && t.status==='active').length;
+      const p0List = THINGS.filter(t => t.status==='active' && (t.imp||0)+(t.urg||0) >= 5)
+                           .slice(0, 3).map(t => `· ${t.title}`).join('<br>');
+      openingHtml = `
+        <div class="pi-bubble pi-bubble-pi" data-pi-opening data-opening-source="consult">
+          来商量今天 ✨<br>
+          你现在有 <b>${focus} 件</b>在关注，<b>${ai} 件</b>等你决策。
+        </div>
+        <div class="pi-bubble pi-bubble-pi">
+          按重要 × 紧急排，建议先看这 3 件 P0：<br>${p0List}
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-1">
+          <button class="pi-reply-chip" onclick="piSendChip(this, '今天精力不足，挑最关键 1 件')">今天精力不足，挑最关键 1 件</button>
+          <button class="pi-reply-chip" onclick="piSendChip(this, 'AI 池里还有什么值得我看')">AI 池里还有什么值得我看</button>
+          <button class="pi-reply-chip" onclick="piSendChip(this, '我想跳过今天')">我想跳过今天</button>
+        </div>
+      `;
+    } else {
+      // 默认：从 ⚙ 进
+      openingHtml = `
+        <div class="pi-bubble pi-bubble-pi" data-pi-opening data-opening-source="pi">
+          ${op.greeting} 我是<b>小 P</b> ✨<br>${op.body}
+        </div>
+        <div class="pi-bubble pi-bubble-pi">
+          ${op.signal}
+        </div>
+        <div class="pi-bubble pi-bubble-pi">
+          想调整什么？点下方的话题 chip，或者直接打字告诉我。
+        </div>
+      `;
+    }
+
+    if (existing) {
+      // 追加（保留历史）
+      const wrap = document.createElement('div');
+      wrap.innerHTML = openingHtml;
+      while (wrap.firstChild) thread.appendChild(wrap.firstChild);
+    } else {
+      thread.innerHTML = openingHtml;
+    }
+    scrollPiThread();
   }
 
   // Predefined responses to user instructions (Wizard of Oz)
@@ -3579,6 +3910,12 @@
     if (/第\s*1\s*条.*不对|妈妈.*看心情/.test(text)) return '✓ 撤回学习：「对家人也少用 emoji」回到中等置信度。\n\n以后我会观察更多样本再下结论。';
     if (/第\s*3\s*条.*不|noa.*忘了/.test(text)) return '✓ 撤回学习：Noa 那条不计入 ignore 样本。\n\n意图差别：忘了 vs 主动忽略。';
     if (/清掉.*学习|清.*今天/.test(text)) return '✓ 今天的 3 条学习全部清空。\n\n（这是逃生通道，你可以随时清空我的学习。）';
+    if (/帮我起草.*问候|起草.*妈妈|草拟.*妈妈/.test(text)) return '<b>给妈妈</b>（约 35 字）：<br><br>"妈，最近忙工作有点缺席。这周看了你转发的那篇文章，写得真好。今晚 8 点给你打个电话？想听你声音。"<br><br>语气：有歉意 + 具体细节 + 给确认时间。要不要发？';
+    if (/今天太忙.*明天|明天.*问候/.test(text)) return '收到。已加到明天的"今日值得连接"。<br><br>但是——"明天"这个词，过去 4 周你说过 11 次。要不我现在帮你录一条 30 秒语音？';
+    if (/为什么.*28\s*天|为什么.*提醒/.test(text)) return '我盯了 30 个月你跟妈妈的联系节奏：<br>· 平均 14 天一次（之前）<br>· 最近 3 个月：23 / 26 / 28 天<br><br>趋势在拉长——这不是判断，是数据。你想恢复到 14 天，还是接受新节奏？';
+    if (/精力不足|挑最关键|最关键\s*1\s*件/.test(text)) return '今天最关键的一件：<br><br>📌 <b>周三客户会议（Rena · Q3 续约）</b><br>P0 · 重要紧急<br>影响：合同金额 + 客户关系长度<br><br>剩下 4 件 AI 池里的我帮你压到明天。';
+    if (/ai 池.*还有|池里.*值得|发现.*还有/.test(text)) return '5 件 AI 池里我筛了下：<br>· <b>Mira 8 点 Blue Note</b>（情绪价值高）<br>· <b>爸爸要复查</b>（需要决策）<br>剩下 3 件可以先放——Jules 离职、Noa 旧话题、设计稿群。';
+    if (/跳过今天|今天.*跳过|想偷懒/.test(text)) return '可以。<br><br>但有 1 件需要至少 1 分钟：<b>Mira 那条邀约</b>——回不回都行，给个反馈她就放心了。<br><br>其他全压到明天，今天的 streak 也照常算（你的 47 天不会断）。';
 
     return PI_RESPONSES.unknown;
   }
@@ -3638,8 +3975,12 @@
     B: { window: 90 },
     C: { window: 365 },
   };
+  // v0.5 P6.5: 用于 piEndTopic 总结改了什么
+  let PI_TOPIC_BEFORE = null;
+  let PI_TOPIC_CHANGES = [];
 
   let PI_CURRENT_TOPIC = null;
+  let PI_ENTER_SOURCE = 'pi'; // P1.3: pi | brief | consult
 
   // Generators for interactive content
   function piMainlinesEditor() {
@@ -3863,11 +4204,22 @@
     if (thread && starter) {
       const summary = document.createElement('div');
       summary.className = 'pi-bubble pi-bubble-pi slide-up';
-      summary.innerHTML = `${starter.icon} <b>${starter.name}</b> 调整完成 ✓<br><span class="text-pulse-text-3 text-[11px]">已记入小 P 的本地配置 · 下条草稿生效</span>`;
+      // P6.5: 把 PI_TOPIC_CHANGES 转成具体摘要
+      let changesHtml = '';
+      if (PI_TOPIC_CHANGES.length > 0) {
+        changesHtml = '<br>这次你改了：<ul style="margin:6px 0 0 18px;padding:0;list-style:disc">' +
+          PI_TOPIC_CHANGES.map(c => `<li style="margin:2px 0">${c}</li>`).join('') +
+          '</ul>';
+      } else {
+        changesHtml = '<br><span class="text-pulse-text-3 text-[11px]">这次没有具体改动 · 已记下你的关注点</span>';
+      }
+      summary.innerHTML = `${starter.icon} <b>${starter.name}</b> 调整完成 ✓${changesHtml}<br><span class="text-pulse-text-3 text-[11px] mt-1.5 inline-block">已记入小 P 的本地配置 · 下条草稿生效</span>`;
       thread.appendChild(summary);
       scrollPiThread();
     }
     PI_CURRENT_TOPIC = null;
+    PI_TOPIC_CHANGES = [];
+    PI_TOPIC_BEFORE = null;
     document.getElementById('pi-topic-bar').classList.add('hidden');
     setActiveChip(null);
   }
@@ -3880,14 +4232,18 @@
 
   function piTunemainline(id, delta) {
     if (!PI_MAINLINE_STATE[id]) return;
-    PI_MAINLINE_STATE[id].window = Math.max(7, PI_MAINLINE_STATE[id].window + delta);
+    const oldVal = PI_MAINLINE_STATE[id].window;
+    PI_MAINLINE_STATE[id].window = Math.max(7, oldVal + delta);
     const el = document.getElementById('pi-ml-window-' + id);
     if (el) el.textContent = PI_MAINLINE_STATE[id].window + ' 天';
-    // 在对话里也回应一下
+    // P6.5: 记录变更
+    PI_TOPIC_CHANGES.push(`主线 <b>${id}</b> 窗口 ${oldVal} → <b>${PI_MAINLINE_STATE[id].window}</b> 天`);
     piMicroResponse(`主线 ${id} 窗口改成 <b>${PI_MAINLINE_STATE[id].window} 天</b> ✓`);
   }
 
   function piTuneStyle(key, val) {
+    const oldVal = PI_STYLE_STATE[key];
+    if (oldVal === val) return; // 没改不算
     PI_STYLE_STATE[key] = val;
     document.querySelectorAll(`[data-style-key="${key}"]`).forEach(b => {
       b.classList.toggle('active', b.dataset.styleVal === val);
@@ -3899,7 +4255,52 @@
       warmth:    {cool:'冷', neutral:'中', warm:'暖'},
     };
     const keyLabel = {length:'长度', emoji:'emoji', directness:'直接度', warmth:'暖度'};
+    // P6.5: 记录变更
+    PI_TOPIC_CHANGES.push(`${keyLabel[key]} ${labels[key][oldVal]} → <b>${labels[key][val]}</b>`);
     piMicroResponse(`${keyLabel[key]} → <b>${labels[key][val]}</b> ✓`);
+    // P6.4: 风格预览 — 改完立刻给一条示例草稿
+    refreshStylePreview();
+  }
+
+  // P6.4: 根据当前 PI_STYLE_STATE 生成一条样例草稿
+  function buildStyleSample() {
+    const s = PI_STYLE_STATE;
+    // 4 维度组合 → 12 种典型样例（demo: 选最具代表性的几个 + 默认）
+    let body = '';
+    // 长度
+    if (s.length === 'short') body = '8 点见';
+    else if (s.length === 'long') body = '今晚 8 点 Blue Note 准时见，trio 我也很期待。你说的那个玻璃杯，谢谢你还记得，路上小心';
+    else body = '好啊，8 点见，期待你说的那个玻璃杯';
+    // 直接度调味
+    if (s.directness === 'soft' && s.length !== 'short') body = body.replace('好啊', '好的呀') + '～';
+    if (s.directness === 'direct') body = body.replace(/，期待.*$/, '').replace('好啊', 'OK');
+    // 暖度调味
+    if (s.warmth === 'cool') body = body.replace('期待', '').replace('～', '');
+    if (s.warmth === 'warm' && s.length !== 'short') body = body.replace('期待', '超期待');
+    // emoji
+    if (s.emoji === 'rare') body = body.replace(/[✨☕🥂🌟🔥]/g, '');
+    if (s.emoji === 'mixed' && !/[✨☕🥂]/.test(body)) body = body + ' ☕';
+    if (s.emoji === 'frequent') body = body + ' ✨ 🥂';
+    return body;
+  }
+
+  function refreshStylePreview() {
+    const thread = document.getElementById('pi-thread');
+    if (!thread) return;
+    const sample = buildStyleSample();
+    let preview = thread.querySelector('[data-style-preview]');
+    if (!preview) {
+      preview = document.createElement('div');
+      preview.dataset.stylePreview = '1';
+      preview.dataset.piTopic = 'style';
+      preview.className = 'pi-bubble pi-bubble-pi slide-up';
+      preview.style.background = 'rgba(245,158,11,0.10)';
+      preview.style.border = '1px solid rgba(245,158,11,0.30)';
+      preview.style.fontSize = '11px';
+      thread.appendChild(preview);
+    }
+    preview.innerHTML = `<span class="text-pulse-amber font-semibold text-[10px]">📝 当前风格示例草稿</span><br><span class="text-pulse-text" style="font-style:italic">"${sample}"</span>`;
+    scrollPiThread();
   }
 
   function piMicroResponse(html) {

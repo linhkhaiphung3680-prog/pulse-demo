@@ -2837,59 +2837,93 @@
               hints:[
                 { emoji:'⚡', label:'快速过', sub:'1 句话 + 落地点',
                   draft:'看了，3 个落地点：\n1) 微信支付场景 A/B 测试\n2) 视频号创作辅助\n3) 客服替代率 +20%\n下午 5:00 给完整 brief。',
-                  chips:[] },
+                  chips:[
+                    { id:'short',  emoji:'➖', label:'更短',  text:'看了，今晚 5:00 给 brief（3 个落地点）' },
+                    { id:'numb',   emoji:'📊', label:'加数字', text:'看了，3 个落地点估算：\n1) 支付 A/B：DAU +3%\n2) 视频号创作：留存 +5pp\n3) 客服：成本 -20%\n5:00 brief。' },
+                    { id:'flip',   emoji:'❓', label:'反问 P', text:'看到了。3 个候选我都能推：支付 / 视频号 / 客服。你最想推哪个？我按这个先动。' },
+                    { id:'cool',   emoji:'🧊', label:'更冷',  text:'收到。今晚 brief。' },
+                  ]},
                 { emoji:'❓', label:'先反问', sub:'确认意图',
                   draft:'看到了。你最想推的方向是哪个？我按这个方向今晚出 brief。',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short',  emoji:'➖', label:'更短',  text:'你想先推哪个？' },
+                    { id:'humble', emoji:'🙇', label:'更恭谨', text:'看到了 Pony。这个方向我有几种切法，您方便指个优先级么？' },
+                    { id:'aside',  emoji:'🎯', label:'给方向', text:'看到了。我的 read 是先攻支付，因为它有现成的 A/B 基础设施。你 OK 么？' },
+                  ]} ]},
       yao:  { analysis:'姚老师凌晨发长 message · 学术 + 紧迫感。<b>建议肯定他的发现 + 提自己的观察</b>，避免被推着走。',
               hints:[
                 { emoji:'🤝', label:'肯定 + 提观点', sub:'同行式平等',
                   draft:'好观察 ✨ 我注意到 Andy 的 reasoning 在 multi-step planning 上更强，我们的优势在 long-context retrieval。要不周一晚我们 align 一下，不必全推。',
-                  chips:[] },
+                  chips:[
+                    { id:'short',  emoji:'➖', label:'更短',  text:'好 catch。我们优势在 long-context retrieval，不必全推。周一晚 align 一下？' },
+                    { id:'paper', emoji:'📄', label:'更学术', text:'好观察。从 ARC-AGI / MMLU 维度看，Andy 的 multi-step 确实更强，但我们在 RAG eval 集上仍有 +12pp 优势。建议保持差异化路线。' },
+                    { id:'humor', emoji:'😎', label:'更轻松', text:'你凌晨 2 点也在追 paper 啊兄弟 🙏 看到了。我们 long-context retrieval 那块还是有牌的，不必全推。周一聊？' },
+                    { id:'firm',  emoji:'🛡', label:'更坚定', text:'看到了。Andy 的 reasoning 强在 planning，我们的优势在 retrieval —— 这是两条赛道，不应被打乱。周一对线时我会 push 这个 framing。' },
+                  ]},
                 { emoji:'📚', label:'请教式', sub:'保持谦虚',
                   draft:'谢谢分享！如果让你重新做，会优先攻 Andy 哪一面？我想听你的判断。',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'你来选：你会优先攻 Andy 哪一面？' },
+                    { id:'specific', emoji:'🔍', label:'更具体', text:'谢谢。具体到 chunk size 那部分，你建议我们继续 dynamic 还是切回 fixed？' },
+                  ]} ]},
       ren:  { analysis:'任宇昕想挪会，但跟战略小组 9:00 冲突 — <b>建议同意 + 给替代时间</b>。',
               hints:[
                 { emoji:'✓', label:'同意 + 替代', sub:'保护双方时间',
                   draft:'9:30 你那边比较好，但我跟战略小组 9:00 已经订了，挪到 10:00 怎样？',
-                  chips:[] },
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'10:00 行不？9:30 我和战略组冲突' },
+                    { id:'apo',   emoji:'🙏', label:'加歉意', text:'抱歉兄弟，9:30 我和战略组冲突了。挪到 10:00 你这边方便么？' },
+                    { id:'cede',  emoji:'🤝', label:'让步',   text:'我帮你挪——把战略小组那边推到下午。9:30 见。' },
+                  ]},
                 { emoji:'🔄', label:'让助理协调', sub:'更轻量',
                   draft:'让 Lin 跟你那边对一下日历，找你我都方便的 30 分钟。',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'让 Lin 对下日历' },
+                  ]} ]},
       lin:  { analysis:'投资人 deck v3 等回复 · <b>专业感 + 准期承诺</b>。Q3 募资节点关键。',
               hints:[
                 { emoji:'📅', label:'专业承诺', sub:'给具体时间',
                   draft:'感谢 Lin。我今晚批注后周三上午发回，重点回应你 P3 提的 retention 问题。',
-                  chips:[] },
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'今晚批注完，周三上午回。重点会答 P3 retention。' },
+                    { id:'warm',  emoji:'🔥', label:'更暖',  text:'感谢 Lin 这么细的批注 ✨ 今晚消化后周三上午发回，会重点回应你 P3 提的 retention，那块我们也在反复 stress test。' },
+                    { id:'data',  emoji:'📊', label:'加预热', text:'感谢 Lin。先剧透一下 retention 那块：W4 已稳在 38%，W12 在 22%，跟我们 LTV 模型对得上。完整版周三发。' },
+                  ]},
                 { emoji:'☎', label:'约电话', sub:'当面聊更高效',
                   draft:'有些 nuance 邮件聊不清楚，约你 30 分钟电话？周二下午我都可以。',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'约 30 分钟电话？周二下午我有空' },
+                  ]} ]},
       mom:  { analysis:'妈妈"你最近忙吗" — 表面是问候，<b>实际想知道你过得好不好 + 何时能见到</b>。',
               hints:[
                 { emoji:'💚', label:'附和 + 具体计划', sub:'给确定性',
                   draft:'最近确实忙，不过这周末我回家吃顿饭，带儿子一起。妈你做你拿手的红烧肉嘛 🍚',
-                  chips:[] },
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'忙归忙，这周末回家吃饭哈，带儿子' },
+                    { id:'warm',  emoji:'🔥', label:'更暖',  text:'妈～最近确实忙，但你别担心我吃睡都正常。这周末我和儿子一起回去吃饭，特别想吃你的红烧肉 🍚' },
+                    { id:'time',  emoji:'⏰', label:'给具体时间', text:'有点忙，不过周六中午我和儿子回家吃饭，10 点半到。妈你做红烧肉就行 🍚' },
+                  ]},
                 { emoji:'📞', label:'给一通电话', sub:'比文字暖',
                   draft:'刚看到 妈，今晚 8 点给你打电话好不好？正经聊 20 分钟。',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'妈今晚 8 点打你电话' },
+                    { id:'warm',  emoji:'🔥', label:'更暖',  text:'妈～刚看到。这两天确实是疏忽了 🥲 今晚 8 点正经给你打电话好不好' },
+                  ]} ]},
       stratteam:{ analysis:'群消息 187 条 · 助理已总结。<b>不需要逐条看，扫要点即可</b>。',
               hints:[
                 { emoji:'📋', label:'扫要点', sub:'看 Lin 的总结',
                   draft:'(已读 Lin 的总结，标了 3 处需要回应)',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'已扫 ✓' },
+                  ]} ]},
       assistant:{ analysis:'助理 Lin 的日报 · 礼貌确认即可。',
               hints:[
                 { emoji:'👍', label:'已收到', sub:'',
                   draft:'收到 Lin，今天的安排我看过了 ✓',
-                  chips:[] }
-              ]},
+                  chips:[
+                    { id:'short', emoji:'➖', label:'更短',  text:'收到 ✓' },
+                    { id:'thanks',emoji:'🙏', label:'加谢谢', text:'收到 Lin，谢谢整理。下午 16:30 那个我会准时到。' },
+                  ]} ]},
     },
     chatHistory: {
       pony: [
@@ -3066,68 +3100,107 @@
             hints:[
               { emoji:'✓', label:'专业准时', sub:'让她放心',
                 draft:'张姐好，已收到。今晚 23:30 前发到您邮箱，思路 + 代码都会附上 ✨',
-                chips:[] },
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'张姐好，已收到。23:30 前提交 ✓' },
+                  { id:'self',  emoji:'💪', label:'更自信', text:'张姐好，收到。题目我看了，思路清晰，今晚 22:30 前先交，留时间给您 review。' },
+                  { id:'humble',emoji:'🙇', label:'更谦逊', text:'张姐您好，已收到。我会全力以赴，今晚 23:30 前提交，麻烦您 ✨' },
+                ]},
               { emoji:'❓', label:'请教延期', sub:'万不得已',
                 draft:'张姐，今晚我有期末小组答辩可能晚 1 小时，方便延到明早 8 点前么？我会提交完整代码 + 思路文档。',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'张姐，今晚有期末答辩冲突，能否延到明早 8 点前？' },
+                  { id:'pity',  emoji:'🥲', label:'更可怜', text:'张姐，实在不好意思 🥲 今晚突然加了期末答辩，能不能延到明早 8 点前提交？我保证完整版' },
+                ]} ]},
       lu: { analysis:'米哈游陆老师指定 RAG 项目 · 他要看你<b>具体决策 + 数字</b>。别背简历。',
             hints:[
               { emoji:'📋', label:'认真准备', sub:'数字 + 决策',
                 draft:'陆老师好，收到。我会准备好这几个角度：\n1) 为什么选 RAG 而不是 fine-tune\n2) chunking 策略的 3 次迭代\n3) 召回率从 67% → 89% 的 3 个关键改动\n周三见 ✨',
-                chips:[] },
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'陆老师好，收到。会重点准备：技术决策 / 迭代过程 / 关键改动。周三见 ✨' },
+                  { id:'demo',  emoji:'💻', label:'加 demo',text:'陆老师好，收到。除了讲解，我会带笔记本做现场 demo，让您能直接看到 chunking 的 3 次迭代效果。周三见 ✨' },
+                  { id:'humble',emoji:'🙇', label:'更谦虚', text:'陆老师您好，收到。会按这几个角度准备：技术决策、迭代、关键改动。如果您还想看其他角度麻烦告诉我，谢谢 ✨' },
+                  { id:'self',  emoji:'💪', label:'更自信', text:'陆老师好。已 ready：决策路径 / 3 次迭代 / 召回率从 67%→89% 的关键改动 / 一个 trade-off 复盘。带 demo。周三见。' },
+                ]},
               { emoji:'🤔', label:'问需要带啥', sub:'更细心',
                 draft:'陆老师好，请问周三需要带笔记本现场演示，还是直接讲 deck 就行？',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'陆老师，需要带笔记本演示么？' },
+                  { id:'extra', emoji:'➕', label:'多问一点', text:'陆老师好，几个准备问题：\n1) 需要带笔记本现场演示吗\n2) 时长大概多久\n3) 还有其他要带的材料吗\n谢谢您 ✨' },
+                ]} ]},
       cathy:{ analysis:'学姐凌晨 1:23 真心写 13 条 · <b>真诚感谢 + 具体回应一两条</b>，别只说"谢谢学姐"。',
             hints:[
               { emoji:'🙏', label:'真诚 + 具体', sub:'尊重她的时间',
                 draft:'学姐 救命谢谢 🥹\n你说的第 3 条（项目要写"我做了"而不是"我们做了"）我立刻改了，第 7 条简历开头那个 case 你说的太对了。\n下周请你喝奶茶（喜茶？）',
-                chips:[] },
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'学姐谢谢🥹 第 3 条第 7 条立刻改了。下周喝奶茶？' },
+                  { id:'cute',  emoji:'🥺', label:'更俏皮', text:'学姐救命 🥹🥹 你凌晨 1 点 23 写 13 条 我居然才看到我自责死了\n第 3 条立刻改了 第 7 条说的太对了\n下周必须请你喝奶茶 喜茶或星巴克你挑！' },
+                  { id:'pro',   emoji:'🎓', label:'更专业', text:'学姐谢谢您的细致建议。第 3 条（用"我做了"）和第 7 条（开头案例）我已采纳并修改，下周修改稿可以发您再看一眼吗？另想请您喝杯奶茶聊聊 :)' },
+                ]},
               { emoji:'💭', label:'分享进展', sub:'让她知道有用',
                 draft:'谢谢学姐！按你说的改完发你了。这周已经投了字节、米哈游，米哈游进二面了 ✨',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'谢学姐！按你说的改完投了，米哈游已二面 ✨' },
+                  { id:'humble',emoji:'🙇', label:'更谦逊', text:'谢谢学姐 🙏 您的建议起了大作用，按您说的改完之后投了 字节 / 米哈游，米哈游已经走到二面了。还在继续努力，到时候再向您汇报' },
+                ]} ]},
       prof: { analysis:'导师催稿 · <b>报具体进度 + 给确定日期</b>，别说"快了"。',
             hints:[
               { emoji:'📅', label:'报进度 + 给日期', sub:'让他放心',
                 draft:'周老师，第 4 章实验部分写了 60%，本周日发您初稿。第 5 章争取下周三前出 draft。',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'周老师，第 4 章周日发初稿，第 5 章下周三前。' },
+                  { id:'apo',   emoji:'🙏', label:'加歉意', text:'周老师，让您催了不好意思 🙏 第 4 章已 60%，周日发初稿；第 5 章下周三前出 draft。秋招也在抓紧，不会耽误进度。' },
+                  { id:'plan',  emoji:'📋', label:'给计划', text:'周老师：\n· 第 4 章：周日发初稿（已 60%）\n· 第 5 章：下周三 draft\n· 终稿：6/18\n· 6/20 交稿\n如有调整随时同步您。' },
+                ]} ]},
       mom: { analysis:'妈妈连问 7 天 · <b>给具体进展，但别报喜不报忧</b>。她最怕你焦虑。',
             hints:[
               { emoji:'💚', label:'具体进展', sub:'让她有数',
                 draft:'妈，米哈游进二面了，周三面。字节笔试今晚做。腾讯还在等。\n别担心，我吃睡都正常 ✨',
-                chips:[] },
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'妈，米哈游二面周三，字节笔试今晚做，腾讯等。我都正常 ✨' },
+                  { id:'warm',  emoji:'🔥', label:'更暖',  text:'妈～有进展啦：米哈游二面（周三）/ 字节笔试今晚做 / 腾讯等通知。你别老担心 我吃饭睡觉都正常的 🥢💤 周末视频啊' },
+                  { id:'plain', emoji:'😐', label:'去夸张', text:'妈，米哈游进二面，周三面。字节笔试今晚做。腾讯等。一切正常。' },
+                ]},
               { emoji:'📞', label:'给一通电话', sub:'比文字暖',
                 draft:'妈我打给你，今晚 9 点行么',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'妈晚上 9 点打你' },
+                  { id:'warm',  emoji:'🔥', label:'更暖',  text:'妈～想你了 今晚 9 点给你打个长的好不好' },
+                ]} ]},
       mentor:{ analysis:'mentor 让你做实习总结分享 · <b>这是转正的隐性环节</b>。认真准备。',
             hints:[
               { emoji:'✓', label:'收到 + 提纲', sub:'体现规划',
                 draft:'M 哥收到。我准备这 3 块：\n1) 这两个月做了 X 个项目（量化）\n2) 1 个有 insight 的发现\n3) 我还需要在哪些方面成长\n周四先发您审一遍可以吗？',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'M 哥收到。3 块：项目量化 / 1 个 insight / 成长方向。周四发您审下？' },
+                  { id:'self',  emoji:'💪', label:'更自信', text:'M 哥，没问题。我会按"做了什么 / 学到什么 / 还要补什么"三段，每段 10 分钟。周四会先 dry-run 给您。' },
+                  { id:'cute',  emoji:'🥺', label:'更紧张', text:'M 哥收到 🙏 第一次正式分享我有点紧张，能不能周四先讲一遍给您？我准备的 3 块是：项目 / insight / 成长。' },
+                ]} ]},
       jay:  { analysis:'阿杰第 3 次约爬山 · <b>给替代时间，别再爽约</b>。',
             hints:[
               { emoji:'🤝', label:'坦诚 + 替代', sub:'重申友情',
                 draft:'兄弟对不起 🙏 这周末真没法（米哈游二面准备）\n下周六我请客撸串 + 桌游？',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'兄弟周末没法 🙏 下周六请你吃饭赔罪' },
+                  { id:'firm',  emoji:'📌', label:'更确定', text:'兄弟这次说定了：下周六晚 7 点，老地方撸串 + 你赢了我请桌游。再爽约我请你一周的奶茶。' },
+                ]} ]},
       xiaomi:{analysis:'小米发早安没回 · <b>关心 + 计划下次见面</b>，异地最怕"被忽视"。',
             hints:[
               { emoji:'🌅', label:'回早安 + 计划', sub:'给具体期待',
                 draft:'早呀 ✨ 这周我准备米哈游面试有点忙，周末等结果出来咱们视频好不好？\n端午我去杭州找你 🥟',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'早 ✨ 这周面试忙，周末视频，端午我去杭州 🥟' },
+                  { id:'sweet', emoji:'🥰', label:'更甜',  text:'早呀宝宝 ☀️ 想你了\n这周米哈游面试稍微忙，但周末等结果出来咱们视频好不好？端午我一定到杭州 🥟🥟' },
+                  { id:'apo',   emoji:'🥲', label:'加歉意', text:'抱歉宝宝刚看到 🥲 这周面试有点紧，没及时回。周末等结果咱们视频，端午我去杭州找你！' },
+                ]} ]},
       zhao: { analysis:'卷王晒 offer · <b>不必回，或给中性祝贺</b>。比较心是陷阱。',
             hints:[
               { emoji:'👍', label:'中性祝贺', sub:'不内卷',
                 draft:'恭喜恭喜 ✨',
-                chips:[] }
-            ]},
+                chips:[
+                  { id:'short', emoji:'➖', label:'更短',  text:'👍' },
+                  { id:'tease', emoji:'😏', label:'加调侃', text:'卷王 ✨ 留口饭给我们吃' },
+                  { id:'silent',emoji:'🙊', label:'不回',   text:'(已读不回 · 我懂你的取舍)' },
+                ]} ]},
     },
     chatHistory: {
       hr: [

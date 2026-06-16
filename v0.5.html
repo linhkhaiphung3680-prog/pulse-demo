@@ -1061,6 +1061,77 @@
       </div>
 
       <!-- Reflection sheet 已迁到 Pi 的 🌙 复盘 topic chip · 不再 overlay -->
+
+      <!-- v0.5: 事详情抽屉 -->
+      <div id="thing-detail-sheet" class="analysis-sheet">
+        <div class="analysis-sheet-body" style="max-height:90%; overflow-y:auto;">
+          <div class="analysis-handle"></div>
+          <div class="px-5 pb-6">
+            <!-- header: badges + title + close -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1 min-w-0 pr-3">
+                <div id="td-badges" class="flex items-center gap-1.5 flex-wrap mb-1.5"></div>
+                <div id="td-title" class="text-[15px] font-semibold leading-snug">—</div>
+                <div id="td-subtitle" class="text-[11px] text-pulse-text-3 leading-snug mt-0.5">—</div>
+              </div>
+              <button onclick="closeThingDetail()" class="w-7 h-7 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2 flex-shrink-0">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- focus streak (only for type=focus) -->
+            <div id="td-streak" class="hidden bg-pulse-card rounded-xl p-3 border border-pulse-line mb-2.5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-pulse-text-3 mb-0.5">打卡进度</div>
+                  <div class="text-[14px] font-semibold">🔥 连续 <span id="td-streak-num" class="text-pulse-emerald">0</span> 天 · 累计 <span id="td-streak-total">0</span> 天</div>
+                </div>
+                <button id="td-checkin" class="text-[11px] px-3 py-1.5 rounded-full bg-gradient-to-r from-pulse-purple/30 to-pulse-purple/15 text-pulse-purple-2 font-semibold border border-pulse-purple/40">📍 今天打卡</button>
+              </div>
+            </div>
+
+            <!-- source message -->
+            <div id="td-source-wrap" class="bg-pulse-card rounded-xl p-3 border border-pulse-line mb-2.5">
+              <div class="text-[10px] text-pulse-text-3 mb-1.5 flex items-center gap-1">
+                <span>📨</span><span>来源消息</span>
+              </div>
+              <div id="td-source" class="text-[12px] leading-snug text-pulse-text">—</div>
+              <button id="td-jump-chat" onclick="jumpFromDetailToChat()" class="hidden mt-2 text-[11px] text-pulse-purple-2 font-medium flex items-center gap-1">
+                查看完整对话 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+
+            <!-- people -->
+            <div id="td-people-wrap" class="bg-pulse-card rounded-xl p-3 border border-pulse-line mb-2.5 hidden">
+              <div class="text-[10px] text-pulse-text-3 mb-2 flex items-center gap-1">
+                <span>👥</span><span>涉及的人</span>
+              </div>
+              <div id="td-people" class="flex flex-wrap gap-1.5"></div>
+            </div>
+
+            <!-- AI reasoning -->
+            <div id="td-reason-wrap" class="rounded-xl p-3 mb-2.5" style="background: linear-gradient(135deg, rgba(139,92,246,0.14), rgba(59,130,246,0.08)); border: 1px solid rgba(139,92,246,0.25);">
+              <div class="text-[10px] text-pulse-purple-2 mb-1 flex items-center gap-1">
+                <span>✦</span><span>小 P 挖出的依据</span>
+              </div>
+              <div id="td-reason" class="text-[12px] leading-snug text-pulse-text">—</div>
+            </div>
+
+            <!-- meta -->
+            <div class="text-[10px] text-pulse-text-3 mb-3 px-1" id="td-meta">—</div>
+
+            <!-- actions -->
+            <div id="td-actions" class="grid grid-cols-3 gap-1.5">
+              <!-- buttons populated dynamically based on container/type -->
+            </div>
+
+            <!-- secondary: 不再推 (only for AI cards) -->
+            <button id="td-mute-btn" onclick="thingActionFromDetail('mute')" class="hidden w-full mt-2 py-2 rounded-lg text-[11px] text-pulse-text-3 hover:bg-pulse-red/15 hover:text-pulse-red transition border border-pulse-line">
+              ✗ 不再推 · 让小 P 学到
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ============================ INBOX ============================ -->
@@ -3412,13 +3483,13 @@
       return `<div class="avatar avatar-tiny" style="background:${p.bg};width:18px;height:18px;font-size:9px">${p.initial}</div>`;
     }).join('');
     return `
-      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line" data-thing-id="${t.id}">
+      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line cursor-pointer hover:border-pulse-purple/40 transition" data-thing-id="${t.id}" onclick="openThingDetail('${t.id}')">
         <div class="flex items-center justify-between mb-1.5">
           <div class="flex items-center gap-1.5 min-w-0">
             ${mlBadge}
             <span class="text-[9px] text-pulse-text-3">长期关注</span>
           </div>
-          <button onclick="checkInThing('${t.id}')" class="streak-checkin-btn flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-gradient-to-r from-pulse-purple/30 to-pulse-purple/15 text-pulse-purple-2 font-semibold border border-pulse-purple/40 hover:from-pulse-purple/40 hover:to-pulse-purple/20 transition active:scale-95">
+          <button onclick="event.stopPropagation();checkInThing('${t.id}')" class="streak-checkin-btn flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-gradient-to-r from-pulse-purple/30 to-pulse-purple/15 text-pulse-purple-2 font-semibold border border-pulse-purple/40 hover:from-pulse-purple/40 hover:to-pulse-purple/20 transition active:scale-95">
             <span>📍</span><span>打卡</span>
           </button>
         </div>
@@ -3432,8 +3503,8 @@
           <div class="flex items-center -space-x-1">${persons}</div>
         </div>
         <div class="flex items-center gap-1 mt-2 pt-2 border-t border-pulse-line/50">
-          <button onclick="thingAction('${t.id}','archive')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition">📦 归档</button>
-          <button onclick="thingAction('${t.id}','unfocus')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-text-3/20 transition">取消关注</button>
+          <button onclick="event.stopPropagation();thingAction('${t.id}','archive')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition">📦 归档</button>
+          <button onclick="event.stopPropagation();thingAction('${t.id}','unfocus')" class="flex-1 text-[10px] py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-text-3/20 transition">取消关注</button>
         </div>
       </div>`;
   }
@@ -3448,7 +3519,7 @@
       return `<div class="avatar avatar-tiny" style="background:${p.bg};width:16px;height:16px;font-size:8px">${p.initial}</div>`;
     }).join('');
     return `
-      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line" data-thing-id="${t.id}">
+      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line cursor-pointer hover:border-pulse-purple/40 transition" data-thing-id="${t.id}" onclick="openThingDetail('${t.id}')">
         <div class="flex items-center gap-1.5 mb-1 flex-wrap">
           ${mlBadge}
           <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:${tb.color}25;color:${tb.color}">${tb.icon} ${tb.label}</span>
@@ -3462,9 +3533,9 @@
         <div class="flex items-center justify-between mt-2 pt-2 border-t border-pulse-line/50">
           <div class="flex items-center -space-x-1">${persons}</div>
           <div class="flex items-center gap-1">
-            <button onclick="thingAction('${t.id}','done')" class="text-[10px] px-2 py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-emerald/15 hover:text-pulse-emerald transition">✓ 完成</button>
-            <button onclick="thingAction('${t.id}','archive')" class="text-[10px] px-2 py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition">📦 归档</button>
-            <button onclick="thingAction('${t.id}','delete')" class="text-[10px] px-2 py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-red/15 hover:text-pulse-red transition">🗑</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','done')" class="text-[10px] px-2 py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-emerald/15 hover:text-pulse-emerald transition">✓ 完成</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','archive')" class="text-[10px] px-2 py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition">📦 归档</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','delete')" class="text-[10px] px-2 py-1 rounded-md bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-red/15 hover:text-pulse-red transition">🗑</button>
           </div>
         </div>
       </div>`;
@@ -3483,7 +3554,7 @@
       </span>`;
     }).join('');
     return `
-      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line/80 relative" data-thing-id="${t.id}">
+      <div class="bg-pulse-card rounded-2xl p-3 border border-pulse-line/80 relative cursor-pointer hover:border-pulse-purple/40 transition" data-thing-id="${t.id}" onclick="openThingDetail('${t.id}')">
         <!-- AI 信号条 -->
         <div class="absolute left-0 top-3 bottom-3 w-1 rounded-r-md bg-gradient-to-b from-pulse-purple to-pulse-purple-3"></div>
         <div class="ml-2">
@@ -3500,10 +3571,10 @@
             <span>小 P：${t.reason}</span>
           </div>`:''}
           <div class="flex items-center gap-1.5">
-            <button onclick="thingAction('${t.id}','focus')" class="flex-1 text-[10px] py-1.5 rounded-lg bg-pulse-purple/15 text-pulse-purple-2 font-semibold border border-pulse-purple/25 hover:bg-pulse-purple/25 transition">⭐ 关注</button>
-            <button onclick="thingAction('${t.id}','peek')"  class="flex-1 text-[10px] py-1.5 rounded-lg bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-card transition">👀 看看</button>
-            <button onclick="thingAction('${t.id}','snooze')" class="text-[10px] px-2 py-1.5 rounded-lg bg-pulse-card-2 text-pulse-text-3 hover:bg-pulse-card transition" title="先不管">😴</button>
-            <button onclick="thingAction('${t.id}','mute')" class="text-[10px] px-2 py-1.5 rounded-lg bg-pulse-card-2 text-pulse-text-3 hover:bg-pulse-red/15 hover:text-pulse-red transition" title="不再推">✗</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','focus')" class="flex-1 text-[10px] py-1.5 rounded-lg bg-pulse-purple/15 text-pulse-purple-2 font-semibold border border-pulse-purple/25 hover:bg-pulse-purple/25 transition">⭐ 关注</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','peek')"  class="flex-1 text-[10px] py-1.5 rounded-lg bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-card transition">👀 看看</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','snooze')" class="text-[10px] px-2 py-1.5 rounded-lg bg-pulse-card-2 text-pulse-text-3 hover:bg-pulse-card transition" title="先不管">😴</button>
+            <button onclick="event.stopPropagation();thingAction('${t.id}','mute')" class="text-[10px] px-2 py-1.5 rounded-lg bg-pulse-card-2 text-pulse-text-3 hover:bg-pulse-red/15 hover:text-pulse-red transition" title="不再推">✗</button>
           </div>
         </div>
       </div>`;
@@ -3592,6 +3663,154 @@
       }
     }
     renderMyFocus();
+  }
+
+  // v0.5: 事详情抽屉
+  let CURRENT_DETAIL_ID = null;
+
+  function openThingDetail(id) {
+    const t = THINGS.find(x => x.id === id);
+    if (!t) return;
+    CURRENT_DETAIL_ID = id;
+
+    // badges row
+    const ml = t.mainline ? MAINLINES.find(m => m.id === t.mainline) : null;
+    const tb = TYPE_BADGE[t.type] || TYPE_BADGE.task;
+    const pri = impUrgLabel(t.imp, t.urg);
+    const containerLabel = t.container === 'focus' ? '⭐ 我的关注' : (t.container === 'ai' ? '🔔 小 P 发现' : '');
+    const badgesHtml = [
+      `<span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:${pri.color}20;color:${pri.color};border:1px solid ${pri.color}40">${pri.code} ${pri.label}</span>`,
+      `<span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:${tb.color}25;color:${tb.color}">${tb.icon} ${tb.label}</span>`,
+      ml ? `<span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:${ml.color}25;color:${ml.color}">主线 ${ml.code}</span>` : '',
+      containerLabel ? `<span class="text-[9px] px-1.5 py-0.5 rounded text-pulse-text-3 bg-pulse-card-2">${containerLabel}</span>` : '',
+    ].filter(Boolean).join('');
+    document.getElementById('td-badges').innerHTML = badgesHtml;
+    document.getElementById('td-title').textContent = t.title || '';
+    document.getElementById('td-subtitle').textContent = t.subtitle || '';
+
+    // streak (focus only)
+    const streakWrap = document.getElementById('td-streak');
+    if (t.type === 'focus') {
+      streakWrap.classList.remove('hidden');
+      document.getElementById('td-streak-num').textContent = t.streakDays || 0;
+      document.getElementById('td-streak-total').textContent = t.totalDays || 0;
+      document.getElementById('td-checkin').onclick = () => {
+        checkInThing(t.id);
+        // refresh detail
+        setTimeout(() => openThingDetail(t.id), 50);
+      };
+    } else {
+      streakWrap.classList.add('hidden');
+    }
+
+    // source
+    const sourceWrap = document.getElementById('td-source-wrap');
+    const jumpBtn    = document.getElementById('td-jump-chat');
+    if (t.source && t.source.preview) {
+      sourceWrap.classList.remove('hidden');
+      const personId = (t.persons && t.persons[0]) || null;
+      const personName = personId && CONTACTS[personId] ? CONTACTS[personId].name : '';
+      document.getElementById('td-source').innerHTML = `${personName ? `<span class="text-pulse-text-3">${personName}：</span>` : ''}"${t.source.preview}"`;
+      if (personId && CONTACTS[personId]) {
+        jumpBtn.classList.remove('hidden');
+      } else {
+        jumpBtn.classList.add('hidden');
+      }
+    } else {
+      sourceWrap.classList.add('hidden');
+    }
+
+    // people
+    const peopleWrap = document.getElementById('td-people-wrap');
+    if ((t.persons||[]).length) {
+      peopleWrap.classList.remove('hidden');
+      document.getElementById('td-people').innerHTML = t.persons.map(pid => {
+        const p = CONTACTS[pid]; if (!p) return '';
+        return `<button onclick="jumpFromDetailToChat('${pid}')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-pulse-card-2 hover:bg-pulse-purple/15 transition border border-pulse-line">
+          <span class="avatar avatar-tiny" style="background:${p.bg};width:20px;height:20px;font-size:10px">${p.initial}</span>
+          <span class="text-[11px] text-pulse-text">${p.name}</span>
+          <span class="text-[9px] text-pulse-text-3">${p.tag||''}</span>
+        </button>`;
+      }).join('');
+    } else {
+      peopleWrap.classList.add('hidden');
+    }
+
+    // reason
+    const reasonWrap = document.getElementById('td-reason-wrap');
+    if (t.reason) {
+      reasonWrap.classList.remove('hidden');
+      document.getElementById('td-reason').textContent = t.reason;
+    } else {
+      reasonWrap.classList.add('hidden');
+    }
+
+    // meta
+    const metaParts = [];
+    if (t.lastTouchedAt) metaParts.push(`最后接触：${t.lastTouchedAt}`);
+    metaParts.push(`重要度 ${'●'.repeat(t.imp||0) + '○'.repeat(3-(t.imp||0))}`);
+    metaParts.push(`紧急度 ${'●'.repeat(t.urg||0) + '○'.repeat(3-(t.urg||0))}`);
+    document.getElementById('td-meta').innerHTML = metaParts.join(' · ');
+
+    // actions: 按 container 给不同操作
+    const actionsEl = document.getElementById('td-actions');
+    const muteBtn   = document.getElementById('td-mute-btn');
+    if (t.container === 'ai') {
+      // AI 池 → ⭐ 关注 / 👀 看看 / 😴 折叠
+      actionsEl.innerHTML = `
+        <button onclick="thingActionFromDetail('focus')"  class="py-2 rounded-lg bg-pulse-purple/20 text-pulse-purple-2 font-semibold border border-pulse-purple/35 text-[11px]">⭐ 关注</button>
+        <button onclick="thingActionFromDetail('peek')"   class="py-2 rounded-lg bg-pulse-card-2 text-pulse-text-2 border border-pulse-line text-[11px]">👀 看消息</button>
+        <button onclick="thingActionFromDetail('snooze')" class="py-2 rounded-lg bg-pulse-card-2 text-pulse-text-3 border border-pulse-line text-[11px]">😴 先不管</button>
+      `;
+      muteBtn.classList.remove('hidden');
+    } else if (t.container === 'focus' && t.type === 'focus') {
+      // 长期关注 → 📦 归档 / 取消关注 (no done)
+      actionsEl.innerHTML = `
+        <button onclick="thingActionFromDetail('archive')" class="py-2 rounded-lg bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition border border-pulse-line text-[11px]">📦 归档</button>
+        <button onclick="thingActionFromDetail('unfocus')" class="py-2 rounded-lg bg-pulse-card-2 text-pulse-text-3 border border-pulse-line text-[11px] col-span-2">取消关注</button>
+      `;
+      muteBtn.classList.add('hidden');
+    } else if (t.container === 'focus') {
+      // 短期关注 → ✓ 完成 / 📦 归档 / 🗑 删除
+      actionsEl.innerHTML = `
+        <button onclick="thingActionFromDetail('done')"    class="py-2 rounded-lg bg-pulse-emerald/15 text-pulse-emerald font-semibold border border-pulse-emerald/30 text-[11px]">✓ 完成</button>
+        <button onclick="thingActionFromDetail('archive')" class="py-2 rounded-lg bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-amber/15 hover:text-pulse-amber transition border border-pulse-line text-[11px]">📦 归档</button>
+        <button onclick="thingActionFromDetail('delete')"  class="py-2 rounded-lg bg-pulse-card-2 text-pulse-text-2 hover:bg-pulse-red/15 hover:text-pulse-red transition border border-pulse-line text-[11px]">🗑 删除</button>
+      `;
+      muteBtn.classList.add('hidden');
+    } else {
+      actionsEl.innerHTML = '';
+      muteBtn.classList.add('hidden');
+    }
+
+    document.getElementById('thing-detail-sheet').classList.add('show');
+  }
+
+  function closeThingDetail() {
+    document.getElementById('thing-detail-sheet').classList.remove('show');
+    CURRENT_DETAIL_ID = null;
+  }
+
+  function thingActionFromDetail(action) {
+    if (!CURRENT_DETAIL_ID) return;
+    const id = CURRENT_DETAIL_ID;
+    closeThingDetail();
+    // 让 sheet 关闭动画先跑一会儿，再执行操作（飞行动画就能看到）
+    setTimeout(() => thingAction(id, action), 220);
+  }
+
+  function jumpFromDetailToChat(personId) {
+    const t = THINGS.find(x => x.id === CURRENT_DETAIL_ID);
+    if (!t) return;
+    const pid = personId || (t.persons && t.persons[0]);
+    if (!pid || !CONTACTS[pid]) {
+      showToast('这条暂无关联对话');
+      return;
+    }
+    closeThingDetail();
+    PEEK_SOURCE = t.source && t.source.preview ? t.source.preview : null;
+    PEEK_BACK_TO_TODAY = true;
+    setTimeout(() => openChat(pid), 200);
   }
 
   function checkInThing(id) {

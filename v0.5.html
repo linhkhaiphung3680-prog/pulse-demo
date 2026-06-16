@@ -1027,15 +1027,14 @@
           <button id="ai-pool-fold" onclick="toggleAiPoolFold()" class="hidden w-full mt-2 text-[10px] text-pulse-text-3 py-2 rounded-lg border border-pulse-line/60 bg-pulse-card/50">还有 <span id="ai-pool-fold-n">0</span> 件 · 展开 ⌄</button>
         </div>
 
-        <!-- Bottom action row -->
-        <div class="px-5 mt-5 mb-2 grid grid-cols-2 gap-2">
-          <button onclick="openConsultToday()" class="rounded-xl p-3 bg-pulse-purple/15 hover:bg-pulse-purple/25 transition border border-pulse-purple/30 text-left">
-            <div class="text-[11px] text-pulse-purple-2 font-semibold mb-0.5">✨ 跟小 P 商量</div>
-            <div class="text-[10px] text-pulse-text-2 leading-snug">这些事怎么排</div>
-          </button>
-          <button onclick="openReflection()" class="rounded-xl p-3 bg-pulse-card hover:bg-pulse-card-2 transition border border-pulse-line text-left">
-            <div class="text-[11px] text-pulse-text font-semibold mb-0.5">🌙 今晚复盘</div>
-            <div class="text-[10px] text-pulse-text-3 leading-snug">5 分钟三问</div>
+        <!-- Bottom action row · v0.5: 1 button (复盘已迁到 Pi topic chip) -->
+        <div class="px-5 mt-5 mb-2">
+          <button onclick="openConsultToday()" class="w-full rounded-xl p-3 bg-pulse-purple/15 hover:bg-pulse-purple/25 transition border border-pulse-purple/30 text-left flex items-center justify-between">
+            <div>
+              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-0.5">✨ 跟小 P 商量</div>
+              <div class="text-[10px] text-pulse-text-2 leading-snug">今天这些事怎么排 · 也可以聊复盘 / 改风格 / 调主线</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pulse-purple-2 flex-shrink-0"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </div>
 
@@ -1061,86 +1060,7 @@
         <button onclick="undoThingAction()" class="text-[12px] font-semibold text-pulse-purple-2">撤销</button>
       </div>
 
-      <!-- Reflection sheet (overlay over today) -->
-      <div id="reflection-sheet" class="analysis-sheet">
-        <div class="analysis-sheet-body" style="max-height:90%; overflow-y:auto;">
-          <div class="analysis-handle"></div>
-          <div class="px-5 pb-6">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">🌙</span>
-                <div>
-                  <div class="text-[14px] font-semibold">今日复盘</div>
-                  <div class="text-[10px] text-pulse-text-3">6 月 2 日 · 5 分钟</div>
-                </div>
-              </div>
-              <button onclick="closeReflection()" class="w-8 h-8 rounded-full bg-pulse-card-2 flex items-center justify-center text-pulse-text-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-              </button>
-            </div>
-
-            <!-- Q1: today's 3 -->
-            <div class="bg-pulse-card rounded-2xl p-3.5 border border-pulse-line mb-2.5">
-              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-2">Q1 · 今天三件事</div>
-              <div id="reflect-q1" class="space-y-2"></div>
-            </div>
-
-            <!-- Q2: best moment -->
-            <div class="bg-pulse-card rounded-2xl p-3.5 border border-pulse-line mb-2.5">
-              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-2">Q2 · 今天哪段互动最好？</div>
-              <div class="text-[10px] text-pulse-text-3 mb-2">小 P 已读取所有对话，给你 2 个候选</div>
-              <div class="space-y-1.5">
-                <button onclick="pickBestMoment(this)" data-moment="mira" class="reflect-moment w-full text-left rounded-lg p-2.5 bg-pulse-card-2 hover:bg-pulse-purple/15 transition border border-pulse-line text-[12px] leading-relaxed">
-                  <div class="text-pulse-text-2 mb-0.5 text-[10px]">14:00 · Mira</div>
-                  <div class="text-pulse-text">她跟你聊 PM 转型，让你感觉「不孤单」</div>
-                </button>
-                <button onclick="pickBestMoment(this)" data-moment="daughter" class="reflect-moment w-full text-left rounded-lg p-2.5 bg-pulse-card-2 hover:bg-pulse-purple/15 transition border border-pulse-line text-[12px] leading-relaxed">
-                  <div class="text-pulse-text-2 mb-0.5 text-[10px]">19:30 · 女儿</div>
-                  <div class="text-pulse-text">青蛙弗洛格故事讲完，她说"爸爸再讲一个"</div>
-                </button>
-              </div>
-              <textarea id="reflect-q2-text" placeholder="或自己写一段..." class="w-full mt-2 bg-pulse-bg rounded-lg p-2 text-[12px] text-pulse-text border border-pulse-line resize-none" rows="2"></textarea>
-            </div>
-
-            <!-- Q3: tomorrow's 3 -->
-            <div class="bg-pulse-card rounded-2xl p-3.5 border border-pulse-line mb-2.5">
-              <div class="text-[11px] text-pulse-purple-2 font-semibold mb-2">Q3 · 明天三件事</div>
-              <div class="text-[10px] text-pulse-text-3 mb-2">小 P 草拟（可改）</div>
-              <div class="space-y-1.5 text-[12px]">
-                <div class="flex items-center gap-2 p-2 bg-pulse-card-2 rounded-lg">
-                  <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:#F59E0B25;color:#F59E0B">主线 A</span>
-                  <span class="flex-1">客户访谈准备（3 个问题）</span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-pulse-card-2 rounded-lg">
-                  <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:#10B98125;color:#10B981">主线 B</span>
-                  <span class="flex-1">跑 3km <span class="text-pulse-text-3 text-[10px]">（昨日延期）</span></span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-pulse-card-2 rounded-lg">
-                  <span class="text-[9px] px-1.5 py-0.5 rounded font-semibold" style="background:#F472B625;color:#F472B6">主线 C</span>
-                  <span class="flex-1">陪女儿 19:30</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pi feedback (revealed after submit) -->
-            <div id="reflect-pi-feedback" class="hidden mb-3 rounded-2xl p-3.5" style="background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(59,130,246,0.10)); border: 1px solid rgba(139,92,246,0.3);">
-              <div class="flex items-start gap-2.5">
-                <div class="pi-avatar-sm flex-shrink-0">π</div>
-                <div class="flex-1">
-                  <div class="text-[10px] text-pulse-purple-2 font-medium mb-1">小 P 的反馈</div>
-                  <div id="reflect-pi-text" class="text-[12px] leading-relaxed"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Submit -->
-            <button id="reflect-submit-btn" onclick="submitReflection()" class="w-full py-3 rounded-xl bg-gradient-to-r from-pulse-purple to-pulse-purple-3 text-white text-[13px] font-semibold">
-              完成复盘 · 喂给小 P 的长期记忆
-            </button>
-            <div class="text-[10px] text-pulse-text-3 text-center mt-2">复盘是小 P 长期记忆的<strong>唯一</strong>写入入口</div>
-          </div>
-        </div>
-      </div>
+      <!-- Reflection sheet 已迁到 Pi 的 🌙 复盘 topic chip · 不再 overlay -->
     </div>
 
     <!-- ============================ INBOX ============================ -->
@@ -1856,8 +1776,9 @@
               <button data-topic="mainlines" onclick="piTopic('mainlines')" class="pi-topic-chip">🎯 调主线</button>
               <button data-topic="thingrules" onclick="piTopic('thingrules')" class="pi-topic-chip">📜 事的规则</button>
               <button data-topic="style" onclick="piTopic('style')" class="pi-topic-chip">🎨 改风格</button>
-              <button data-topic="perm" onclick="piTopic('perm')" class="pi-topic-chip">🔒 权限</button>
+              <button data-topic="reflect" onclick="piTopic('reflect')" class="pi-topic-chip">🌙 复盘</button>
               <button data-topic="learn" onclick="piTopic('learn')" class="pi-topic-chip">🧠 已学到</button>
+              <button data-topic="perm" onclick="piTopic('perm')" class="pi-topic-chip">🔒 权限</button>
             </div>
           </div>
         </div>
@@ -2759,6 +2680,10 @@
   let LAST_UNDO_ACTION = null;    // {kind, snapshot, timer}
   let PEEK_SOURCE = null;         // P3.3: 看看跳转时传给 chat 的来源消息预览（用于高亮）
   let PEEK_BACK_TO_TODAY = false; // P3.4: 看看跳转时是否显示"返回我的事"短路
+  // v0.5 复盘：本会话累计的事池操作（用于 🌙 复盘 topic 摘要）
+  let SESSION_STATS = { focused:0, completed:0, archived:0, deleted:0, checkedIn:0, muted:0, snoozed:0, peeked:0 };
+  // 用户在 session 里关注（拉入 focus 容器）的 thing id 集合（用于"接住了哪些 P0"）
+  let SESSION_FOCUSED_IDS = [];
 
   // 消息 → 该消息拆出的事（v0.5: 混合 0/1/2/3 让用户看到 AI 真在判断）
   let MSG_TO_THINGS = {
@@ -3286,6 +3211,9 @@
     if (typeof PEEK_SOURCE !== 'undefined')      PEEK_SOURCE = null;
     if (typeof PEEK_BACK_TO_TODAY !== 'undefined') PEEK_BACK_TO_TODAY = false;
     if (typeof rebuildPiMainlineState === 'function') rebuildPiMainlineState();
+    // 重置今日操作 stats
+    if (typeof SESSION_STATS !== 'undefined') SESSION_STATS = { focused:0, completed:0, archived:0, deleted:0, checkedIn:0, muted:0, snoozed:0, peeked:0 };
+    if (typeof SESSION_FOCUSED_IDS !== 'undefined') SESSION_FOCUSED_IDS = [];
 
     // reset Pi thread (so opening re-renders for new persona)
     const piThread = document.getElementById('pi-thread');
@@ -3520,13 +3448,17 @@
         t.container = 'focus';
         undoLabel = `⭐ 已关注「${t.title}」 · 移入「我的关注」`;
         animateLanding = true;
+        SESSION_STATS.focused++;
+        if (!SESSION_FOCUSED_IDS.includes(id)) SESSION_FOCUSED_IDS.push(id);
         break;
       case 'unfocus':
         t.container = 'ai';
         undoLabel = `已取消关注「${t.title}」`;
         animateLanding = true;
+        SESSION_FOCUSED_IDS = SESSION_FOCUSED_IDS.filter(x => x !== id);
         break;
       case 'peek': {
+        SESSION_STATS.peeked++;
         // 跳到来源：优先关联消息，否则回到该联系人聊天
         const personId = (t.persons && t.persons[0]) || null;
         if (personId && CONTACTS[personId]) {
@@ -3543,23 +3475,28 @@
       case 'snooze':
         t.folded = true;
         undoLabel = `😴 「${t.title}」收入折叠区`;
+        SESSION_STATS.snoozed++;
         break;
       case 'mute':
         t.status = 'archived';
         t.muted = true;
         undoLabel = `✗ 不再推「${t.title}」 · 小 P 已学到`;
+        SESSION_STATS.muted++;
         break;
       case 'done':
         t.status = 'done';
         undoLabel = `✓ 完成「${t.title}」`;
+        SESSION_STATS.completed++;
         break;
       case 'archive':
         t.status = 'archived';
         undoLabel = `📦 归档「${t.title}」`;
+        SESSION_STATS.archived++;
         break;
       case 'delete':
         t.status = 'deleted';
         undoLabel = `🗑 删除「${t.title}」`;
+        SESSION_STATS.deleted++;
         break;
     }
     LAST_UNDO_ACTION = { id, before, timer: null };
@@ -3590,6 +3527,7 @@
     const before = JSON.parse(JSON.stringify(t));
     t.streakDays = (t.streakDays||0) + 1;
     t.totalDays  = (t.totalDays||0) + 1;
+    SESSION_STATS.checkedIn++;
     LAST_UNDO_ACTION = { id, before, timer: null };
     showThingUndo(`📍 打卡「${t.title}」 · 连续 ${t.streakDays} 天 🔥`);
     renderMyFocus();
@@ -3758,91 +3696,16 @@
   }
 
   // ===================== REFLECTION SHEET =====================
+  // v0.5: 复盘已迁到 Pi 的 🌙 复盘 topic chip。以下是 legacy no-op 兼容层。
   function openReflection() {
-    // Build Q1 task list
-    const q1 = document.getElementById('reflect-q1');
-    if (q1) {
-      q1.innerHTML = DAILY_3.map(t => {
-        const ml = MAINLINES.find(m => m.id === t.mainline);
-        const isDone = t.status === 'done';
-        return `
-          <div class="reflect-task flex items-center gap-2.5 rounded-lg p-2 ${isDone?'bg-pulse-emerald/10':'bg-pulse-card-2'}" data-task="${t.id}" data-status="${isDone?'done':'pending'}">
-            <span class="text-[14px]">${isDone?'✓':'✗'}</span>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1 mb-0.5">
-                <span class="text-[9px] px-1 rounded font-semibold" style="background:${ml.color}25;color:${ml.color}">${ml.code}</span>
-                <span class="text-[12px] ${isDone?'line-through text-pulse-text-3':'text-pulse-text'}">${t.title}</span>
-              </div>
-              ${!isDone ? `
-                <div class="flex gap-1 mt-1">
-                  <button onclick="pickReason(this,'busy')" class="reflect-reason text-[9px] px-2 py-0.5 rounded bg-pulse-card border border-pulse-line text-pulse-text-2">太忙</button>
-                  <button onclick="pickReason(this,'no-energy')" class="reflect-reason text-[9px] px-2 py-0.5 rounded bg-pulse-card border border-pulse-line text-pulse-text-2">没动力</button>
-                  <button onclick="pickReason(this,'other-thing')" class="reflect-reason text-[9px] px-2 py-0.5 rounded bg-pulse-card border border-pulse-line text-pulse-text-2">别的事</button>
-                </div>
-              `:''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-    // reset state
-    document.getElementById('reflect-pi-feedback').classList.add('hidden');
-    document.getElementById('reflect-submit-btn').textContent = '完成复盘 · 喂给小 P 的长期记忆';
-    document.getElementById('reflect-submit-btn').disabled = false;
-    document.querySelectorAll('.reflect-moment').forEach(b => b.classList.remove('active'));
-    document.getElementById('reflect-sheet') || document.getElementById('reflection-sheet').classList.add('show');
-    document.getElementById('reflection-sheet').classList.add('show');
+    PI_ENTER_SOURCE = 'pi';
+    showScreen('pi');
+    setTimeout(() => piTopic('reflect'), 240);
   }
-
-  function closeReflection() {
-    document.getElementById('reflection-sheet').classList.remove('show');
-  }
-
-  function pickBestMoment(btn) {
-    document.querySelectorAll('.reflect-moment').forEach(b => {
-      b.classList.remove('active');
-      b.style.borderColor = '#2A2B33';
-      b.style.background = '#1E1F26';
-    });
-    btn.classList.add('active');
-    btn.style.borderColor = 'rgba(139,92,246,0.5)';
-    btn.style.background = 'rgba(139,92,246,0.15)';
-  }
-
-  function pickReason(btn, reason) {
-    const parent = btn.parentElement;
-    parent.querySelectorAll('.reflect-reason').forEach(b => {
-      b.classList.remove('active');
-      b.style.background = '#16171D';
-      b.style.color = '#A0A4AD';
-      b.style.borderColor = '#2A2B33';
-    });
-    btn.classList.add('active');
-    btn.style.background = 'rgba(139,92,246,0.18)';
-    btn.style.color = '#A78BFA';
-    btn.style.borderColor = 'rgba(139,92,246,0.4)';
-  }
-
-  function submitReflection() {
-    const completed = DAILY_3.filter(t => t.status === 'done').length;
-    let feedback;
-    if (completed === 3) {
-      feedback = '今天三件事全部完成 — 主线 A/B/C 都推进了一格。我把"周二上午精力最佳"这个观察记进了你的长期偏好。';
-    } else if (completed === 2) {
-      feedback = '本周第二次延期主线 B（跑步）。要不要把强度先调到 2km？我把这个延期模式记进了你的长期偏好。';
-    } else if (completed === 1) {
-      feedback = '今天只完成 1/3。这种节奏不可持续，明天我会建议你把三件事的精力总量降到 < 150。';
-    } else {
-      feedback = '今天没完成主线 — 不指责。我会观察是不是你的精力曲线最近有变化，明早简报会给你建议。';
-    }
-    document.getElementById('reflect-pi-text').textContent = feedback;
-    document.getElementById('reflect-pi-feedback').classList.remove('hidden');
-    const btn = document.getElementById('reflect-submit-btn');
-    btn.textContent = '✓ 已喂给小 P 长期记忆 · 关闭';
-    btn.disabled = true;
-    btn.onclick = () => closeReflection();
-    showPiInsight('复盘 → 长期记忆 · 我学到的偏好今天又完整了一点 ✨');
-  }
+  function closeReflection() {}
+  function pickBestMoment() {}
+  function pickReason() {}
+  function submitReflection() {}
 
   // ===================== RENDER: INBOX =====================
   function renderInbox() {
@@ -4494,6 +4357,12 @@
     if (/ai 池.*还有|池里.*值得|发现.*还有/.test(text)) return '5 件 AI 池里我筛了下：<br>· <b>Mira 8 点 Blue Note</b>（情绪价值高）<br>· <b>爸爸要复查</b>（需要决策）<br>剩下 3 件可以先放——Jules 离职、Noa 旧话题、设计稿群。';
     if (/跳过今天|今天.*跳过|想偷懒/.test(text)) return '可以。<br><br>但有 1 件需要至少 1 分钟：<b>Mira 那条邀约</b>——回不回都行，给个反馈她就放心了。<br><br>其他全压到明天，今天的 streak 也照常算（你的 47 天不会断）。';
 
+    // v0.5 复盘话题的快捷回复
+    if (/^状态不错$|今天.*不错|挺好/.test(text)) return '✨ 记下了。<br>动了这么多事还能保持状态——这本身就是一件值得看见的事。<br>明天随你心情。';
+    if (/^今天太累$|太累了|累爆/.test(text)) return '辛苦了 🙏<br>累的时候我建议明天减半：只看 P0，其他全压一压。<br>你现在最该做的事是<b>关掉手机睡觉</b>——不是再看一眼事池。';
+    if (/感觉没干啥|没干啥|什么都没做|没动力/.test(text)) return '看了下你今天的事池操作记录——其实<b>不算少</b>。<br>"感觉没干"和"实际没干"经常不一样。<br>明天定 1 件最关键的就行，别多。';
+    if (/为明天准备|明天.*准备|计划.*明天/.test(text)) return '行。基于今天没接的 P0，明天最该看的：<br>1. 优先级最高的那条 — 明早第一件就处理<br>2. 已关注但没动的那几件 — 给它们一个明确动作<br>3. 你自己的精力管理 — 几点是你状态最好的窗口？';
+
     return PI_RESPONSES.unknown;
   }
 
@@ -4692,6 +4561,48 @@
         '第 1 条不对，对妈妈我看心情',
         '第 3 条别这么记，我就是忘了',
         '清掉今天的学习',
+      ],
+    },
+    reflect: {
+      icon: '🌙', name: '复盘',
+      userText: '陪我复盘下今天',
+      get piHtml() {
+        const s = SESSION_STATS;
+        const total = s.focused + s.completed + s.archived + s.deleted + s.checkedIn + s.muted + s.snoozed + s.peeked;
+        if (total === 0) {
+          return `今天还没有动过事池 ✦<br><span class="text-pulse-text-3 text-[11px]">⭐ 关注 / ✓ 完成 / 📦 归档 任何一个都行——动一下我们再聊</span>`;
+        }
+        // 主统计
+        const lines = [];
+        if (s.focused)    lines.push(`⭐ 关注 <b>${s.focused}</b> 件`);
+        if (s.completed)  lines.push(`✓ 完成 <b>${s.completed}</b> 件`);
+        if (s.checkedIn)  lines.push(`📍 打卡 <b>${s.checkedIn}</b> 次`);
+        if (s.archived)   lines.push(`📦 归档 <b>${s.archived}</b> 件`);
+        if (s.deleted)    lines.push(`🗑 删除 <b>${s.deleted}</b> 件`);
+        if (s.muted)      lines.push(`✗ 不再推 <b>${s.muted}</b> 件`);
+        if (s.snoozed)    lines.push(`😴 稍后看 <b>${s.snoozed}</b> 件`);
+        if (s.peeked)     lines.push(`👀 看了 <b>${s.peeked}</b> 件`);
+
+        // 接住 / 没接住 P0
+        const p0Caught = SESSION_FOCUSED_IDS.map(id => THINGS.find(t => t.id === id))
+                                            .filter(t => t && (t.imp||0)+(t.urg||0) >= 5);
+        const p0Missed = THINGS.filter(t => t.container === 'ai' && t.status === 'active'
+                                       && (t.imp||0)+(t.urg||0) >= 5);
+        let p0Html = '';
+        if (p0Caught.length) {
+          p0Html += `<br><br>🎯 接住的 P0：<br>${p0Caught.map(t => `· ${t.title}`).join('<br>')}`;
+        }
+        if (p0Missed.length) {
+          p0Html += `<br><br>⚠ 还没接的 P0：<br>${p0Missed.slice(0,2).map(t => `· ${t.title}`).join('<br>')}`;
+        }
+        return `今天的事池 · 你动了 <b>${total}</b> 次<br>${lines.join(' · ')}${p0Html}`;
+      },
+      followUp: `想聊聊么？我也可以闭嘴，按下面的 chip 选一个就行。`,
+      replies: [
+        '状态不错',
+        '今天太累',
+        '感觉没干啥',
+        '为明天准备一下',
       ],
     },
   };

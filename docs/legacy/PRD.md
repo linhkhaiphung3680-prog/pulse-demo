@@ -1,5 +1,7 @@
 # Pulse · Life Copilot · 产品需求文档（PRD）
 
+> ⚠️ 已归档 · 被 [../00-PRD.md](../00-PRD.md)（Coop Final v1.0）取代。本文件仅作历史记录，其「身份 / 主线 / 北极星 / 打卡」等概念不再适用。
+
 > 范围：从当前 demo（v0.4-pre Life Copilot）到正式发布（v1.0 Life Copilot）
 > 状态：Draft v2.1 · demo 升级反馈版
 > 最后更新：2026-06-04

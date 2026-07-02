@@ -11,3 +11,6 @@ evals/reports/*.jsonl
 # Office lock files (auto-generated when xlsx/docx open in Excel/Word)
 ~$*
 .~lock.*
+
+# macOS
+.DS_Store
